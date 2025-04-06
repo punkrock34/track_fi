@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:trackfi/core/services/theme_controller.dart';
 import 'package:trackfi/app/theme/theme_extensions.dart';
+import 'package:trackfi/features/onboarding/ui/widgets/feature_item.dart';
+import 'package:trackfi/features/onboarding/ui/widgets/theme_toggle.dart';
 
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final themeController = context.watch<ThemeController>();
-    final isDark = themeController.mode == ThemeMode.dark;
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
 
@@ -26,7 +24,6 @@ class WelcomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -56,29 +53,29 @@ class WelcomeScreen extends StatelessWidget {
                       color: Colors.white.withAlpha((8 * 255).round()),
                     ),
                   ),
-                  
+
                   SizedBox(height: size.height * 0.05),
-                  
-                  _buildFeatureItem(
+
+                  const FeatureItem(
                     icon: Icons.account_balance,
                     title: 'All Your Accounts',
                     description: 'Bank, trading, and crypto in one dashboard',
                   ),
                   const SizedBox(height: 24),
-                  _buildFeatureItem(
+                  const FeatureItem(
                     icon: Icons.insights,
                     title: 'Smart Analytics',
                     description: 'Track performance and optimize your portfolio',
                   ),
                   const SizedBox(height: 24),
-                  _buildFeatureItem(
+                  const FeatureItem(
                     icon: Icons.lock,
                     title: 'Secure & Private',
                     description: 'Your financial data stays protected',
                   ),
-                  
+
                   const Spacer(),
-                  
+
                   ElevatedButton(
                     onPressed: () => context.go('/dashboard'),
                     style: ElevatedButton.styleFrom(
@@ -101,79 +98,13 @@ class WelcomeScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 16),
-                  
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Dark Mode',
-                          style: TextStyle(
-                            color: Colors.white.withAlpha((0.8 * 255).round()),
-                          ),
-                        ),
-                        Switch(
-                          value: isDark,
-                          onChanged: (_) => themeController.toggle(),
-                          activeColor: Colors.white,
-                          inactiveTrackColor: Colors.white.withAlpha((0.3 * 255).round()),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const ThemeToggle(),
                 ],
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildFeatureItem({
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha((0.2 * 255).round()),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                description,
-                style: TextStyle(
-                  color: Colors.white.withAlpha((0.7 * 255).round()),
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

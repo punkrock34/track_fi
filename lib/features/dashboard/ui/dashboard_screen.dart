@@ -6,7 +6,6 @@ import 'package:trackfi/features/dashboard/ui/sections/quick_actions.dart';
 import 'package:trackfi/features/dashboard/ui/sections/transaction_list.dart';
 import 'package:trackfi/features/dashboard/ui/sections/dashboard_title_bar.dart';
 import 'package:trackfi/app/theme/theme_extensions.dart';
-import 'package:trackfi/shared/widgets/app_nav_bar.dart';
 
 final class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -94,7 +93,6 @@ final class DashboardScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const AppNavBar(),
     );
   }
 }
