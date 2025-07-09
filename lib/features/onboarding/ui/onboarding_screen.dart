@@ -237,7 +237,7 @@ class OnboardingScreen extends StatelessWidget {
             TextButton(
               child: const Text('Got it'),
               onPressed: () {
-                Navigator.of(context).pop();
+                context.pop();
               },
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/design_tokens/design_tokens.dart';
 
@@ -116,7 +117,13 @@ class WorkInProgressScreen extends StatelessWidget {
                   SizedBox(
                     width: size.width * 0.6,
                     child: ElevatedButton.icon(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.goNamed('onboarding');
+                        }
+                      },
                       icon: const Icon(Icons.arrow_back_rounded),
                       label: const Text('Go Back'),
                       style: ElevatedButton.styleFrom(
