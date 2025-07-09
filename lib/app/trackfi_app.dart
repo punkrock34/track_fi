@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
-import 'router/app_router.dart';
-import 'theme/app_theme.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-final class TrackFiApp extends StatelessWidget {
-  final ThemeMode themeMode;
+import '../core/router/router.dart';
+import '../core/theme/app_theme.dart';
+import '../core/theme/providers/theme_provider.dart';
 
-  const TrackFiApp({super.key, required this.themeMode});
-  
+class TrackFiApp extends ConsumerWidget {
+  const TrackFiApp({super.key});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final GoRouter router = ref.watch(appRouterProvider);
+    final ThemeMode themeMode = ref.watch(themeProvider);
+    final bool isDark = ref.watch(isDarkModeProvider);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      isDark
+          ? AppTheme.darkSystemUiOverlayStyle
+          : AppTheme.lightSystemUiOverlayStyle,
+    );
+
     return MaterialApp.router(
       title: 'TrackFi',
+      debugShowCheckedModeBanner: false,
+      
+      // Theme configuration
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      routerConfig: AppRouter.config,
-      debugShowCheckedModeBanner: false,
+      
+      // Router configuration
+      routerConfig: router,
+      
+      // Builder for additional configurations
+      builder: (BuildContext context, Widget? child) {
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }

@@ -1,34 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:trackfi/app/trackfi_app.dart';
-import 'package:trackfi/core/services/theme_controller.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'app/trackfi_app.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await SystemChrome.setPreferredOrientations([
+  await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
+  await dotenv.load(fileName: '.env.ini');
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeController(),
-      child: const TrackFiRoot(),
+    const ProviderScope(
+      child: TrackFiApp(),
     ),
   );
-}
-
-class TrackFiRoot extends StatelessWidget {
-  const TrackFiRoot({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ThemeController>(
-      builder: (_, controller, __) {
-        return TrackFiApp(themeMode: controller.mode);
-      },
-    );
-  }
 }
