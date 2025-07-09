@@ -21,7 +21,7 @@ abstract class ComponentThemes {
 
   static CardTheme get lightCardTheme => CardTheme(
     color: ColorSchemes.premiumWhite,
-    shadowColor: Colors.black.withOpacity(0.08),
+    shadowColor: Colors.black.withOpacity(0.8),
     elevation: DesignTokens.elevationCard,
     margin: const EdgeInsets.all(DesignTokens.spacingXs),
     shape: RoundedRectangleBorder(
@@ -41,7 +41,7 @@ abstract class ComponentThemes {
       disabledBackgroundColor: const Color(0xFFE5E7EB),
       disabledForegroundColor: const Color(0xFF9CA3AF),
       elevation: 2,
-      shadowColor: ColorSchemes.accentBlue.withOpacity(0.3),
+      shadowColor: ColorSchemes.accentBlue.withOpacity(0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
       ),

@@ -19,7 +19,6 @@ class ThemeToggle extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeMode themeMode = ref.watch(themeProvider);
-    final bool isDark = ref.watch(isDarkModeProvider);
     final ThemeData theme = Theme.of(context);
 
     return AnimatedContainer(
@@ -53,11 +52,9 @@ class ThemeToggle extends ConsumerWidget {
             ),
             Gap(size.spacing),
           ],
-          
-          // Theme mode selector
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+              color: theme.colorScheme.background,
               borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
             ),
             child: Row(
@@ -66,19 +63,22 @@ class ThemeToggle extends ConsumerWidget {
                 _ThemeButton(
                   icon: Icons.light_mode_rounded,
                   isSelected: themeMode == ThemeMode.light,
-                  onTap: () => ref.read(themeProvider.notifier).setThemeMode(ThemeMode.light),
+                  onTap: () =>
+                      ref.read(themeProvider.notifier).setThemeMode(ThemeMode.light),
                   size: size,
                 ),
                 _ThemeButton(
                   icon: Icons.auto_mode_rounded,
                   isSelected: themeMode == ThemeMode.system,
-                  onTap: () => ref.read(themeProvider.notifier).setThemeMode(ThemeMode.system),
+                  onTap: () =>
+                      ref.read(themeProvider.notifier).setThemeMode(ThemeMode.system),
                   size: size,
                 ),
                 _ThemeButton(
                   icon: Icons.dark_mode_rounded,
                   isSelected: themeMode == ThemeMode.dark,
-                  onTap: () => ref.read(themeProvider.notifier).setThemeMode(ThemeMode.dark),
+                  onTap: () =>
+                      ref.read(themeProvider.notifier).setThemeMode(ThemeMode.dark),
                   size: size,
                 ),
               ],
@@ -86,9 +86,7 @@ class ThemeToggle extends ConsumerWidget {
           ),
         ],
       ),
-    )
-        .animate(target: isDark ? 1 : 0)
-        .tint(color: Colors.blue.withOpacity(0.1), curve: Curves.easeInOut);
+    );
   }
 }
 
@@ -117,30 +115,30 @@ class _ThemeButton extends StatelessWidget {
         margin: EdgeInsets.all(size.buttonMargin),
         padding: EdgeInsets.all(size.buttonPadding),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? theme.colorScheme.primary
-              : Colors.transparent,
+          color: isSelected ? theme.colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-          boxShadow: isSelected ? <BoxShadow>[
-            BoxShadow(
-              color: theme.colorScheme.primary.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ] : null,
+          boxShadow: isSelected
+              ? <BoxShadow>[
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Icon(
           icon,
           size: size.iconSize,
-          color: isSelected 
+          color: isSelected
               ? theme.colorScheme.onPrimary
-              : theme.colorScheme.onSurface.withOpacity(0.6),
+              : theme.colorScheme.outline,
         ),
       ),
-    )
-        .animate(target: isSelected ? 1 : 0)
-        .scale(begin: const Offset(0.9, 0.9), end: const Offset(1.0, 1.0))
-        .fadeIn();
+    ).animate(target: isSelected ? 1 : 0).scale(
+          begin: const Offset(0.9, 0.9),
+          end: const Offset(1.0, 1.0),
+        );
   }
 }
 
