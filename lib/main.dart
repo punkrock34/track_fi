@@ -11,7 +11,7 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  await dotenv.load(fileName: '.env.ini');
+  await dotenv.load(fileName: 'lib/core/config/.env.ini');
 
   runApp(
     const ProviderScope(
