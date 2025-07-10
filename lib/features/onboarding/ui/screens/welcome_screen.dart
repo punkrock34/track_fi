@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../shared/widgets/feature_card.dart';
-import '../../../shared/widgets/theme_toggle.dart';
+import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../shared/widgets/feature_card.dart';
+import '../../../../shared/widgets/theme_toggle.dart';
+import '../../providers/onboarding_provider.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
+class WelcomeScreen extends ConsumerWidget {
+  const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final Size size = MediaQuery.of(context).size;
 
@@ -26,7 +28,7 @@ class OnboardingScreen extends StatelessWidget {
               Gap(size.height * 0.06),
               _buildFeaturesSection(theme),
               Gap(size.height * 0.04),
-              _buildActionButtons(context, theme),
+              _buildActionButtons(context, theme, ref),
               const Gap(DesignTokens.spacingMd),
               const Center(
                 child: ThemeToggle(
@@ -149,19 +151,20 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, ThemeData theme) {
+  Widget _buildActionButtons(BuildContext context, ThemeData theme, WidgetRef ref) {
     return Column(
       children: <Widget>[
         SizedBox(
           width: double.infinity,
           height: DesignTokens.buttonHeightLg,
           child: ElevatedButton(
-            onPressed: () => context.go('/dashboard'),
+            // Updated line: use onboarding provider instead of direct navigation
+            onPressed: () => ref.read(onboardingProvider.notifier).nextStep(),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Start Tracking',
+                  'Get Started',  // Changed text
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),

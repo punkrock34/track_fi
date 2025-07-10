@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/providers/theme/theme_provider.dart';
 import '../core/router/router.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/providers/theme/theme_provider.dart';
 
 class TrackFiApp extends ConsumerWidget {
   const TrackFiApp({super.key});
