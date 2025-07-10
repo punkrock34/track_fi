@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../logging/log.dart';
 import '../../app_theme.dart';
 
 class ThemeNotifier extends StateNotifier<ThemeMode> {
@@ -30,8 +31,12 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
   Future<void> _saveThemeMode(ThemeMode mode) async {
     try {
       await _storage.write(key: _themeKey, value: mode.toString());
-    } catch (e) {
-      debugPrint('Failed to save theme mode: $e');
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Failed to save theme mode',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
