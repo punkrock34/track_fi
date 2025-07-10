@@ -63,6 +63,6 @@ class OnboardingState {
   }
 
   int get totalSteps {
-    return OnboardingStep.values.length;
+    return OnboardingStep.values.length - 1; // Exclude the welcome step since that has no progress bar
   }
 }
