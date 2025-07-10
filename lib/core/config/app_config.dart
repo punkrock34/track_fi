@@ -1,0 +1,12 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+class AppConfig {
+  static String get trackfiSalt {
+    return dotenv.env['TRACKFI_SALT'] ??
+        (throw Exception('TRACKFI_SALT is missing in your .env file!'));
+  }
+
+  static bool get isProduction {
+    return dotenv.env['ENVIRONMENT'] == 'production';
+  }
+}

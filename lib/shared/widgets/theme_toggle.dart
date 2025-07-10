@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../core/theme/design_tokens/design_tokens.dart';
-import '../../core/theme/providers/theme_provider.dart';
+import '../../core/theme/providers/theme/theme_provider.dart';
 
 class ThemeToggle extends ConsumerWidget {
   const ThemeToggle({
