@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/widgets/feature_card.dart';
-import '../../../../shared/widgets/theme_toggle.dart';
 import '../../providers/onboarding_provider.dart';
 
 class WelcomeScreen extends ConsumerWidget {
@@ -29,12 +28,6 @@ class WelcomeScreen extends ConsumerWidget {
               _buildFeaturesSection(theme),
               Gap(size.height * 0.04),
               _buildActionButtons(context, theme, ref),
-              const Gap(DesignTokens.spacingMd),
-              const Center(
-                child: ThemeToggle(
-                  showLabel: false,
-                ),
-              ),
               const Gap(DesignTokens.spacingMd),
             ],
           ),
@@ -158,19 +151,27 @@ class WelcomeScreen extends ConsumerWidget {
           width: double.infinity,
           height: DesignTokens.buttonHeightLg,
           child: ElevatedButton(
-            // Updated line: use onboarding provider instead of direct navigation
             onPressed: () => ref.read(onboardingProvider.notifier).nextStep(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Get Started',  // Changed text
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  'Get Started',
+                  style: TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onPrimary,
                   ),
                 ),
                 const Gap(DesignTokens.spacingXs),
-                const Icon(Icons.arrow_forward_rounded),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: theme.colorScheme.onPrimary,
+                ),
               ],
             ),
           ),

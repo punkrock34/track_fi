@@ -1,4 +1,3 @@
-// lib/features/onboarding/ui/screens/pin_setup_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +19,7 @@ class PinSetupScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(DesignTokens.spacingMd),
           child: Column(
             children: <Widget>[
@@ -88,7 +87,7 @@ class PinSetupScreen extends ConsumerWidget {
                 ),
               ).animate().slideY(begin: 0.3, delay: 1000.ms).fadeIn(delay: 1000.ms),
               
-              const Spacer(),
+              const Gap(DesignTokens.spacing3xl),
               
               Row(
                 children: <Widget>[

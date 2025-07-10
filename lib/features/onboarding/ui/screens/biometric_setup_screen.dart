@@ -16,11 +16,12 @@ class BiometricSetupScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(DesignTokens.spacingMd),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              const Gap(DesignTokens.spacingXl),
+              
               Icon(
                 Icons.fingerprint,
                 size: 80,
@@ -47,7 +48,7 @@ class BiometricSetupScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(delay: 600.ms),
               
-              const Gap(DesignTokens.spacing2xl),
+              const Gap(DesignTokens.spacing3xl),
               
               Row(
                 children: <Widget>[

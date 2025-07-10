@@ -7,32 +7,20 @@ enum OnboardingStep {
   complete,
 }
 
-enum DataSourceOption {
-  bankApi,
-  pdfUpload,
-  skipForNow,
-}
-
 class OnboardingState {
-
   const OnboardingState({
     this.currentStep = OnboardingStep.welcome,
     this.pin,
     this.confirmPin,
     this.biometricEnabled = false,
-    this.dataSourceChoice,
-    this.isDarkMode = false,
-    this.primaryColorHex,
     this.isLoading = false,
     this.error,
   });
+
   final OnboardingStep currentStep;
   final String? pin;
   final String? confirmPin;
   final bool biometricEnabled;
-  final DataSourceOption? dataSourceChoice;
-  final bool isDarkMode;
-  final String? primaryColorHex;
   final bool isLoading;
   final String? error;
 
@@ -41,9 +29,6 @@ class OnboardingState {
     String? pin,
     String? confirmPin,
     bool? biometricEnabled,
-    DataSourceOption? dataSourceChoice,
-    bool? isDarkMode,
-    String? primaryColorHex,
     bool? isLoading,
     String? error,
   }) {
@@ -52,9 +37,6 @@ class OnboardingState {
       pin: pin ?? this.pin,
       confirmPin: confirmPin ?? this.confirmPin,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
-      dataSourceChoice: dataSourceChoice ?? this.dataSourceChoice,
-      isDarkMode: isDarkMode ?? this.isDarkMode,
-      primaryColorHex: primaryColorHex ?? this.primaryColorHex,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
@@ -83,5 +65,4 @@ class OnboardingState {
   int get totalSteps {
     return OnboardingStep.values.length;
   }
-
 }

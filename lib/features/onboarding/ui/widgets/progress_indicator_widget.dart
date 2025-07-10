@@ -1,4 +1,3 @@
-// lib/features/onboarding/ui/widgets/progress_indicator_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 

@@ -36,12 +36,12 @@ abstract class ComponentThemes {
 
   static ElevatedButtonThemeData get lightElevatedButtonTheme => ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: ColorSchemes.accentBlue,
+      backgroundColor: ColorSchemes.premiumBlack,
       foregroundColor: ColorSchemes.premiumWhite,
       disabledBackgroundColor: const Color(0xFFE5E7EB),
       disabledForegroundColor: const Color(0xFF9CA3AF),
       elevation: 2,
-      shadowColor: ColorSchemes.accentBlue.withOpacity(0.5),
+      shadowColor: ColorSchemes.premiumBlack.withOpacity(0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
       ),
@@ -60,11 +60,11 @@ abstract class ComponentThemes {
 
   static OutlinedButtonThemeData get lightOutlinedButtonTheme => OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
-      foregroundColor: ColorSchemes.accentBlue,
+      foregroundColor: ColorSchemes.premiumBlack,
       backgroundColor: Colors.transparent,
       disabledForegroundColor: const Color(0xFF9CA3AF),
       side: const BorderSide(
-        color: ColorSchemes.accentBlue,
+        color: ColorSchemes.premiumBlack,
         width: 1.5,
       ),
       shape: RoundedRectangleBorder(
@@ -85,7 +85,7 @@ abstract class ComponentThemes {
 
   static TextButtonThemeData get lightTextButtonTheme => TextButtonThemeData(
     style: TextButton.styleFrom(
-      foregroundColor: ColorSchemes.accentBlue,
+      foregroundColor: ColorSchemes.premiumBlack,
       disabledForegroundColor: const Color(0xFF9CA3AF),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
@@ -121,7 +121,7 @@ abstract class ComponentThemes {
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
       borderSide: const BorderSide(
-        color: ColorSchemes.accentBlue,
+        color: ColorSchemes.premiumBlack,
         width: 2,
       ),
     ),
@@ -153,7 +153,7 @@ abstract class ComponentThemes {
   );
 
   static FloatingActionButtonThemeData get lightFabTheme => const FloatingActionButtonThemeData(
-    backgroundColor: ColorSchemes.accentBlue,
+    backgroundColor: ColorSchemes.premiumBlack,
     foregroundColor: ColorSchemes.premiumWhite,
     elevation: DesignTokens.elevationFab,
     shape: RoundedRectangleBorder(
@@ -170,7 +170,7 @@ abstract class ComponentThemes {
     }),
     trackColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
-        return ColorSchemes.accentBlue;
+        return ColorSchemes.premiumBlack;
       }
       return const Color(0xFFE5E7EB);
     }),
@@ -183,7 +183,7 @@ abstract class ComponentThemes {
   );
 
   static AppBarTheme get darkAppBarTheme => const AppBarTheme(
-    backgroundColor: Color(0xFF1E293B),
+    backgroundColor: ColorSchemes.premiumBlack,
     foregroundColor: ColorSchemes.premiumWhite,
     elevation: 0,
     scrolledUnderElevation: 4,
@@ -197,7 +197,7 @@ abstract class ComponentThemes {
   );
 
   static CardTheme get darkCardTheme => CardTheme(
-    color: const Color(0xFF1E293B),
+    color: ColorSchemes.charcoal,
     shadowColor: Colors.black.withOpacity(0.3),
     elevation: DesignTokens.elevationCard,
     margin: const EdgeInsets.all(DesignTokens.spacingXs),
@@ -213,12 +213,12 @@ abstract class ComponentThemes {
 
   static ElevatedButtonThemeData get darkElevatedButtonTheme => ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: ColorSchemes.accentBlue,
-      foregroundColor: ColorSchemes.premiumWhite,
+      backgroundColor: ColorSchemes.premiumWhite,
+      foregroundColor: ColorSchemes.premiumBlack,
       disabledBackgroundColor: const Color(0xFF374151),
       disabledForegroundColor: const Color(0xFF6B7280),
       elevation: 2,
-      shadowColor: ColorSchemes.accentBlue.withOpacity(0.3),
+      shadowColor: ColorSchemes.premiumWhite.withOpacity(0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
       ),
@@ -237,11 +237,11 @@ abstract class ComponentThemes {
 
   static OutlinedButtonThemeData get darkOutlinedButtonTheme => OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
-      foregroundColor: ColorSchemes.accentBlue,
+      foregroundColor: ColorSchemes.premiumWhite,
       backgroundColor: Colors.transparent,
       disabledForegroundColor: const Color(0xFF6B7280),
       side: const BorderSide(
-        color: ColorSchemes.accentBlue,
+        color: ColorSchemes.premiumWhite,
         width: 1.5,
       ),
       shape: RoundedRectangleBorder(
@@ -262,7 +262,7 @@ abstract class ComponentThemes {
 
   static TextButtonThemeData get darkTextButtonTheme => TextButtonThemeData(
     style: TextButton.styleFrom(
-      foregroundColor: ColorSchemes.accentBlue,
+      foregroundColor: ColorSchemes.premiumWhite,
       disabledForegroundColor: const Color(0xFF6B7280),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
@@ -298,7 +298,7 @@ abstract class ComponentThemes {
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
       borderSide: const BorderSide(
-        color: ColorSchemes.accentBlue,
+        color: ColorSchemes.premiumWhite,
         width: 2,
       ),
     ),
@@ -330,8 +330,8 @@ abstract class ComponentThemes {
   );
 
   static FloatingActionButtonThemeData get darkFabTheme => const FloatingActionButtonThemeData(
-    backgroundColor: ColorSchemes.accentBlue,
-    foregroundColor: ColorSchemes.premiumWhite,
+    backgroundColor: ColorSchemes.premiumWhite,
+    foregroundColor: ColorSchemes.premiumBlack,
     elevation: DesignTokens.elevationFab,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(DesignTokens.radiusLg)),
@@ -341,13 +341,13 @@ abstract class ComponentThemes {
   static SwitchThemeData get darkSwitchTheme => SwitchThemeData(
     thumbColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
-        return ColorSchemes.premiumWhite;
+        return ColorSchemes.premiumBlack;
       }
       return const Color(0xFF6B7280);
     }),
     trackColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
       if (states.contains(WidgetState.selected)) {
-        return ColorSchemes.accentBlue;
+        return ColorSchemes.premiumWhite;
       }
       return const Color(0xFF374151);
     }),

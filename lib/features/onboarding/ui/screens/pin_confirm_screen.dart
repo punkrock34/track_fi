@@ -1,4 +1,3 @@
-// lib/features/onboarding/ui/screens/pin_confirm_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +19,7 @@ class PinConfirmScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(DesignTokens.spacingMd),
           child: Column(
             children: <Widget>[
@@ -92,7 +91,7 @@ class PinConfirmScreen extends ConsumerWidget {
                 ).animate().slideY(begin: 0.3, delay: 100.ms).fadeIn(delay: 100.ms),
               ],
               
-              const Spacer(),
+              const Gap(DesignTokens.spacing3xl),
               
               Row(
                 children: <Widget>[

@@ -3,12 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/contracts/services/secure_storage/i_biometric_storage_service.dart';
 import '../../../core/contracts/services/secure_storage/i_onboarding_storage_service.dart';
 import '../../../core/contracts/services/secure_storage/i_pin_storage_service.dart';
-import '../../../core/contracts/services/secure_storage/i_theme_storage_service.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/providers/secure_storage/biometric_storage_provider.dart';
 import '../../../core/providers/secure_storage/onboarding_storage_provider.dart';
 import '../../../core/providers/secure_storage/pin_storage_provider.dart';
-import '../../../core/providers/secure_storage/theme_storage_provider.dart';
 import '../../../core/services/security/biometric_service.dart';
 import '../models/onboarding_state.dart';
 
@@ -20,7 +18,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   IPinStorageService get _pinStorage => _ref.read(pinStorageProvider);
   IBiometricStorageService get _biometricStorage => _ref.read(biometricStorageProvider);
   IOnboardingStorageService get _onboardingStorage => _ref.read(onboardingStorageProvider);
-  IThemeStorageService get _themeStorage => _ref.read(themeStorageProvider);
 
   void nextStep() {
     final int index = OnboardingStep.values.indexOf(state.currentStep);
@@ -50,17 +47,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
   void setBiometric(bool enabled) {
     state = state.copyWith(biometricEnabled: enabled);
-  }
-
-  void setDataSource(DataSourceOption option) {
-    state = state.copyWith(dataSourceChoice: option);
-  }
-
-  void setTheme(bool isDark, String? colorHex) {
-    state = state.copyWith(
-      isDarkMode: isDark,
-      primaryColorHex: colorHex,
-    );
   }
 
   void setLoading(bool loading) {
@@ -140,16 +126,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   Future<bool> completeOnboarding() async {
     try {
       setLoading(true);
-
       await _onboardingStorage.setOnboardingComplete(true);
-
-      if (state.primaryColorHex != null) {
-        await _themeStorage.storeThemePreferences(<String, Object?>{
-          'isDarkMode': state.isDarkMode,
-          'primaryColor': state.primaryColorHex,
-        });
-      }
-
       setLoading(false);
       return true;
     } catch (e, st) {
@@ -168,7 +145,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   }
 }
 
-final StateNotifierProvider<OnboardingNotifier, OnboardingState> onboardingProvider =
-    StateNotifierProvider<OnboardingNotifier, OnboardingState>(
+final StateNotifierProvider<OnboardingNotifier, OnboardingState> onboardingProvider = StateNotifierProvider<OnboardingNotifier, OnboardingState>(
   (StateNotifierProviderRef<OnboardingNotifier, OnboardingState> ref) => OnboardingNotifier(ref),
 );
