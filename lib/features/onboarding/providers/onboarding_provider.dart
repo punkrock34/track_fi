@@ -8,6 +8,8 @@ import '../../../core/providers/secure_storage/biometric_storage_provider.dart';
 import '../../../core/providers/secure_storage/onboarding_storage_provider.dart';
 import '../../../core/providers/secure_storage/pin_storage_provider.dart';
 import '../../../core/services/security/biometric_service.dart';
+import '../../../shared/state/status/error_state.dart';
+import '../../../shared/state/status/loading_state.dart';
 import '../models/onboarding_state.dart';
 
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
@@ -21,16 +23,24 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
   void nextStep() {
     final int index = OnboardingStep.values.indexOf(state.currentStep);
-    if (index < OnboardingStep.values.length - 1) {
-      state = state.copyWith(currentStep: OnboardingStep.values[index + 1]);
+    if (index >= OnboardingStep.values.length - 1) {
+      return;
     }
+
+    state = state.copyWith(
+      currentStep: OnboardingStep.values[index + 1],
+    );
   }
 
   void previousStep() {
     final int index = OnboardingStep.values.indexOf(state.currentStep);
-    if (index > 0) {
-      state = state.copyWith(currentStep: OnboardingStep.values[index - 1]);
+    if (index <= 0) {
+      return;
     }
+
+    state = state.copyWith(
+      currentStep: OnboardingStep.values[index - 1],
+    );
   }
 
   void goToStep(OnboardingStep step) {
@@ -49,29 +59,24 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(biometricEnabled: enabled);
   }
 
-  void setLoading(bool loading) {
-    state = state.copyWith(isLoading: loading);
-  }
-
-  void setError(String error) {
-    state = state.copyWith(error: error, isLoading: false);
-  }
-
   Future<bool> validateAndSavePin() async {
     if (!state.isPinValid) {
-      setError('PIN must be 4-6 digits');
+      state = state.error('PIN must be 4-6 digits');
       return false;
     }
 
     if (!state.pinsMatch) {
-      setError('PINs do not match');
+      state = state.error('PINs do not match');
       return false;
     }
 
     try {
-      setLoading(true);
+      state = state.loading();
       await _pinStorage.storePin(state.pin!);
-      setLoading(false);
+      print('📝 PIN stored, checking immediately...');
+      final bool checkPin = await _pinStorage.hasPinSet();
+      print('📝 PIN check result: $checkPin');
+      state = state.notLoading();
       return true;
     } catch (e, st) {
       await log(
@@ -79,24 +84,24 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         error: e,
         stackTrace: st,
       );
-      setError('Failed to save PIN. Please try again.');
+      state = state.error('Failed to save PIN. Please try again.');
       return false;
     }
   }
 
   Future<bool> setupBiometric() async {
     try {
-      setLoading(true);
+      state = state.loading();
 
       if (!state.biometricEnabled) {
         await _biometricStorage.setBiometricEnabled(false);
-        setLoading(false);
+        state = state.notLoading();
         return true;
       }
 
       final bool isAvailable = await BiometricService.isAvailable();
       if (!isAvailable) {
-        setError('Biometric authentication is not available on this device');
+        state = state.error('Biometric authentication is not available on this device');
         return false;
       }
 
@@ -104,30 +109,37 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         reason: 'Set up biometric authentication for TrackFi',
       );
 
-      if (authenticated) {
-        await _biometricStorage.setBiometricEnabled(true);
-        setLoading(false);
-        return true;
-      } else {
-        setError('Biometric setup failed. You can set it up later in settings.');
+      if (!authenticated) {
+        state = state.error('Biometric setup failed. You can set it up later in settings.');
         return false;
       }
+
+      await _biometricStorage.setBiometricEnabled(true);
+      state = state.notLoading();
+      return true;
+
     } catch (e, st) {
       await log(
         message: 'Failed to setup biometric auth',
         error: e,
         stackTrace: st,
       );
-      setError('Failed to setup biometric authentication');
+      state = state.error('Failed to setup biometric authentication');
       return false;
     }
   }
 
   Future<bool> completeOnboarding() async {
+    final bool hasPin = await _pinStorage.hasPinSet();
+    if (!hasPin) {
+      state = state.error('Cannot complete onboarding without setting a PIN.');
+      return false;
+    }
+
     try {
-      setLoading(true);
+      state = state.loading();
       await _onboardingStorage.setOnboardingComplete(true);
-      setLoading(false);
+      state = state.notLoading();
       return true;
     } catch (e, st) {
       await log(
@@ -135,7 +147,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         error: e,
         stackTrace: st,
       );
-      setError('Failed to complete onboarding');
+      state = state.error('Failed to complete onboarding');
       return false;
     }
   }
@@ -145,6 +157,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   }
 }
 
-final StateNotifierProvider<OnboardingNotifier, OnboardingState> onboardingProvider = StateNotifierProvider<OnboardingNotifier, OnboardingState>(
+final StateNotifierProvider<OnboardingNotifier, OnboardingState> onboardingProvider =
+    StateNotifierProvider<OnboardingNotifier, OnboardingState>(
   (StateNotifierProviderRef<OnboardingNotifier, OnboardingState> ref) => OnboardingNotifier(ref),
 );

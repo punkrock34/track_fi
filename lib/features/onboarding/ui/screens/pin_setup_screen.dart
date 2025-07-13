@@ -56,7 +56,7 @@ class PinSetupScreen extends ConsumerWidget {
               PinInputWidget(
                 pin: state.pin ?? '',
                 onChanged: notifier.updatePin,
-                errorText: state.error,
+                errorText: state.errorMessage,
               ).animate().slideY(begin: 0.5, delay: 800.ms).fadeIn(delay: 800.ms),
               
               const Gap(DesignTokens.spacingXl),

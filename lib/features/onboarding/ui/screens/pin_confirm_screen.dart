@@ -56,7 +56,7 @@ class PinConfirmScreen extends ConsumerWidget {
               PinInputWidget(
                 pin: state.confirmPin ?? '',
                 onChanged: notifier.updateConfirmPin,
-                errorText: state.error,
+                errorText: state.errorMessage,
               ).animate().slideY(begin: 0.5, delay: 800.ms).fadeIn(delay: 800.ms),
               
               if (state.confirmPin != null && state.confirmPin!.isNotEmpty) ...<Widget>[

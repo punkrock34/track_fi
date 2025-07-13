@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/providers/session/session_provider.dart';
 import '../core/providers/theme/theme_provider.dart';
-import '../core/router/router.dart';
+import '../core/router/app_router.dart';
 import '../core/theme/app_theme.dart';
 
 class TrackFiApp extends ConsumerWidget {
@@ -22,22 +23,26 @@ class TrackFiApp extends ConsumerWidget {
           : AppTheme.lightSystemUiOverlayStyle,
     );
 
-    return MaterialApp.router(
-      title: 'TrackFi',
-      debugShowCheckedModeBanner: false,
-      
-      // Theme configuration
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: themeMode,
-      
-      // Router configuration
-      routerConfig: router,
-      
-      // Builder for additional configurations
-      builder: (BuildContext context, Widget? child) {
-        return child ?? const SizedBox.shrink();
-      },
+    return GestureDetector(
+      onTap: () => ref.read(sessionProvider.notifier).updateActivity(),
+      onPanDown: (_) => ref.read(sessionProvider.notifier).updateActivity(),
+      child: MaterialApp.router(
+        title: 'TrackFi',
+        debugShowCheckedModeBanner: false,
+        
+        // Theme configuration
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: themeMode,
+        
+        // Router configuration
+        routerConfig: router,
+        
+        // Builder for additional configurations
+        builder: (BuildContext context, Widget? child) {
+          return child ?? const SizedBox.shrink();
+        },
+      ),
     );
   }
 }

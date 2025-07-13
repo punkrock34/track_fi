@@ -1,3 +1,5 @@
+import '../../../shared/state/status/has_status.dart';
+
 enum OnboardingStep {
   welcome,
   pinSetup,
@@ -7,30 +9,33 @@ enum OnboardingStep {
   complete,
 }
 
-class OnboardingState {
+class OnboardingState implements HasStatus {
   const OnboardingState({
     this.currentStep = OnboardingStep.welcome,
     this.pin,
     this.confirmPin,
     this.biometricEnabled = false,
     this.isLoading = false,
-    this.error,
+    this.errorMessage,
   });
 
   final OnboardingStep currentStep;
   final String? pin;
   final String? confirmPin;
   final bool biometricEnabled;
+  @override
   final bool isLoading;
-  final String? error;
+  @override
+  final String? errorMessage;
 
+  @override
   OnboardingState copyWith({
     OnboardingStep? currentStep,
     String? pin,
     String? confirmPin,
     bool? biometricEnabled,
     bool? isLoading,
-    String? error,
+    String? errorMessage,
   }) {
     return OnboardingState(
       currentStep: currentStep ?? this.currentStep,
@@ -38,13 +43,15 @@ class OnboardingState {
       confirmPin: confirmPin ?? this.confirmPin,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
-  bool get isPinValid => pin != null && pin!.length >= 4 && pin!.length <= 6;
+  bool get isPinValid =>
+      (pin?.length ?? 0) >= 4 && (pin?.length ?? 0) <= 6;
+
   bool get pinsMatch => pin == confirmPin;
-  
+
   int get progress {
     switch (currentStep) {
       case OnboardingStep.welcome:
@@ -62,7 +69,5 @@ class OnboardingState {
     }
   }
 
-  int get totalSteps {
-    return OnboardingStep.values.length - 1; // Exclude the welcome step since that has no progress bar
-  }
+  int get totalSteps => OnboardingStep.values.length - 2; // Exclude welcome and complete steps since they don't count towards progress
 }

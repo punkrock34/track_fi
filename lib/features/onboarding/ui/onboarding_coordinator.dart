@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers/secure_storage/pin_storage_provider.dart';
+import '../../../core/providers/session/session_provider.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
 import '../models/onboarding_state.dart';
 import '../providers/onboarding_provider.dart';
@@ -21,17 +23,21 @@ class OnboardingCoordinator extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final OnboardingState state = ref.watch(onboardingProvider);
     
-    // Listen for completion
-    ref.listen<OnboardingState>(onboardingProvider, (OnboardingState? previous, OnboardingState current) {
-      if (current.currentStep == OnboardingStep.complete) {
-        // Navigate to dashboard after a delay
-        Future<void>.delayed(const Duration(seconds: 2), () {
-          if (context.mounted) {
-            context.go('/dashboard');
-          }
-        });
+  ref.listen<OnboardingState>(onboardingProvider, (OnboardingState? previous, OnboardingState current) async {
+    if (current.currentStep == OnboardingStep.complete) {
+      final bool hasPin = await ref.read(pinStorageProvider).hasPinSet();
+      if (!hasPin) {
+        ref.read(onboardingProvider.notifier).goToStep(OnboardingStep.pinSetup);
+        return;
       }
-    });
+      
+      Future<void>.delayed(const Duration(seconds: 2), () {
+        if (context.mounted) {
+          context.go('/dashboard');
+        }
+      });
+    }
+  });
 
     return Scaffold(
       body: Column(

@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../contracts/services/secure_storage/i_secure_storage_service.dart';
 import '../../logging/log.dart';
 import '../../theme/app_theme.dart';
+import '../secure_storage/secure_storage_provider.dart';
 
 class ThemeNotifier extends StateNotifier<ThemeMode> {
-  ThemeNotifier() : super(ThemeMode.system) {
+  ThemeNotifier(this._secureStorage) : super(ThemeMode.system) {
     _loadThemeMode();
   }
 
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
-  static const String _themeKey = 'app_theme_mode';
+  final ISecureStorageService _secureStorage;
+  static const String _themeKey = 'theme_preferences';
 
   Future<void> _loadThemeMode() async {
     try {
-      final String? savedTheme = await _storage.read(key: _themeKey);
+      final String? savedTheme = await _secureStorage.read(_themeKey);
       if (savedTheme != null) {
         state = ThemeMode.values.firstWhere(
           (ThemeMode mode) => mode.toString() == savedTheme,
@@ -30,7 +31,7 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
 
   Future<void> _saveThemeMode(ThemeMode mode) async {
     try {
-      await _storage.write(key: _themeKey, value: mode.toString());
+      await _secureStorage.write( _themeKey, mode.toString());
     } catch (e, stackTrace) {
       await log(
         message: 'Failed to save theme mode',
@@ -74,7 +75,10 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
 }
 
 final StateNotifierProvider<ThemeNotifier, ThemeMode> themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>(
-  (StateNotifierProviderRef<ThemeNotifier, ThemeMode> ref) => ThemeNotifier(),
+  (StateNotifierProviderRef<ThemeNotifier, ThemeMode> ref) {
+    final ISecureStorageService storage = ref.read(secureStorageProvider);
+    return ThemeNotifier(storage);
+  }
 );
 
 final Provider<bool> isDarkModeProvider = Provider<bool>((ProviderRef<bool> ref) {
