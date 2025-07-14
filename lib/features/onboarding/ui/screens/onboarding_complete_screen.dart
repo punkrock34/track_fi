@@ -55,119 +55,126 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(DesignTokens.spacingMd),
-            child: Column(
-              children: <Widget>[
-                const Gap(DesignTokens.spacing3xl),
-
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withOpacity(0.3),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 2),
-                  ),
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    color: theme.colorScheme.primary,
-                    size: 60,
-                  ),
-                ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack),
-
-                const Gap(DesignTokens.spacing2xl),
-
-                Text(
-                  'Welcome to TrackFi!',
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(delay: 400.ms),
-
-                const Gap(DesignTokens.spacingSm),
-
-                Text(
-                  'Your account is set up and ready to go. Start tracking your finances securely.',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(delay: 600.ms),
-
-                const Gap(DesignTokens.spacing2xl),
-
-                Container(
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(DesignTokens.spacingMd),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
-                    border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
-                  ),
                   child: Column(
                     children: <Widget>[
+                      const Gap(DesignTokens.spacingXl),
+                      
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 2),
+                        ),
+                        child: Icon(
+                          Icons.check_circle_rounded,
+                          color: theme.colorScheme.primary,
+                          size: 60,
+                        ),
+                      ).animate().scale(duration: 800.ms, curve: Curves.easeOutBack),
+
+                      const Gap(DesignTokens.spacing2xl),
+
                       Text(
-                        "You're all set with:",
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                      ),
+                        'Welcome to TrackFi!',
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        textAlign: TextAlign.center,
+                      ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(delay: 400.ms),
+
                       const Gap(DesignTokens.spacingSm),
-                      _buildFeatureSummary(Icons.lock_rounded, 'Secure PIN Protection'),
-                      const Gap(DesignTokens.spacingXs),
-                      _buildFeatureSummary(Icons.fingerprint, 'Biometric Authentication'),
-                      const Gap(DesignTokens.spacingXs),
-                      _buildFeatureSummary(Icons.palette_rounded, 'Personalized Theme'),
+
+                      Text(
+                        'Your account is set up and ready to go. Start tracking your finances securely.',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(delay: 600.ms),
+
+                      const Gap(DesignTokens.spacing2xl),
+
+                      Container(
+                        padding: const EdgeInsets.all(DesignTokens.spacingMd),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+                          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            Text(
+                              "You're all set with:",
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const Gap(DesignTokens.spacingSm),
+                            _buildFeatureSummary(Icons.lock_rounded, 'Secure PIN Protection'),
+                            const Gap(DesignTokens.spacingXs),
+                            _buildFeatureSummary(Icons.fingerprint, 'Biometric Authentication'),
+                            const Gap(DesignTokens.spacingXs),
+                            _buildFeatureSummary(Icons.palette_rounded, 'Personalized Theme'),
+                          ],
+                        ),
+                      ).animate().slideY(begin: 0.5, delay: 800.ms).fadeIn(delay: 800.ms),
                     ],
                   ),
-                ).animate().slideY(begin: 0.5, delay: 800.ms).fadeIn(delay: 800.ms),
-
-                const Gap(DesignTokens.spacing2xl),
-
-                SizedBox(
+                ),
+              ),
+              
+              // Fixed button at bottom
+              Padding(
+                padding: const EdgeInsets.all(DesignTokens.spacingMd),
+                child: SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed:
-                        isLoading
-                            ? null
-                            : () async {
-                              setState(() {
-                                _isCompletingOnboarding = true;
-                              });
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isCompletingOnboarding = true;
+                            });
 
-                              try {
-                                final bool success = await onboardingNotifier.completeOnboarding();
-                                if (!success) {
-                                  setState(() {
-                                    _isCompletingOnboarding = false;
-                                  });
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Failed to complete onboarding. Please try again.',
-                                        ),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                }
-                              } catch (e) {
+                            try {
+                              final bool success = await onboardingNotifier.completeOnboarding();
+                              if (!success) {
                                 setState(() {
                                   _isCompletingOnboarding = false;
                                 });
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('An error occurred. Please try again.'),
+                                      content: Text(
+                                        'Failed to complete onboarding. Please try again.',
+                                      ),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
                                 }
                               }
-                            },
+                            } catch (e) {
+                              setState(() {
+                                _isCompletingOnboarding = false;
+                              });
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('An error occurred. Please try again.'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: theme.colorScheme.onPrimary,
@@ -179,33 +186,32 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
                     ),
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
-                      child:
-                          isLoading
-                              ? SizedBox(
-                                key: const ValueKey<String>('loading'),
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    theme.colorScheme.primary,
-                                  ),
-                                ),
-                              )
-                              : Text(
-                                key: const ValueKey<String>('text'),
-                                'Enter TrackFi',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: theme.colorScheme.onPrimary,
+                      child: isLoading
+                          ? SizedBox(
+                              key: const ValueKey<String>('loading'),
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  theme.colorScheme.onPrimary,
                                 ),
                               ),
+                            )
+                          : Text(
+                              key: const ValueKey<String>('text'),
+                              'Enter TrackFi',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
                     ),
                   ),
                 ).animate().slideY(begin: 0.5, delay: 1200.ms).fadeIn(delay: 1200.ms),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

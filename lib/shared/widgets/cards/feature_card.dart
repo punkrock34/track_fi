@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gap/gap.dart';
 
-import '../../core/theme/design_tokens/design_tokens.dart';
-import '../../core/theme/schemes/color_schemes.dart';
+import '../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../core/theme/schemes/color_schemes.dart';
 
 class FeatureCard extends StatelessWidget {
   const FeatureCard({

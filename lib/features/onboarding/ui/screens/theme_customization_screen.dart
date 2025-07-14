@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../shared/widgets/theme_toggle.dart';
+import '../../../../shared/widgets/theme/theme_toggle.dart';
 import '../../providers/onboarding_provider.dart';
 
 class ThemeCustomizationScreen extends ConsumerWidget {

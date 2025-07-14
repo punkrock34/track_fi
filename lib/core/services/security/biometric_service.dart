@@ -1,9 +1,38 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
 import 'package:local_auth_darwin/local_auth_darwin.dart';
 
 import '../../logging/log.dart';
+
+enum BiometricResult {
+  success,
+  failed,
+  userCancel,
+  notAvailable,
+  notEnrolled,
+  lockedOut,
+  temporaryLockout,
+  permanentLockout,
+  unknown,
+}
+
+class BiometricAuthResult {
+  const BiometricAuthResult({
+    required this.result,
+    this.error,
+    this.shouldFallbackToPin = false,
+  });
+
+  final BiometricResult result;
+  final String? error;
+  final bool shouldFallbackToPin;
+
+  bool get isSuccess => result == BiometricResult.success;
+  bool get isUserCancel => result == BiometricResult.userCancel;
+  bool get shouldShowError => !isSuccess && !isUserCancel && !shouldFallbackToPin;
+}
 
 class BiometricService {
   static final LocalAuthentication _localAuth = LocalAuthentication();
@@ -57,28 +86,32 @@ class BiometricService {
     }
   }
 
-  static Future<bool> authenticate({
+  static Future<BiometricAuthResult> authenticate({
     String reason = 'Please authenticate to continue',
     bool biometricOnly = false,
+    bool allowFallbackToPin = true,
   }) async {
     try {
       final bool available = await isAvailable();
       if (!available) {
         await log(message: 'Biometrics not available for authentication');
-        return false;
+        return const BiometricAuthResult(
+          result: BiometricResult.notAvailable,
+          shouldFallbackToPin: true,
+        );
       }
 
-      return await _localAuth.authenticate(
+      final bool authenticated = await _localAuth.authenticate(
         localizedReason: reason,
-        authMessages: const <AuthMessages>[
-          IOSAuthMessages(
-            cancelButton: 'Cancel',
+        authMessages: <AuthMessages>[
+          const IOSAuthMessages(
+            cancelButton: 'Use PIN',
             goToSettingsButton: 'Settings',
             goToSettingsDescription: 'Set up your biometric authentication in Settings.',
-            lockOut: 'Biometric authentication is temporarily locked. Please try again later.',
+            lockOut: 'Biometric authentication is temporarily locked. Please use your PIN.',
           ),
-          AndroidAuthMessages(
-            cancelButton: 'Cancel',
+          const AndroidAuthMessages(
+            cancelButton: 'Use PIN',
             goToSettingsButton: 'Settings',
             goToSettingsDescription: 'Please set up biometric authentication in your device settings.',
             biometricHint: 'Touch the fingerprint sensor',
@@ -95,39 +128,100 @@ class BiometricService {
           stickyAuth: true,
         ),
       );
-    } on PlatformException catch (e, stackTrace) {
-      // Handle specific error codes
-      String userMessage;
-      switch (e.code) {
-        case 'no_fragment_activity':
-          userMessage = 'Biometric authentication setup issue. Please restart the app.';
-        case 'NotAvailable':
-          userMessage = 'Biometric authentication is not available on this device.';
-        case 'NotEnrolled':
-          userMessage = 'No biometric credentials are enrolled. Please set them up in Settings.';
-        case 'LockedOut':
-          userMessage = 'Biometric authentication is temporarily locked. Please try again later.';
-        case 'PermanentlyLockedOut':
-          userMessage = 'Biometric authentication is permanently locked. Please use device credentials.';
-        case 'UserCancel':
-          userMessage = 'Authentication was cancelled by user.';
-        default:
-          userMessage = 'Biometric authentication failed. Please try again.';
+
+      if (authenticated) {
+        return const BiometricAuthResult(result: BiometricResult.success);
       }
+
+      return BiometricAuthResult(
+        result: BiometricResult.userCancel,
+        shouldFallbackToPin: allowFallbackToPin,
+      );
       
+    } on PlatformException catch (e, stackTrace) {
       await log(
-        message: 'Biometric authentication failed: ${e.code} - $userMessage',
+        message: 'Biometric authentication failed: ${e.code} - ${e.message}',
         error: e,
         stackTrace: stackTrace,
       );
-      return false;
+
+      return _handlePlatformException(e, allowFallbackToPin);
     } catch (e, stackTrace) {
       await log(
         message: 'Unexpected error during biometric authentication',
         error: e,
         stackTrace: stackTrace,
       );
-      return false;
+      
+      return BiometricAuthResult(
+        result: BiometricResult.unknown,
+        error: 'Unexpected error occurred. Please try again.',
+        shouldFallbackToPin: allowFallbackToPin,
+      );
+    }
+  }
+
+  static BiometricAuthResult _handlePlatformException(
+    PlatformException e,
+    bool allowFallbackToPin,
+  ) {
+    switch (e.code) {
+      case 'UserCancel':
+      case 'SystemCancel':
+        return BiometricAuthResult(
+          result: BiometricResult.userCancel,
+          shouldFallbackToPin: allowFallbackToPin,
+        );
+        
+      case 'NotAvailable':
+        return BiometricAuthResult(
+          result: BiometricResult.notAvailable,
+          error: 'Biometric authentication is not available on this device.',
+          shouldFallbackToPin: allowFallbackToPin,
+        );
+        
+      case 'NotEnrolled':
+        return BiometricAuthResult(
+          result: BiometricResult.notEnrolled,
+          error: 'No biometric credentials are enrolled. Please set them up in Settings.',
+          shouldFallbackToPin: allowFallbackToPin,
+        );
+        
+      case 'LockedOut':
+        return const BiometricAuthResult(
+          result: BiometricResult.temporaryLockout,
+          error: 'Biometric authentication is temporarily locked. Please use your PIN.',
+          shouldFallbackToPin: true, // Force fallback for lockouts
+        );
+        
+      case 'PermanentlyLockedOut':
+        return const BiometricAuthResult(
+          result: BiometricResult.permanentLockout,
+          error: 'Biometric authentication is permanently locked. Please use your PIN.',
+          shouldFallbackToPin: true, // Force fallback for permanent lockouts
+        );
+        
+      case 'BiometricNotRecognized':
+      case 'AuthenticationFailed':
+        return BiometricAuthResult(
+          result: BiometricResult.failed,
+          error: 'Biometric not recognized. Please try again or use your PIN.',
+          shouldFallbackToPin: allowFallbackToPin,
+        );
+        
+      case 'no_fragment_activity':
+        return BiometricAuthResult(
+          result: BiometricResult.unknown,
+          error: 'App configuration issue. Please restart the app.',
+          shouldFallbackToPin: allowFallbackToPin,
+        );
+        
+      default:
+        return BiometricAuthResult(
+          result: BiometricResult.unknown,
+          error: 'Biometric authentication failed. Please try your PIN.',
+          shouldFallbackToPin: allowFallbackToPin,
+        );
     }
   }
 
@@ -145,23 +239,16 @@ class BiometricService {
     }
     return 'Biometric';
   }
-  
-  static String getErrorMessage(PlatformException e) {
-    switch (e.code) {
-      case 'no_fragment_activity':
-        return 'App configuration issue. Please restart the app and try again.';
-      case 'NotAvailable':
-        return 'Biometric authentication is not available on this device.';
-      case 'NotEnrolled':
-        return 'No fingerprint or face ID is set up. Please configure biometric security in your device settings.';
-      case 'LockedOut':
-        return 'Too many failed attempts. Biometric authentication is temporarily disabled.';
-      case 'PermanentlyLockedOut':
-        return 'Biometric authentication is disabled. Please use your device passcode.';
-      case 'UserCancel':
-        return 'Authentication was cancelled.';
-      default:
-        return 'Biometric authentication failed. Please try again or use your PIN.';
+
+  /// Get the appropriate icon for the available biometric types
+  static IconData getBiometricIcon(List<BiometricType> types) {
+    if (types.contains(BiometricType.face)) {
+      return Icons.face;
+    } else if (types.contains(BiometricType.fingerprint)) {
+      return Icons.fingerprint;
+    } else if (types.contains(BiometricType.iris)) {
+      return Icons.visibility;
     }
+    return Icons.fingerprint;
   }
 }

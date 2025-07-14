@@ -6,8 +6,6 @@ import '../../core/contracts/services/secure_storage/i_onboarding_storage_servic
 import '../../core/contracts/services/secure_storage/i_pin_storage_service.dart';
 import '../../core/providers/secure_storage/onboarding_storage_provider.dart';
 import '../../core/providers/secure_storage/pin_storage_provider.dart';
-import '../../features/auth/models/auth_state.dart';
-import '../../features/auth/providers/auth_provider.dart';
 import '../models/session/session_state.dart';
 import '../providers/session/session_provider.dart';
 

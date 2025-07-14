@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/secure_storage/pin_storage_provider.dart';
-import '../../../core/providers/session/session_provider.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
 import '../models/onboarding_state.dart';
 import '../providers/onboarding_provider.dart';
@@ -47,7 +46,7 @@ class OnboardingCoordinator extends ConsumerWidget {
               state.currentStep != OnboardingStep.complete)
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(DesignTokens.spacingMd),
+                padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingMd, vertical: DesignTokens.spacingSm),
                 child: ProgressIndicatorWidget(progress: state.progress, totalSteps: state.totalSteps),
               ),
             ),

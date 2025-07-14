@@ -8,8 +8,6 @@ import '../../../core/logging/log.dart';
 import '../../../core/providers/secure_storage/biometric_storage_provider.dart';
 import '../../../core/providers/secure_storage/pin_storage_provider.dart';
 import '../../../core/services/security/biometric_service.dart';
-import '../../../shared/state/status/error_state.dart';
-import '../../../shared/state/status/loading_state.dart';
 import '../models/auth_state.dart';
 
 class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
@@ -27,10 +25,11 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
     await perform(() async {
       final bool hasPin = await _pinStorage.hasPinSet();
       if (!hasPin) {
-        state = state.error('Authentication not properly configured.');
         return;
       }
 
+      final int? expectedPinLength = await _pinStorage.getPinLength();
+      
       final bool biometricEnabled = await _biometricStorage.isBiometricEnabled();
       final bool biometricAvailable = await BiometricService.isAvailable();
 
@@ -40,24 +39,24 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
         return;
       }
 
-      state = state.pinStep();
+      state = state.pinStep().copyWith(
+        expectedPinLength: expectedPinLength,
+      );
     }, failMessage: 'Failed to initialize authentication.');
   }
 
   Future<void> _authenticateWithBiometric() async {
     await perform(() async {
-      final bool authenticated = await BiometricService.authenticate(
+      final BiometricAuthResult authenticated = await BiometricService.authenticate(
         reason: 'Authenticate to access TrackFi',
       );
 
-      if (authenticated) {
+      if (authenticated.isSuccess) {
         state = state.success();
         return;
       }
 
-      state = state.pinStep().copyWith(
-        errorMessage: 'Biometric authentication failed. Please enter your PIN.',
-      );
+      state = state.pinStep();
     }, failMessage: 'Biometric authentication unavailable. Please enter your PIN.');
   }
 
@@ -99,7 +98,6 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
       attemptCount: newAttempt,
       pin: '',
       isLoading: false,
-      errorMessage: 'Incorrect PIN. ${state.maxAttempts - newAttempt} attempts remaining.',
     );
   }
 
@@ -150,7 +148,6 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
         error: e,
         stackTrace: st,
       );
-      state = state.error(failMessage ?? 'Something went wrong.');
     }
   }
 }

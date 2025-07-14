@@ -5,7 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../shared/widgets/feature_card.dart';
+import '../../../../shared/widgets/cards/feature_card.dart';
 import '../../providers/onboarding_provider.dart';
 
 class WelcomeScreen extends ConsumerWidget {
@@ -22,7 +22,6 @@ class WelcomeScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(DesignTokens.spacingMd),
           child: Column(
             children: <Widget>[
-              Gap(size.height * 0.08),
               _buildBrandingSection(theme),
               Gap(size.height * 0.06),
               _buildFeaturesSection(theme),

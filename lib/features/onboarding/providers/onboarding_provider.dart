@@ -8,8 +8,6 @@ import '../../../core/providers/secure_storage/biometric_storage_provider.dart';
 import '../../../core/providers/secure_storage/onboarding_storage_provider.dart';
 import '../../../core/providers/secure_storage/pin_storage_provider.dart';
 import '../../../core/services/security/biometric_service.dart';
-import '../../../shared/state/status/error_state.dart';
-import '../../../shared/state/status/loading_state.dart';
 import '../models/onboarding_state.dart';
 
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
@@ -73,9 +71,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     try {
       state = state.loading();
       await _pinStorage.storePin(state.pin!);
-      print('📝 PIN stored, checking immediately...');
-      final bool checkPin = await _pinStorage.hasPinSet();
-      print('📝 PIN check result: $checkPin');
       state = state.notLoading();
       return true;
     } catch (e, st) {
@@ -101,20 +96,22 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
       final bool isAvailable = await BiometricService.isAvailable();
       if (!isAvailable) {
-        state = state.error('Biometric authentication is not available on this device');
-        return false;
+        await _biometricStorage.setBiometricEnabled(false);
+        state = state.notLoading();
+        return true;
       }
 
-      final bool authenticated = await BiometricService.authenticate(
+      final BiometricAuthResult result = await BiometricService.authenticate(
         reason: 'Set up biometric authentication for TrackFi',
       );
 
-      if (!authenticated) {
-        state = state.error('Biometric setup failed. You can set it up later in settings.');
-        return false;
+      if (result.isSuccess) {
+        await _biometricStorage.setBiometricEnabled(true);
+        state = state.notLoading();
+        return true;
       }
 
-      await _biometricStorage.setBiometricEnabled(true);
+      await _biometricStorage.setBiometricEnabled(false);
       state = state.notLoading();
       return true;
 
@@ -124,8 +121,15 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         error: e,
         stackTrace: st,
       );
-      state = state.error('Failed to setup biometric authentication');
-      return false;
+      
+      try {
+        await _biometricStorage.setBiometricEnabled(false);
+      } catch (_) {
+        // Ignore errors setting biometric preference
+      }
+      
+      state = state.notLoading();
+      return true;
     }
   }
 
