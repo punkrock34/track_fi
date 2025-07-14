@@ -60,7 +60,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 
                 return Column(
                   children: <Widget>[
-                    // Add some top spacing
                     const Gap(DesignTokens.spacing3xl),
                     
                     Padding(
@@ -229,7 +228,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ],
                         ).animate().fadeIn(),
                       )
-                    else if (authState.currentStep == AuthenticationStep.pin)
+                    else if (authState.currentStep == AuthenticationStep.pin ||
+                             authState.currentStep == AuthenticationStep.biometric)
                       SizedBox(
                         child: PinInputWidget(
                           pin: authState.pin,

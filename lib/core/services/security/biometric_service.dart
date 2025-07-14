@@ -66,6 +66,94 @@ class BiometricService {
     }
   }
 
+  static Future<bool> isSpecificBiometricAvailable({
+    bool allowFingerprint = true,
+    bool allowFaceID = true,
+    bool allowIris = false,
+  }) async {
+    try {
+      final bool canCheckBiometrics = await _localAuth.canCheckBiometrics;
+      final bool isDeviceSupported = await _localAuth.isDeviceSupported();
+      
+      if (!canCheckBiometrics || !isDeviceSupported) {
+        return false;
+      }
+      
+      final List<BiometricType> availableBiometrics = await _localAuth.getAvailableBiometrics();
+      
+      for (final BiometricType type in availableBiometrics) {
+        switch (type) {
+          case BiometricType.fingerprint:
+            if (allowFingerprint) {
+              return true;
+            }
+          case BiometricType.face:
+            if (allowFaceID) {
+              return true;
+            }
+          case BiometricType.iris:
+            if (allowIris) {
+              return true;
+            }
+          case BiometricType.strong:
+          case BiometricType.weak:
+            if (allowFingerprint || allowFaceID) {
+              return true;
+            }
+        }
+      }
+      
+      return false;
+      
+    } on PlatformException catch (e, stackTrace) {
+      await log(
+        message: 'Specific biometric availability check failed: ${e.code} - ${e.message}',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return false;
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Unexpected error checking specific biometric availability',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  static Future<BiometricType?> getPrimaryBiometricType() async {
+    try {
+      final List<BiometricType> availableBiometrics = await getAvailableBiometrics();
+      
+      // Priority order: fingerprint > face > iris > strong > weak
+      if (availableBiometrics.contains(BiometricType.fingerprint)) {
+        return BiometricType.fingerprint;
+      }
+      if (availableBiometrics.contains(BiometricType.face)) {
+        return BiometricType.face;
+      }
+      if (availableBiometrics.contains(BiometricType.iris)) {
+        return BiometricType.iris;
+      }
+      if (availableBiometrics.contains(BiometricType.strong)) {
+        return BiometricType.strong;
+      }
+      if (availableBiometrics.contains(BiometricType.weak)) {
+        return BiometricType.weak;
+      }
+      
+      return null;
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Error getting primary biometric type',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
   static Future<List<BiometricType>> getAvailableBiometrics() async {
     try {
       return await _localAuth.getAvailableBiometrics();
@@ -88,7 +176,7 @@ class BiometricService {
 
   static Future<BiometricAuthResult> authenticate({
     String reason = 'Please authenticate to continue',
-    bool biometricOnly = false,
+    bool biometricOnly = true,
     bool allowFallbackToPin = true,
   }) async {
     try {
@@ -149,6 +237,92 @@ class BiometricService {
     } catch (e, stackTrace) {
       await log(
         message: 'Unexpected error during biometric authentication',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      
+      return BiometricAuthResult(
+        result: BiometricResult.unknown,
+        error: 'Unexpected error occurred. Please try again.',
+        shouldFallbackToPin: allowFallbackToPin,
+      );
+    }
+  }
+
+  static Future<BiometricAuthResult> authenticateWithSpecificType({
+    String reason = 'Please authenticate to continue',
+    bool allowFingerprint = true,
+    bool allowFaceID = true,
+    bool allowIris = false,
+    bool allowFallbackToPin = true,
+  }) async {
+    try {
+      final bool specificBiometricAvailable = await isSpecificBiometricAvailable(
+        allowFingerprint: allowFingerprint,
+        allowFaceID: allowFaceID,
+        allowIris: allowIris,
+      );
+      
+      if (!specificBiometricAvailable) {
+        await log(message: 'Desired biometric types not available');
+        return const BiometricAuthResult(
+          result: BiometricResult.notAvailable,
+          shouldFallbackToPin: true,
+        );
+      }
+
+      final bool authenticated = await _localAuth.authenticate(
+        localizedReason: reason,
+        authMessages: <AuthMessages>[
+          const IOSAuthMessages(
+            cancelButton: 'Use PIN',
+            goToSettingsButton: 'Settings',
+            goToSettingsDescription: 'Set up your biometric authentication in Settings.',
+            lockOut: 'Biometric authentication is temporarily locked. Please use your PIN.',
+          ),
+          AndroidAuthMessages(
+            cancelButton: 'Use PIN',
+            goToSettingsButton: 'Settings',
+            goToSettingsDescription: 'Please set up biometric authentication in your device settings.',
+            biometricHint: allowFingerprint
+                ? 'Touch the fingerprint sensor'
+                : allowFaceID
+                    ? 'Look at the camera'
+                    : 'Use your biometric',
+            biometricNotRecognized: 'Biometric not recognized. Please try again.',
+            biometricRequiredTitle: 'Biometric authentication required',
+            biometricSuccess: 'Biometric authentication succeeded!',
+            deviceCredentialsRequiredTitle: 'Device credentials required',
+            deviceCredentialsSetupDescription: 'Please set up device credentials in Settings.',
+            signInTitle: 'Authenticate to access TrackFi',
+          ),
+        ],
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+
+      if (authenticated) {
+        return const BiometricAuthResult(result: BiometricResult.success);
+      }
+
+      return BiometricAuthResult(
+        result: BiometricResult.userCancel,
+        shouldFallbackToPin: allowFallbackToPin,
+      );
+      
+    } on PlatformException catch (e, stackTrace) {
+      await log(
+        message: 'Specific biometric authentication failed: ${e.code} - ${e.message}',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return _handlePlatformException(e, allowFallbackToPin);
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Unexpected error during specific biometric authentication',
         error: e,
         stackTrace: stackTrace,
       );
@@ -240,7 +414,6 @@ class BiometricService {
     return 'Biometric';
   }
 
-  /// Get the appropriate icon for the available biometric types
   static IconData getBiometricIcon(List<BiometricType> types) {
     if (types.contains(BiometricType.face)) {
       return Icons.face;

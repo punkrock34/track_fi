@@ -11,9 +11,9 @@ enum AuthenticationStep {
 class AuthenticationState {
   const AuthenticationState({
     this.currentStep = AuthenticationStep.initial,
+    this.expectedPinLength,
     this.pin = '',
     this.isLoading = false,
-    this.expectedPinLength,
     this.attemptCount = 0,
     this.maxAttempts = 5,
     this.isLocked = false,
@@ -24,9 +24,9 @@ class AuthenticationState {
   });
 
   final AuthenticationStep currentStep;
+  final int? expectedPinLength;
   final String pin;
   final bool isLoading;
-  final int? expectedPinLength;
   final int attemptCount;
   final int maxAttempts;
   final bool isLocked;
@@ -37,9 +37,9 @@ class AuthenticationState {
 
   AuthenticationState copyWith({
     AuthenticationStep? currentStep,
+    int? expectedPinLength,
     String? pin,
     bool? isLoading,
-    int? expectedPinLength,
     int? attemptCount,
     int? maxAttempts,
     bool? isLocked,
@@ -50,9 +50,9 @@ class AuthenticationState {
   }) {
     return AuthenticationState(
       currentStep: currentStep ?? this.currentStep,
+      expectedPinLength: expectedPinLength ?? this.expectedPinLength,
       pin: pin ?? this.pin,
       isLoading: isLoading ?? this.isLoading,
-      expectedPinLength: expectedPinLength ?? this.expectedPinLength,
       attemptCount: attemptCount ?? this.attemptCount,
       maxAttempts: maxAttempts ?? this.maxAttempts,
       isLocked: isLocked ?? this.isLocked,
@@ -127,7 +127,6 @@ extension AuthStateTransitions on AuthenticationState {
         currentStep: AuthenticationStep.pin,
         isLoading: false,
         isBiometricInProgress: false,
-        expectedPinLength: expectedPinLength
       );
 
   AuthenticationState biometricStep() => copyWith(

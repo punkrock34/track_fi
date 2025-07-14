@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:local_auth/local_auth.dart';
 
 import '../../../core/contracts/services/secure_storage/i_biometric_storage_service.dart';
 import '../../../core/contracts/services/secure_storage/i_pin_storage_service.dart';
@@ -29,25 +30,34 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
       }
 
       final int? expectedPinLength = await _pinStorage.getPinLength();
-      
       final bool biometricEnabled = await _biometricStorage.isBiometricEnabled();
-      final bool biometricAvailable = await BiometricService.isAvailable();
+      final bool specificBiometricAvailable = await BiometricService.isSpecificBiometricAvailable();
+      final List<BiometricType> availableBiometrics = await BiometricService.getAvailableBiometrics();
 
-      if (biometricEnabled && biometricAvailable) {
-        state = state.biometricStep();
+      if (biometricEnabled && specificBiometricAvailable) {
+        state = state.biometricStep().copyWith(
+          expectedPinLength: expectedPinLength,
+          biometricAvailable: true,
+          availableBiometrics: availableBiometrics,
+        );
         await _authenticateWithBiometric();
         return;
       }
 
       state = state.pinStep().copyWith(
         expectedPinLength: expectedPinLength,
+        biometricAvailable: specificBiometricAvailable,
+        availableBiometrics: availableBiometrics,
       );
     }, failMessage: 'Failed to initialize authentication.');
   }
 
   Future<void> _authenticateWithBiometric() async {
+    state = state.copyWith(isBiometricInProgress: true);
+    
     await perform(() async {
-      final BiometricAuthResult authenticated = await BiometricService.authenticate(
+      // Use the specific biometric authentication method
+      final BiometricAuthResult authenticated = await BiometricService.authenticateWithSpecificType(
         reason: 'Authenticate to access TrackFi',
       );
 
@@ -56,7 +66,13 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
         return;
       }
 
-      state = state.pinStep();
+      // Fall back to PIN with proper state preservation
+      state = state.pinStep().copyWith(
+        expectedPinLength: state.expectedPinLength,
+        biometricAvailable: state.biometricAvailable,
+        availableBiometrics: state.availableBiometrics,
+        isBiometricInProgress: false,
+      );
     }, failMessage: 'Biometric authentication unavailable. Please enter your PIN.');
   }
 
@@ -116,15 +132,22 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
   }
 
   void retryBiometric() {
-    if (state.currentStep != AuthenticationStep.pin) {
+    if (state.currentStep != AuthenticationStep.pin && 
+        state.currentStep != AuthenticationStep.biometric) {
       return;
     }
 
+    // Use specific biometric authentication for retry as well
     _authenticateWithBiometric();
   }
 
   void fallbackToPin() {
-    state = state.pinStep();
+    state = state.pinStep().copyWith(
+      expectedPinLength: state.expectedPinLength,
+      biometricAvailable: state.biometricAvailable,
+      availableBiometrics: state.availableBiometrics,
+      isBiometricInProgress: false,
+    );
   }
 
   void reset() {
