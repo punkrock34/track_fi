@@ -132,7 +132,11 @@ class _PinConfirmScreenState extends ConsumerState<PinConfirmScreen> {
                       children: <Widget>[
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: notifier.previousStep,
+                             onPressed: () {
+                              notifier.updatePin('');
+                              notifier.updateConfirmPin('');
+                              notifier.previousStep();
+                            },
                             child: const Text('Back'),
                           ),
                         ),

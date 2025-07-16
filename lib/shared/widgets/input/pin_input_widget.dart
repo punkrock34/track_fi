@@ -50,16 +50,24 @@ class PinInputWidget extends StatefulWidget {
 }
 
 class _PinInputWidgetState extends State<PinInputWidget> {
+  bool _isSubmitting = false;
+  
   @override
   Widget build(BuildContext context) {
     final bool isComplete = _isComplete();
     final bool shouldAutoSubmit = widget.autoSubmit &&
                                  isComplete &&
+                                 !_isSubmitting &&
                                  widget.mode == PinInputMode.auth &&
                                  widget.onAutoSubmit != null;
 
     if (shouldAutoSubmit) {
+      _isSubmitting = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || widget.onAutoSubmit == null) {
+          return;
+        }
+
         widget.onAutoSubmit!();
       });
     }
@@ -98,6 +106,15 @@ class _PinInputWidgetState extends State<PinInputWidget> {
         ),
       ],
     );
+  }
+
+  @override
+  void didUpdateWidget(PinInputWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset flag when PIN changes (important for retry after failed attempt)
+    if (oldWidget.pin != widget.pin) {
+      _isSubmitting = false;
+    }
   }
 
   bool _isComplete() {

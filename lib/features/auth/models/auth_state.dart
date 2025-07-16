@@ -65,7 +65,7 @@ class AuthenticationState {
 
   bool get canAttemptAuth => !isLocked && attemptCount < maxAttempts;
   bool get isPinComplete => pin.length >= 4 && pin.length <= 6;
-  bool get showBiometricButton => biometricAvailable && !isBiometricInProgress;
+  bool get showBiometricButton => biometricAvailable && !isBiometricInProgress && !isLocked;
   
   int get remainingAttempts => maxAttempts - attemptCount;
   

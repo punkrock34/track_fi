@@ -211,7 +211,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     const Gap(DesignTokens.spacingLg),
 
                     // Main content based on step
-                    if (authState.currentStep == AuthenticationStep.initial)
+                    if (!authState.isLocked && authState.currentStep == AuthenticationStep.initial)
                       SizedBox(
                         child: Column(
                           children: <Widget>[
@@ -228,8 +228,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ],
                         ).animate().fadeIn(),
                       )
-                    else if (authState.currentStep == AuthenticationStep.pin ||
-                             authState.currentStep == AuthenticationStep.biometric)
+                    else if (!authState.isLocked &&
+                              (authState.currentStep == AuthenticationStep.pin ||
+                              authState.currentStep == AuthenticationStep.biometric)
+                            )
                       SizedBox(
                         child: PinInputWidget(
                           pin: authState.pin,

@@ -71,7 +71,13 @@ class AppTheme {
       ],
       
       appBarTheme: ComponentThemes.lightAppBarTheme,
-      cardTheme: ComponentThemes.lightCardTheme,
+      cardTheme: CardThemeData(
+        color: ComponentThemes.lightCardTheme.color,
+        elevation: ComponentThemes.lightCardTheme.elevation,
+        shape: ComponentThemes.lightCardTheme.shape,
+        margin: ComponentThemes.lightCardTheme.margin,
+        clipBehavior: ComponentThemes.lightCardTheme.clipBehavior,
+      ),
       elevatedButtonTheme: ComponentThemes.lightElevatedButtonTheme,
       outlinedButtonTheme: ComponentThemes.lightOutlinedButtonTheme,
       textButtonTheme: ComponentThemes.lightTextButtonTheme,
@@ -144,7 +150,13 @@ class AppTheme {
       ],
 
       appBarTheme: ComponentThemes.darkAppBarTheme,
-      cardTheme: ComponentThemes.darkCardTheme,
+      cardTheme: CardThemeData(
+        color: ComponentThemes.darkCardTheme.color,
+        elevation: ComponentThemes.darkCardTheme.elevation,
+        shape: ComponentThemes.darkCardTheme.shape,
+        margin: ComponentThemes.darkCardTheme.margin,
+        clipBehavior: ComponentThemes.darkCardTheme.clipBehavior,
+      ),
       elevatedButtonTheme: ComponentThemes.darkElevatedButtonTheme,
       outlinedButtonTheme: ComponentThemes.darkOutlinedButtonTheme,
       textButtonTheme: ComponentThemes.darkTextButtonTheme,
