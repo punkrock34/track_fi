@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../models/session/session_state.dart';
 
 class SessionNotifier extends StateNotifier<SessionState> {
@@ -31,5 +30,5 @@ class SessionNotifier extends StateNotifier<SessionState> {
 
 final StateNotifierProvider<SessionNotifier, SessionState> sessionProvider =
     StateNotifierProvider<SessionNotifier, SessionState>(
-  (StateNotifierProviderRef<SessionNotifier, dynamic> ref) => SessionNotifier(),
+  (StateNotifierProviderRef<SessionNotifier, SessionState> ref) => SessionNotifier(),
 );

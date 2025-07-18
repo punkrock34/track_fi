@@ -3,53 +3,49 @@ import '../../../contracts/services/database/storage/i_account_storage_service.d
 import '../../../models/database/account.dart';
 
 class AccountStorageService implements IAccountStorageService {
+  AccountStorageService(this._db);
 
-  AccountStorageService(this.db);
-  final IDatabaseService db;
+  final IDatabaseService _db;
 
-  @override
-  Future<void> save(Account account) async {
-    await db.insert('accounts', account.toMap());
-  }
+  static const String _table = 'accounts';
 
   @override
-  Future<void> update(Account account) async {
-    await db.update(
-      'accounts',
-      account.toMap(),
-      where: 'id = ?',
-      whereArgs: <String>[account.id],
-    );
-  }
+  Future<void> save(Account account) =>
+      _db.insert(_table, account.toMap());
 
   @override
-  Future<void> delete(String id) async {
-    await db.delete(
-      'accounts',
-      where: 'id = ?',
-      whereArgs: <String>[id],
-    );
-  }
+  Future<void> update(Account account) =>
+      _db.update(
+        _table,
+        account.toMap(),
+        where: 'id = ?',
+        whereArgs: <Object?>[account.id],
+      );
+
+  @override
+  Future<void> delete(String id) =>
+      _db.delete(
+        _table,
+        where: 'id = ?',
+        whereArgs: <Object?>[id],
+      );
 
   @override
   Future<Account?> get(String id) async {
-    final List<Map<String, dynamic>> result = await db.query(
-      'accounts',
+    final List<Map<String, dynamic>> result = await _db.query(
+      _table,
       where: 'id = ?',
-      whereArgs: <String>[id],
+      whereArgs: <Object?>[id],
     );
-
     return result.isEmpty ? null : Account.fromMap(result.first);
   }
 
   @override
   Future<List<Account>> getAll() async {
-    final List<Map<String, dynamic>> results = await db.query('accounts');
-    return results.map((Map<String, dynamic> m) => Account.fromMap(m)).toList();
+    final List<Map<String, dynamic>> results = await _db.query(_table);
+    return results.map(Account.fromMap).toList();
   }
-  
+
   @override
-  Future<void> clearAll() async {
-    await db.delete('accounts');
-  }
+  Future<void> clearAll() => _db.delete(_table);
 }

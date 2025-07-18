@@ -1,13 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/contracts/services/auth/biometric/i_biometric_service.dart';
 import '../../../core/contracts/services/secure_storage/i_biometric_storage_service.dart';
 import '../../../core/contracts/services/secure_storage/i_onboarding_storage_service.dart';
 import '../../../core/contracts/services/secure_storage/i_pin_storage_service.dart';
 import '../../../core/logging/log.dart';
+import '../../../core/models/auth/biometric/biometric_auth_result.dart';
+import '../../../core/providers/auth/biometric/biometric_service_provider.dart';
 import '../../../core/providers/secure_storage/biometric_storage_provider.dart';
 import '../../../core/providers/secure_storage/onboarding_storage_provider.dart';
 import '../../../core/providers/secure_storage/pin_storage_provider.dart';
-import '../../../core/services/security/biometric_service.dart';
 import '../models/onboarding_state.dart';
 
 class OnboardingNotifier extends StateNotifier<OnboardingState> {
@@ -16,7 +18,8 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   final Ref _ref;
 
   IPinStorageService get _pinStorage => _ref.read(pinStorageProvider);
-  IBiometricStorageService get _biometricStorage => _ref.read(biometricStorageProvider);
+  IBiometricStorageService get _biometricStorage => _ref.watch(biometricStorageProvider);
+  IBiometricService get _biometricService => _ref.watch(biometricServiceProvider);
   IOnboardingStorageService get _onboardingStorage => _ref.read(onboardingStorageProvider);
 
   void nextStep() {
@@ -94,14 +97,14 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         return true;
       }
 
-      final bool isAvailable = await BiometricService.isAvailable();
+      final bool isAvailable = await _biometricService.isAvailable();
       if (!isAvailable) {
         await _biometricStorage.setBiometricEnabled(false);
         state = state.notLoading();
         return true;
       }
 
-      final BiometricAuthResult result = await BiometricService.authenticate(
+      final BiometricAuthResult result = await _biometricService.authenticate(
         reason: 'Set up biometric authentication for TrackFi',
       );
 

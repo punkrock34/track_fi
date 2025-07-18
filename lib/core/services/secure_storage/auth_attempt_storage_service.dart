@@ -5,49 +5,46 @@ class AuthAttemptStorageService implements IAuthAttemptStorageService {
   AuthAttemptStorageService(this._storage);
 
   final ISecureStorageService _storage;
-  
+
   static const String _lockoutEndTimeKey = 'auth_lockout_end_time';
   static const String _failedAttemptsKey = 'auth_failed_attempts';
 
   @override
-  Future<void> setLockoutEndTime(DateTime lockoutEnd) async {
-    await _storage.write(_lockoutEndTimeKey, lockoutEnd.toIso8601String());
-  }
+  Future<void> setLockoutEndTime(DateTime lockoutEnd) =>
+      _storage.write(_lockoutEndTimeKey, lockoutEnd.toIso8601String());
 
   @override
   Future<DateTime?> getLockoutEndTime() async {
-    final String? lockoutStr = await _storage.read(_lockoutEndTimeKey);
-    if (lockoutStr == null) {
+    final String? raw = await _storage.read(_lockoutEndTimeKey);
+    if (raw == null) {
       return null;
     }
+
     try {
-      return DateTime.parse(lockoutStr);
-    } catch (e) {
+      return DateTime.parse(raw);
+    } catch (_) {
       await clearLockoutEndTime();
       return null;
     }
   }
 
   @override
-  Future<void> clearLockoutEndTime() async {
-    await _storage.delete(_lockoutEndTimeKey);
-  }
+  Future<void> clearLockoutEndTime() =>
+      _storage.delete(_lockoutEndTimeKey);
 
   @override
-  Future<void> setFailedAttempts(int attempts) async {
-    await _storage.write(_failedAttemptsKey, attempts.toString());
-  }
+  Future<void> setFailedAttempts(int attempts) =>
+      _storage.write(_failedAttemptsKey, attempts.toString());
 
   @override
   Future<int> getFailedAttempts() async {
-    final String? attemptsStr = await _storage.read(_failedAttemptsKey);
-    return int.tryParse(attemptsStr ?? '0') ?? 0;
+    final String? raw = await _storage.read(_failedAttemptsKey);
+    return int.tryParse(raw ?? '0') ?? 0;
   }
 
   @override
-  Future<void> clearFailedAttempts() async {
-    await _storage.delete(_failedAttemptsKey);
-  }
+  Future<void> clearFailedAttempts() =>
+      _storage.delete(_failedAttemptsKey);
 
   @override
   Future<void> incrementFailedAttempts() async {
@@ -61,21 +58,15 @@ class AuthAttemptStorageService implements IAuthAttemptStorageService {
     if (lockoutEnd == null) {
       return false;
     }
-    
-    final bool isLocked = DateTime.now().isBefore(lockoutEnd);
-    
-    if (!isLocked) {
+
+    final bool locked = DateTime.now().isBefore(lockoutEnd);
+    if (!locked) {
       await clearLockoutEndTime();
     }
-    
-    return isLocked;
+    return locked;
   }
 
   @override
-  Future<void> clearAllAttemptData() async {
-    await Future.wait(<Future<void>>[
-      clearLockoutEndTime(),
-      clearFailedAttempts(),
-    ]);
-  }
+  Future<void> clearAllAttemptData() =>
+      Future.wait(<Future<void>>[clearLockoutEndTime(), clearFailedAttempts()]);
 }

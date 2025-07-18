@@ -8,9 +8,8 @@ class BiometricStorageService implements IBiometricStorageService {
   static const String _biometricEnabledKey = 'biometric_enabled';
 
   @override
-  Future<void> setBiometricEnabled(bool enabled) async {
-    await _storage.write(_biometricEnabledKey, enabled.toString());
-  }
+  Future<void> setBiometricEnabled(bool enabled) =>
+      _storage.write(_biometricEnabledKey, enabled.toString());
 
   @override
   Future<bool> isBiometricEnabled() async {

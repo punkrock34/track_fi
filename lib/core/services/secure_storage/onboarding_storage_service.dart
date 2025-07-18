@@ -8,9 +8,8 @@ class OnboardingStorageService implements IOnboardingStorageService {
   static const String _onboardingCompleteKey = 'onboarding_complete';
 
   @override
-  Future<void> setOnboardingComplete(bool complete) async {
-    await _storage.write(_onboardingCompleteKey, complete.toString());
-  }
+  Future<void> setOnboardingComplete(bool complete) =>
+      _storage.write(_onboardingCompleteKey, complete.toString());
 
   @override
   Future<bool> isOnboardingComplete() async {

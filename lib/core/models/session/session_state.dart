@@ -17,6 +17,7 @@ class SessionState {
     );
   }
 
+  /// Returns true if the user has been idle > 5 minutes while authenticated.
   bool get isExpired {
     if (!isAuthenticated || lastActivityTime == null) {
       return false;

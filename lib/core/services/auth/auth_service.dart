@@ -3,70 +3,78 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../../../core/contracts/services/auth/biometric/i_biometric_service.dart';
+import '../../../core/contracts/services/auth/i_auth_service.dart';
 import '../../../core/contracts/services/secure_storage/i_auth_attempt_storage_service.dart';
 import '../../../core/contracts/services/secure_storage/i_biometric_storage_service.dart';
 import '../../../core/contracts/services/secure_storage/i_pin_storage_service.dart';
 import '../../../core/logging/log.dart';
-import '../../../core/providers/secure_storage/auth_attempt_storage_provider.dart';
-import '../../../core/providers/secure_storage/biometric_storage_provider.dart';
-import '../../../core/providers/secure_storage/pin_storage_provider.dart';
-import '../../../core/services/security/biometric_service.dart';
-import '../models/auth_state.dart';
-import '../models/biometric_setup.dart';
+import '../../../core/models/auth/biometric/biometric_auth_result.dart';
+import '../../../features/auth/models/auth_state.dart';
+import '../../../features/auth/models/biometric_setup.dart';
 
-class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
-  AuthenticationNotifier(this._ref) : super(const AuthenticationState()) {
-    init();
-  }
+class AuthService extends StateNotifier<AuthenticationState> implements IAuthService {
+  AuthService({
+    required this.pinStorage,
+    required this.biometricStorage,
+    required this.authAttemptStorage,
+    required this.biometricService,
+  }) : super(const AuthenticationState());
 
-  final Ref _ref;
+  final IPinStorageService pinStorage;
+  final IBiometricStorageService biometricStorage;
+  final IAuthAttemptStorageService authAttemptStorage;
+  final IBiometricService biometricService;
+
   Timer? _lockoutTimer;
   Timer? _countdownTimer;
 
-  IPinStorageService get _pinStorage => _ref.watch(pinStorageProvider);
-  IBiometricStorageService get _biometricStorage => _ref.watch(biometricStorageProvider);
-  IAuthAttemptStorageService get _authAttemptStorage => _ref.watch(authAttemptStorageProvider);
+  @override
+  set state(AuthenticationState state) {
+    super.state = state;
+  }
 
+  @override
+  AuthenticationState get state => super.state;
+
+  @override
   Future<void> init() async {
     await perform(() async {
-      final bool hasPin = await _pinStorage.hasPinSet();
+      final bool hasPin = await pinStorage.hasPinSet();
       if (!hasPin) {
         return;
       }
-
       if (await _handleExistingLockout()) {
         return;
       }
-
       await _setupAuthenticationFlow();
     }, failMessage: 'Failed to initialize authentication.');
   }
 
   Future<bool> _handleExistingLockout() async {
-    final bool isLockedOut = await _authAttemptStorage.isCurrentlyLockedOut();
+    final bool isLockedOut = await authAttemptStorage.isCurrentlyLockedOut();
     if (!isLockedOut) {
       return false;
     }
 
-    final DateTime? lockoutEnd = await _authAttemptStorage.getLockoutEndTime();
-    final int failedAttempts = await _authAttemptStorage.getFailedAttempts();
-    
+    final DateTime? lockoutEnd = await authAttemptStorage.getLockoutEndTime();
+    final int failedAttempts = await authAttemptStorage.getFailedAttempts();
+
     if (lockoutEnd != null) {
       state = state.locked(lockoutEnd).copyWith(attemptCount: failedAttempts);
       _scheduleUnlock(lockoutEnd);
       _setupCountdownTimer(lockoutEnd);
       return true;
     }
-    
+
     return false;
   }
 
   Future<void> _setupAuthenticationFlow() async {
-    final int? expectedPinLength = await _pinStorage.getPinLength();
-    final int failedAttempts = await _authAttemptStorage.getFailedAttempts();
-    
+    final int? expectedPinLength = await pinStorage.getPinLength();
+    final int failedAttempts = await authAttemptStorage.getFailedAttempts();
     final BiometricSetup biometricSetup = await _getBiometricSetup();
-    
+
     if (biometricSetup.shouldUseBiometric) {
       await _setupBiometricAuth(expectedPinLength, failedAttempts, biometricSetup);
     } else {
@@ -75,55 +83,56 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
   }
 
   Future<BiometricSetup> _getBiometricSetup() async {
-    final bool biometricEnabled = await _biometricStorage.isBiometricEnabled();
-    final bool specificBiometricAvailable = await BiometricService.isSpecificBiometricAvailable();
-    final List<BiometricType> availableBiometrics = await BiometricService.getAvailableBiometrics();
-    
+    final bool enabled = await biometricStorage.isBiometricEnabled();
+    final bool available = await biometricService.isSpecificBiometricAvailable();
+    final List<BiometricType> types = await biometricService.getAvailableBiometrics();
+
     return BiometricSetup(
-      enabled: biometricEnabled,
-      available: specificBiometricAvailable,
-      types: availableBiometrics,
-      shouldUseBiometric: biometricEnabled && specificBiometricAvailable,
+      enabled: enabled,
+      available: available,
+      types: types,
+      shouldUseBiometric: enabled && available,
     );
   }
 
   Future<void> _setupBiometricAuth(
     int? expectedPinLength,
     int failedAttempts,
-    BiometricSetup biometricSetup,
+    BiometricSetup setup,
   ) async {
     state = state.biometricStep().copyWith(
       expectedPinLength: expectedPinLength,
       biometricAvailable: true,
-      availableBiometrics: biometricSetup.types,
+      availableBiometrics: setup.types,
       attemptCount: failedAttempts,
     );
+
     await _authenticateWithBiometric();
   }
 
   void _setupPinAuth(
     int? expectedPinLength,
     int failedAttempts,
-    BiometricSetup biometricSetup,
+    BiometricSetup setup,
   ) {
     state = state.pinStep().copyWith(
       expectedPinLength: expectedPinLength,
-      biometricAvailable: biometricSetup.isBiometricAvailable,
-      availableBiometrics: biometricSetup.types,
+      biometricAvailable: setup.isBiometricAvailable,
+      availableBiometrics: setup.types,
       attemptCount: failedAttempts,
     );
   }
 
   Future<void> _authenticateWithBiometric() async {
     state = state.copyWith(isBiometricInProgress: true);
-    
+
     await perform(() async {
-      final BiometricAuthResult authenticated = await BiometricService.authenticateWithSpecificType(
+      final BiometricAuthResult result = await biometricService.authenticateWithSpecificType(
         reason: 'Authenticate to access TrackFi',
       );
 
-      if (authenticated.isSuccess) {
-        await _authAttemptStorage.clearAllAttemptData();
+      if (result.isSuccess) {
+        await authAttemptStorage.clearAllAttemptData();
         state = state.success();
         return;
       }
@@ -134,26 +143,27 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
         availableBiometrics: state.availableBiometrics,
         isBiometricInProgress: false,
       );
-    }, failMessage: 'Biometric authentication unavailable. Please enter your PIN.');
+    }, failMessage: 'Biometric authentication failed.');
   }
 
+  @override
   void updatePin(String pin) {
     if (state.isLocked) {
       return;
     }
-
     state = state.copyWith(pin: pin);
   }
 
+  @override
   Future<void> authenticateWithPin() async {
     if (!state.canAttemptAuth || !state.isPinComplete) {
       return;
     }
 
     await perform(() async {
-      final bool isValid = await _pinStorage.verifyPin(state.pin);
+      final bool isValid = await pinStorage.verifyPin(state.pin);
       if (isValid) {
-        await _authAttemptStorage.clearAllAttemptData();
+        await authAttemptStorage.clearAllAttemptData();
         state = state.success();
         return;
       }
@@ -163,14 +173,12 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
   }
 
   Future<void> _handleFailedPin() async {
-    await _authAttemptStorage.incrementFailedAttempts();
-    final int newAttempt = await _authAttemptStorage.getFailedAttempts();
+    await authAttemptStorage.incrementFailedAttempts();
+    final int newAttempt = await authAttemptStorage.getFailedAttempts();
 
     if (newAttempt >= state.maxAttempts) {
       final DateTime lockoutEnd = DateTime.now().add(const Duration(minutes: 5));
-      
-      await _authAttemptStorage.setLockoutEndTime(lockoutEnd);
-      
+      await authAttemptStorage.setLockoutEndTime(lockoutEnd);
       state = state.locked(lockoutEnd).copyWith(attemptCount: newAttempt);
       _scheduleUnlock(lockoutEnd);
       _setupCountdownTimer(lockoutEnd);
@@ -186,27 +194,17 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
 
   void _scheduleUnlock(DateTime unlockTime) {
     _lockoutTimer?.cancel();
-
-    final Duration duration = unlockTime.difference(DateTime.now());
-    _lockoutTimer = Timer(duration, () async {
-      if (mounted) {
-        await _authAttemptStorage.clearAllAttemptData();
-        state = state.copyWith(isLocked: false, attemptCount: 0);
-        await init();
-      }
+    _lockoutTimer = Timer(unlockTime.difference(DateTime.now()), () async {
+      await authAttemptStorage.clearAllAttemptData();
+      state = state.copyWith(isLocked: false, attemptCount: 0);
+      await init();
     });
   }
 
   void _setupCountdownTimer(DateTime unlockTime) {
     _countdownTimer?.cancel();
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-
       final Duration remaining = unlockTime.difference(DateTime.now());
-      
       if (remaining.isNegative || remaining.inSeconds <= 0) {
         timer.cancel();
         return;
@@ -216,19 +214,19 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
     });
   }
 
+  @override
   void retryBiometric() {
     if (state.isLocked || state.isBiometricInProgress) {
       return;
     }
 
-    if (state.currentStep != AuthenticationStep.pin &&
-        state.currentStep != AuthenticationStep.biometric) {
-      return;
+    if (state.currentStep == AuthenticationStep.pin ||
+        state.currentStep == AuthenticationStep.biometric) {
+      _authenticateWithBiometric();
     }
-
-    _authenticateWithBiometric();
   }
 
+  @override
   void fallbackToPin() {
     state = state.pinStep().copyWith(
       expectedPinLength: state.expectedPinLength,
@@ -238,6 +236,7 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
     );
   }
 
+  @override
   void reset() {
     state = const AuthenticationState();
     init();
@@ -263,8 +262,3 @@ class AuthenticationNotifier extends StateNotifier<AuthenticationState> {
     }
   }
 }
-
-final StateNotifierProvider<AuthenticationNotifier, AuthenticationState> authenticationProvider =
-    StateNotifierProvider<AuthenticationNotifier, AuthenticationState>(
-  (StateNotifierProviderRef<AuthenticationNotifier, AuthenticationState> ref) => AuthenticationNotifier(ref),
-);

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
-import '../../contracts/services/auth/i_jwt_auth_service.dart';
+import '../../contracts/services/auth/jwt/i_jwt_auth_service.dart';
 import '../../contracts/services/http/i_authenticated_http_client.dart';
 import '../../logging/log.dart';
 

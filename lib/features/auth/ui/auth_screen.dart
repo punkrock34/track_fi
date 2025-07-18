@@ -4,11 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/contracts/services/auth/i_auth_service.dart';
+import '../../../core/providers/auth/auth_service_provider.dart';
 import '../../../core/providers/session/session_provider.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../shared/widgets/input/pin_input_widget.dart';
 import '../../auth/models/auth_state.dart';
-import '../../auth/providers/auth_provider.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -19,12 +20,20 @@ class AuthScreen extends ConsumerStatefulWidget {
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
+  void initState() {
+    super.initState();
+    Future<void>.microtask(() {
+      ref.read(authServiceProvider.notifier).init();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final AuthenticationState authState = ref.watch(authenticationProvider);
-    final AuthenticationNotifier authNotifier = ref.read(authenticationProvider.notifier);
+    final AuthenticationState authState = ref.watch(authServiceProvider);
+    final IAuthService authNotifier = ref.read(authServiceProvider.notifier);
     final ThemeData theme = Theme.of(context);
 
-    ref.listen<AuthenticationState>(authenticationProvider, (
+    ref.listen<AuthenticationState>(authServiceProvider, (
       AuthenticationState? previous,
       AuthenticationState current,
     ) {

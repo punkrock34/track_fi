@@ -3,59 +3,57 @@ import '../../../contracts/services/database/storage/i_transaction_storage_servi
 import '../../../models/database/transaction.dart';
 
 class TransactionStorageService implements ITransactionStorageService {
+  TransactionStorageService(this._db);
 
-  TransactionStorageService(this.db);
-  final IDatabaseService db;
+  final IDatabaseService _db;
 
-  @override
-  Future<void> save(Transaction transaction) async {
-    await db.insert('transactions', transaction.toMap());
-  }
+  static const String _table = 'transactions';
 
   @override
-  Future<void> update(Transaction transaction) async {
-    await db.update(
-      'transactions',
-      transaction.toMap(),
-      where: 'id = ?',
-      whereArgs: <String>[transaction.id],
-    );
-  }
+  Future<void> save(Transaction transaction) =>
+      _db.insert(_table, transaction.toMap());
 
   @override
-  Future<void> delete(String id) async {
-    await db.delete(
-      'transactions',
-      where: 'id = ?',
-      whereArgs: <String>[id],
-    );
-  }
+  Future<void> update(Transaction transaction) =>
+      _db.update(
+        _table,
+        transaction.toMap(),
+        where: 'id = ?',
+        whereArgs: <Object?>[transaction.id],
+      );
+
+  @override
+  Future<void> delete(String id) =>
+      _db.delete(
+        _table,
+        where: 'id = ?',
+        whereArgs: <Object?>[id],
+      );
 
   @override
   Future<Transaction?> get(String id) async {
-    final List<Map<String, dynamic>> result = await db.query(
-      'transactions',
+    final List<Map<String, dynamic>> result = await _db.query(
+      _table,
       where: 'id = ?',
-      whereArgs: <String>[id],
+      whereArgs: <Object?>[id],
     );
-
     return result.isEmpty ? null : Transaction.fromMap(result.first);
   }
 
   @override
   Future<List<Transaction>> getAllByAccount(String accountId) async {
-    final List<Map<String, dynamic>> results = await db.query(
-      'transactions',
+    final List<Map<String, dynamic>> results = await _db.query(
+      _table,
       where: 'account_id = ?',
-      whereArgs: <String>[accountId],
+      whereArgs: <Object?>[accountId],
       orderBy: 'transaction_date DESC',
     );
 
-    return results.map((Map<String, dynamic> m) => Transaction.fromMap(m)).toList();
+    return results
+        .map(Transaction.fromMap)
+        .toList();
   }
 
   @override
-  Future<void> clearAll() async {
-    await db.delete('transactions');
-  }
+  Future<void> clearAll() => _db.delete(_table);
 }
