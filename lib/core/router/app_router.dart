@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'app_redirect.dart';
 import 'routes/auth/auth_route.dart';
-import 'routes/dashboard/dashboard_route.dart';
+import 'routes/main/main_shell_route.dart';
 import 'routes/onboarding/onboarding_route.dart';
 
 final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((ProviderRef<GoRouter> ref) {
@@ -15,7 +15,7 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((ProviderRef<GoR
     routes: <RouteBase>[
       onboardingRoute,
       authRoute,
-      dashboardRoute,
+      mainShellRoute,
       GoRoute(
         path: '/',
         redirect: (_, _) => null, // Root handled by redirect

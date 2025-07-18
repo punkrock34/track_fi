@@ -24,8 +24,12 @@ class TrackFiApp extends ConsumerWidget {
     );
 
     return GestureDetector(
-      onTap: () => ref.read(sessionProvider.notifier).updateActivity(),
-      onPanDown: (_) => ref.read(sessionProvider.notifier).updateActivity(),
+      onTap: () {
+        Future<void>.microtask(() => ref.read(sessionProvider.notifier).updateActivity());
+      },
+      onPanDown: (_) {
+        Future<void>.microtask(() => ref.read(sessionProvider.notifier).updateActivity());
+      },
       child: MaterialApp.router(
         title: 'TrackFi',
         debugShowCheckedModeBanner: false,

@@ -1,8 +1,14 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/session/session_state.dart';
 
 class SessionNotifier extends StateNotifier<SessionState> {
-  SessionNotifier() : super(const SessionState());
+  SessionNotifier() : super(const SessionState()) {
+    // Start the session checker timer
+    _startSessionChecker();
+  }
+
+  Timer? _sessionTimer;
 
   void setAuthenticated(bool authenticated) {
     state = state.copyWith(
@@ -25,6 +31,24 @@ class SessionNotifier extends StateNotifier<SessionState> {
 
   void logout() {
     state = const SessionState();
+    _stopSessionChecker();
+  }
+
+  void _startSessionChecker() {
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      checkExpiration();
+    });
+  }
+
+  void _stopSessionChecker() {
+    _sessionTimer?.cancel();
+  }
+
+  @override
+  void dispose() {
+    _stopSessionChecker();
+    super.dispose();
   }
 }
 

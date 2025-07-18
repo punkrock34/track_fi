@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../features/dashboard/ui/dashboard_screen.dart';
 
-final GoRoute dashboardRoute = GoRoute(
+final GoRoute dashboardRoutes = GoRoute(
   name: 'dashboard',
   path: '/dashboard',
   builder: (BuildContext context, GoRouterState state) => const DashboardScreen(),
