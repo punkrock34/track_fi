@@ -63,7 +63,7 @@ class OnboardingState {
   }
 
   int get totalSteps {
-    return OnboardingStep.values.length;
+    return OnboardingStep.values.length - 2; // Exclude welcome and complete steps
   }
 }
 
