@@ -1,3 +1,4 @@
+// lib/shared/utils/date_utils.dart - Enhanced version
 class DateUtils {
   DateUtils._();
 
@@ -68,5 +69,28 @@ class DateUtils {
       return 'Good afternoon';
     }
     return 'Good evening';
+  }
+
+  static String formatDateKey(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  static DateTime parseDateKey(String dateKey) {
+    final List<String> parts = dateKey.split('-');
+    return DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+  }
+
+  static String getTimeAgoForSync(DateTime dateTime) {
+    final Duration difference = DateTime.now().difference(dateTime);
+    
+    if (difference.inMinutes < 1) {
+      return 'now';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inDays < 1) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
   }
 }

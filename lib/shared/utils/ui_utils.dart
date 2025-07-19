@@ -6,12 +6,13 @@ class UiUtils {
 
   /// Show a "coming soon" snackbar
   static void showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
       SnackBar(
         content: Text('$feature coming soon!'),
         action: SnackBarAction(
           label: 'OK',
-          onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+          onPressed: () => messenger.hideCurrentSnackBar(),
         ),
       ),
     );
@@ -19,7 +20,8 @@ class UiUtils {
 
   /// Show a success snackbar
   static void showSuccess(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -30,7 +32,8 @@ class UiUtils {
 
   /// Show an error snackbar
   static void showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.error,
@@ -42,7 +45,8 @@ class UiUtils {
   /// Copy text to clipboard and show confirmation
   static void copyToClipboard(BuildContext context, String text, {String? confirmationMessage}) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
+    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
       SnackBar(
         content: Text(confirmationMessage ?? 'Copied to clipboard'),
         duration: const Duration(seconds: 2),

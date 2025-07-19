@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/widgets/cards/feature_card.dart';
+import '../../models/feature_data.dart';
 import '../../providers/onboarding_provider.dart';
 
 class WelcomeScreen extends ConsumerWidget {
@@ -104,18 +105,18 @@ class WelcomeScreen extends ConsumerWidget {
   }
 
   Widget _buildFeaturesSection(ThemeData theme) {
-    final List<_FeatureData> features = <_FeatureData>[
-      const _FeatureData(
+    final List<FeatureData> features = <FeatureData>[
+      const FeatureData(
         icon: Icons.account_balance_rounded,
         title: 'Unified Banking',
         description: 'Connect Revolut, BT, and more in one secure dashboard',
       ),
-      const _FeatureData(
+      const FeatureData(
         icon: Icons.analytics_rounded,
         title: 'Smart Analytics',
         description: 'AI-powered insights to optimize your financial health',
       ),
-      const _FeatureData(
+      const FeatureData(
         icon: Icons.security_rounded,
         title: 'Bank-Grade Security',
         description: 'Military-grade encryption keeps your data safe',
@@ -124,9 +125,9 @@ class WelcomeScreen extends ConsumerWidget {
 
     return Column(
       children:
-          features.asMap().entries.map((MapEntry<int, _FeatureData> entry) {
+          features.asMap().entries.map((MapEntry<int, FeatureData> entry) {
         final int index = entry.key;
-        final _FeatureData feature = entry.value;
+        final FeatureData feature = entry.value;
 
         return Padding(
           padding: EdgeInsets.only(
@@ -248,16 +249,4 @@ class WelcomeScreen extends ConsumerWidget {
       },
     );
   }
-}
-
-class _FeatureData {
-  const _FeatureData({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
 }

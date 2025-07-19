@@ -1,4 +1,3 @@
-// lib/features/settings/ui/widgets/pin_change_modal.dart - Fixed version
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +11,7 @@ import '../../../../core/providers/auth/biometric/biometric_service_provider.dar
 import '../../../../core/providers/secure_storage/biometric_storage_provider.dart';
 import '../../../../core/providers/secure_storage/pin_storage_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../shared/widgets/input/compact_pin_input_widget.dart';
 import '../../../../shared/widgets/input/pin_input_widget.dart';
 
 enum PinChangeStep {
@@ -237,14 +237,14 @@ class _PinChangeModalState extends ConsumerState<PinChangeModal> {
     return Container(
       constraints: const BoxConstraints(maxHeight: 350), // Constrain PIN input height
       child: SingleChildScrollView(
-        child: _CompactPinInput(
+        child: CompactPinInput(
           pin: currentPin,
           onChanged: onChanged,
-          mode: _currentStep == PinChangeStep.confirmPin 
-              ? PinInputMode.confirm 
+          mode: _currentStep == PinChangeStep.confirmPin
+              ? PinInputMode.confirm
               : PinInputMode.setup,
-          maxLength: _currentStep == PinChangeStep.confirmPin 
-              ? _newPin.length 
+          maxLength: _currentStep == PinChangeStep.confirmPin
+              ? _newPin.length
               : 6,
           showBiometric: showBiometric,
           onBiometricPressed: onBiometricPressed,
@@ -506,249 +506,6 @@ class _PinChangeModalState extends ConsumerState<PinChangeModal> {
   }
 }
 
-// Compact PIN input widget for modal use
-class _CompactPinInput extends StatelessWidget {
-  const _CompactPinInput({
-    required this.pin,
-    required this.onChanged,
-    required this.mode,
-    this.maxLength = 6,
-    this.showBiometric = false,
-    this.onBiometricPressed,
-  });
-
-  final String pin;
-  final ValueChanged<String> onChanged;
-  final PinInputMode mode;
-  final int maxLength;
-  final bool showBiometric;
-  final VoidCallback? onBiometricPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        // PIN Display
-        _CompactPinDisplay(
-          pin: pin,
-          maxLength: maxLength,
-        ),
-        
-        const Gap(DesignTokens.spacingMd),
-        
-        // Compact Keypad
-        _CompactNumericKeypad(
-          onNumberPressed: (String number) {
-            if (pin.length < maxLength) {
-              final String newPin = pin + number;
-              onChanged(newPin);
-            }
-          },
-          onBackspace: () {
-            if (pin.isNotEmpty) {
-              onChanged(pin.substring(0, pin.length - 1));
-            }
-          },
-          onBiometricPressed: onBiometricPressed,
-          showBiometric: showBiometric,
-          currentLength: pin.length,
-          maxLength: maxLength,
-        ),
-      ],
-    );
-  }
-}
-
-// Compact PIN display
-class _CompactPinDisplay extends StatelessWidget {
-  const _CompactPinDisplay({
-    required this.pin,
-    required this.maxLength,
-  });
-
-  final String pin;
-  final int maxLength;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(maxLength, (int index) {
-            final bool isFilled = index < pin.length;
-            
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isFilled
-                    ? theme.colorScheme.primary
-                    : Colors.transparent,
-                border: Border.all(
-                  color: isFilled
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline.withOpacity(0.3),
-                  width: 1.5,
-                ),
-              ),
-            );
-          }),
-        ),
-        const Gap(DesignTokens.spacingXs),
-        Text(
-          '${pin.length}/$maxLength',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
-            fontSize: 11,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// Compact numeric keypad
-class _CompactNumericKeypad extends StatelessWidget {
-  const _CompactNumericKeypad({
-    required this.onNumberPressed,
-    required this.onBackspace,
-    this.onBiometricPressed,
-    this.showBiometric = false,
-    required this.currentLength,
-    required this.maxLength,
-  });
-
-  final ValueChanged<String> onNumberPressed;
-  final VoidCallback onBackspace;
-  final VoidCallback? onBiometricPressed;
-  final bool showBiometric;
-  final int currentLength;
-  final int maxLength;
-
-  @override
-  Widget build(BuildContext context) {
-    
-    return Column(
-      children: <Widget>[
-        _buildKeypadRow(<String>['1', '2', '3']),
-        const Gap(DesignTokens.spacingXs),
-        _buildKeypadRow(<String>['4', '5', '6']),
-        const Gap(DesignTokens.spacingXs),
-        _buildKeypadRow(<String>['7', '8', '9']),
-        const Gap(DesignTokens.spacingXs),
-        _buildBottomRow(),
-      ],
-    );
-  }
-
-  Widget _buildKeypadRow(List<String> numbers) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: numbers.map((String number) => _CompactKeypadButton(
-        text: number,
-        onPressed: currentLength < maxLength ? () => onNumberPressed(number) : null,
-      )).toList(),
-    );
-  }
-
-  Widget _buildBottomRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        if (showBiometric) _CompactKeypadButton(
-                icon: Icons.fingerprint,
-                onPressed: onBiometricPressed,
-                isSpecial: true,
-              ) else const SizedBox(width: 48, height: 48),
-        
-        _CompactKeypadButton(
-          text: '0',
-          onPressed: currentLength < maxLength ? () => onNumberPressed('0') : null,
-        ),
-        
-        _CompactKeypadButton(
-          icon: Icons.backspace_outlined,
-          onPressed: currentLength > 0 ? onBackspace : null,
-          isSpecial: true,
-        ),
-      ],
-    );
-  }
-}
-
-// Compact keypad button
-class _CompactKeypadButton extends StatelessWidget {
-  const _CompactKeypadButton({
-    this.text,
-    this.icon,
-    required this.onPressed,
-    this.isSpecial = false,
-  });
-
-  final String? text;
-  final IconData? icon;
-  final VoidCallback? onPressed;
-  final bool isSpecial;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isEnabled = onPressed != null;
-
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSpecial
-              ? (isEnabled
-                  ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                  : theme.colorScheme.surface.withOpacity(0.5))
-              : (isEnabled
-                  ? theme.colorScheme.surface
-                  : theme.colorScheme.surface.withOpacity(0.5)),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.2),
-          ),
-        ),
-        child: Center(
-          child: text != null
-              ? Text(
-                  text!,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isEnabled
-                        ? theme.colorScheme.onSurface
-                        : theme.colorScheme.onSurface.withOpacity(0.38),
-                  ),
-                )
-              : Icon(
-                  icon,
-                  size: 20,
-                  color: isSpecial
-                      ? (isEnabled
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.primary.withOpacity(0.38))
-                      : (isEnabled
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withOpacity(0.38)),
-                ),
-        ),
-      ),
-    );
-  }
-}
-
-// Show the modal function
 Future<bool?> showPinChangeModal(BuildContext context) {
   return showDialog<bool>(
     context: context,

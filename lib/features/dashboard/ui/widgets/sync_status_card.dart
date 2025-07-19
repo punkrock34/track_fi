@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../shared/utils/sync_utils.dart';
 import '../../models/sync_state.dart';
 
 class SyncStatusCard extends StatelessWidget {
@@ -17,7 +18,7 @@ class SyncStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final SyncState state = _getSyncState();
+    final SyncState state = SyncUtils.getSyncState(syncStatus);
     
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -51,62 +52,5 @@ class SyncStatusCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  SyncState _getSyncState() {
-    if (syncStatus == null) {
-      return const SyncState(
-        label: 'Never synced',
-        icon: Icons.sync_disabled,
-        color: Colors.grey,
-      );
-    }
-
-    final String status = syncStatus!['sync_status'] as String? ?? 'unknown';
-    final DateTime? lastSync = syncStatus!['last_successful_sync'] != null
-        ? DateTime.tryParse(syncStatus!['last_successful_sync'] as String)
-        : null;
-
-    switch (status) {
-      case 'success':
-        final String timeAgo = lastSync != null ? _getTimeAgo(lastSync) : 'unknown';
-        return SyncState(
-          label: 'Synced $timeAgo',
-          icon: Icons.check_circle,
-          color: Colors.green,
-        );
-      case 'failed':
-        return const SyncState(
-          label: 'Sync failed',
-          icon: Icons.error,
-          color: Colors.red,
-        );
-      case 'in_progress':
-        return const SyncState(
-          label: 'Syncing...',
-          icon: Icons.sync,
-          color: Colors.blue,
-        );
-      default:
-        return const SyncState(
-          label: 'Unknown',
-          icon: Icons.help,
-          color: Colors.grey,
-        );
-    }
-  }
-
-  String _getTimeAgo(DateTime dateTime) {
-    final Duration difference = DateTime.now().difference(dateTime);
-    
-    if (difference.inMinutes < 1) {
-      return 'now';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h ago';
-    } else {
-      return '${difference.inDays}d ago';
-    }
   }
 }
