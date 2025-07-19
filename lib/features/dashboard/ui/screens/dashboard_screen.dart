@@ -1,17 +1,21 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DateUtils;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens/design_tokens.dart';
-import '../models/dashboard_state.dart';
-import '../providers/dashboard_provider.dart';
-import 'widgets/account_balance_card.dart';
-import 'widgets/quick_actions_row.dart';
-import 'widgets/recent_transactions_cart.dart';
-import 'widgets/spending_overview_card.dart';
-import 'widgets/sync_status_card.dart';
+import '../../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../../shared/utils/date_utils.dart';
+import '../../../../../shared/utils/ui_utils.dart';
+import '../../../../../shared/widgets/states/error_state.dart';
+import '../../../../../shared/widgets/states/loading_state.dart';
+import '../../models/dashboard_state.dart';
+import '../../providers/dashboard_provider.dart';
+import '../widgets/account_balance_card.dart';
+import '../widgets/quick_actions_row.dart';
+import '../widgets/recent_transactions_cart.dart';
+import '../widgets/spending_overview_card.dart';
+import '../widgets/sync_status_card.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -47,9 +51,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Navigate to notifications
-            },
+            onPressed: () => UiUtils.showComingSoon(context, 'Notifications'),
           ),
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
@@ -67,11 +69,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildContent(BuildContext context, DashboardState state, ThemeData theme) {
     if (state.isFirstLoad) {
-      return _buildLoadingState(theme);
+      return const LoadingState(message: 'Loading your financial data...');
     }
 
     if (state.error != null) {
-      return _buildErrorState(state.error!, theme);
+      return ErrorState(
+        title: 'Something went wrong',
+        message: state.error!,
+        onRetry: () => ref.read(dashboardProvider.notifier).loadDashboardData(),
+      );
     }
 
     return CustomScrollView(
@@ -91,7 +97,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            _getGreeting(),
+                            DateUtils.getGreeting(),
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -127,12 +133,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 QuickActionsRow(
                   onViewAccounts: () => context.go('/accounts'),
                   onViewTransactions: () => context.go('/transactions'),
-                  onAddTransaction: () {
-                    // TODO: Implement add transaction
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Add transaction coming soon!')),
-                    );
-                  },
+                  onAddTransaction: () => UiUtils.showComingSoon(context, 'Add Transaction'),
                 ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
                 
                 const Gap(DesignTokens.spacingMd),
@@ -159,75 +160,5 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
       ],
     );
-  }
-
-  Widget _buildLoadingState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          CircularProgressIndicator(
-            color: theme.colorScheme.primary,
-          ),
-          const Gap(DesignTokens.spacingMd),
-          Text(
-            'Loading your financial data...',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String error, ThemeData theme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(DesignTokens.spacingMd),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
-            const Gap(DesignTokens.spacingMd),
-            Text(
-              'Something went wrong',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Gap(DesignTokens.spacingSm),
-            Text(
-              error,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const Gap(DesignTokens.spacingLg),
-            ElevatedButton.icon(
-              onPressed: () => ref.read(dashboardProvider.notifier).loadDashboardData(),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try Again'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getGreeting() {
-    final int hour = DateTime.now().hour;
-    if (hour < 12) {
-      return 'Good morning';
-    }
-    if (hour < 17) {
-      return 'Good afternoon';
-    }
-    return 'Good evening';
   }
 }

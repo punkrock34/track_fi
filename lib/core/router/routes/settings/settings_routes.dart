@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../features/settings/ui/security_settings_screen.dart';
-import '../../../../features/settings/ui/settings_screen.dart';
+import '../../../../features/settings/ui/screens/security_settings_screen.dart';
+import '../../../../features/settings/ui/screens/settings_screen.dart';
 
 final GoRoute settingsRoutes = GoRoute(
   name: 'settings',

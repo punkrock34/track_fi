@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../features/transactions/ui/transaction_details_screen.dart';
-import '../../../../features/transactions/ui/transactions_screen.dart';
+import '../../../../features/transactions/ui/screens/transaction_details_screen.dart';
+import '../../../../features/transactions/ui/screens/transactions_screen.dart';
 
 final GoRoute transactionsRoutes = GoRoute(
   name: 'transactions',

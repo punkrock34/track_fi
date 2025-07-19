@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../features/accounts/ui/account_details_screen.dart';
-import '../../../../features/accounts/ui/accounts_screen.dart';
+import '../../../../features/accounts/ui/screens/account_details_screen.dart';
+import '../../../../features/accounts/ui/screens/accounts_screen.dart';
 
 final GoRoute accountsRoutes = GoRoute(
   name: 'accounts',

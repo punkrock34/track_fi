@@ -5,13 +5,14 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../../../core/providers/theme/theme_provider.dart';
-import '../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../shared/widgets/theme/theme_toggle.dart';
-import '../models/settings_state.dart';
-import '../providers/settings_providers.dart';
-import 'widgets/settings_group.dart';
-import 'widgets/settings_item.dart';
+import '../../../../../core/providers/theme/theme_provider.dart';
+import '../../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../../shared/utils/ui_utils.dart';
+import '../../../../../shared/widgets/theme/theme_toggle.dart';
+import '../../models/settings_state.dart';
+import '../../providers/settings_providers.dart';
+import '../widgets/settings_group.dart';
+import '../widgets/settings_item.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -88,7 +89,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: <Widget>[
                 SettingsItem(
                   title: 'Theme',
-                  subtitle: _getThemeDescription(ref.watch(themeProvider)),
+                  subtitle: UiUtils.getThemeDescription(ref.watch(themeProvider)),
                   icon: Icons.palette_rounded,
                   trailing: const ThemeToggle(
                     showLabel: false,
@@ -100,6 +101,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
             const Gap(DesignTokens.spacingLg),
 
+            // Data Settings
             SettingsGroup(
               title: 'Data',
               children: <Widget>[
@@ -107,17 +109,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: 'Export Data',
                   subtitle: 'Download your financial data',
                   icon: Icons.download_rounded,
-                  onTap: () => _showComingSoon(context, 'Export Data'),
+                  onTap: () => UiUtils.showComingSoon(context, 'Export Data'),
                   showTrailing: true,
                 ).animate().slideX(begin: 0.3, delay: 250.ms).fadeIn(),
-                
-                SettingsItem(
-                  title: 'Clear Cache',
-                  subtitle: 'Remove temporary files',
-                  icon: Icons.cleaning_services_rounded,
-                  onTap: () => _showClearCacheDialog(context),
-                  showTrailing: true,
-                ).animate().slideX(begin: 0.3, delay: 300.ms).fadeIn(),
               ],
             ),
 
@@ -131,7 +125,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: 'Help & FAQ',
                   subtitle: 'Get help with TrackFi',
                   icon: Icons.help_outline_rounded,
-                  onTap: () => _showComingSoon(context, 'Help & FAQ'),
+                  onTap: () => UiUtils.showComingSoon(context, 'Help & FAQ'),
                   showTrailing: true,
                 ).animate().slideX(begin: 0.3, delay: 350.ms).fadeIn(),
                 
@@ -139,7 +133,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: 'Contact Support',
                   subtitle: 'Get in touch with our team',
                   icon: Icons.contact_support_rounded,
-                  onTap: () => _showComingSoon(context, 'Contact Support'),
+                  onTap: () => UiUtils.showComingSoon(context, 'Contact Support'),
                   showTrailing: true,
                 ).animate().slideX(begin: 0.3, delay: 400.ms).fadeIn(),
                 
@@ -147,7 +141,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: 'Privacy Policy',
                   subtitle: 'Learn how we protect your data',
                   icon: Icons.privacy_tip_rounded,
-                  onTap: () => _showComingSoon(context, 'Privacy Policy'),
+                  onTap: () => UiUtils.showComingSoon(context, 'Privacy Policy'),
                   showTrailing: true,
                 ).animate().slideX(begin: 0.3, delay: 450.ms).fadeIn(),
               ],
@@ -174,71 +168,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  String _getThemeDescription(ThemeMode themeMode) {
-    switch (themeMode) {
-      case ThemeMode.light:
-        return 'Light mode';
-      case ThemeMode.dark:
-        return 'Dark mode';
-      case ThemeMode.system:
-        return 'System default';
-    }
-  }
-
   Future<void> _toggleBiometric(bool enabled) async {
     final bool success = await ref.read(settingsProvider.notifier).setBiometricEnabled(enabled);
     
     if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(enabled 
-              ? 'Failed to enable biometric authentication'
-              : 'Failed to disable biometric authentication'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+      UiUtils.showError(
+        context,
+        enabled
+            ? 'Failed to enable biometric authentication'
+            : 'Failed to disable biometric authentication',
       );
     }
-  }
-
-  void _showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature coming soon!'),
-        action: SnackBarAction(
-          label: 'OK',
-          onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-        ),
-      ),
-    );
-  }
-
-  void _showClearCacheDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Clear Cache'),
-          content: const Text(
-            'This will remove temporary files and may improve app performance. '
-            'Your financial data will not be affected.',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => context.pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                context.pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Cache cleared successfully')),
-                );
-              },
-              child: const Text('Clear'),
-            ),
-          ],
-        );
-      },
-    );
   }
 }

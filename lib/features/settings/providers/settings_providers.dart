@@ -76,6 +76,10 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     }
   }
 
+  void clearCache() {
+
+  }
+
   void refresh() {
     _loadSettings();
   }

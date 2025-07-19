@@ -3,12 +3,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/theme/design_tokens/design_tokens.dart';
-import '../models/settings_state.dart';
-import '../providers/settings_providers.dart';
-import 'widgets/pin_change_modal.dart';
-import 'widgets/settings_group.dart';
-import 'widgets/settings_item.dart';
+import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../models/settings_state.dart';
+import '../../providers/settings_providers.dart';
+import '../widgets/pin_change_modal.dart';
+import '../widgets/settings_group.dart';
+import '../widgets/settings_item.dart';
 
 class SecuritySettingsScreen extends ConsumerWidget {
   const SecuritySettingsScreen({super.key});

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/models/database/transaction.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../shared/widgets/transactions/transaction_list_item.dart';
 
 class RecentTransactionsCard extends StatelessWidget {
   const RecentTransactionsCard({
@@ -45,94 +46,23 @@ class RecentTransactionsCard extends StatelessWidget {
             if (isLoading)
               ...List<Widget>.generate(3, (int index) => _TransactionSkeleton())
             else if (transactions.isEmpty)
-              _EmptyState()
+              const _EmptyTransactionsState()
             else
               ...transactions.take(5).map((Transaction transaction) =>
-                _TransactionItem(transaction: transaction)),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: DesignTokens.spacingXs),
+                  child: TransactionListItem(
+                    transaction: transaction,
+                    onTap: onViewAll, // Navigate to full transactions list
+                    compact: true,
+                    showCategory: false,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
-  }
-}
-
-class _TransactionItem extends StatelessWidget {
-  const _TransactionItem({required this.transaction});
-
-  final Transaction transaction;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDebit = transaction.type == TransactionType.debit;
-    
-    return Padding(
-      padding: const EdgeInsets.only(bottom: DesignTokens.spacingXs),
-      child: Row(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-            ),
-            child: Icon(
-              isDebit ? Icons.arrow_outward : Icons.arrow_downward,
-              size: 16,
-              color: isDebit 
-                  ? theme.colorScheme.error 
-                  : theme.colorScheme.primary,
-            ),
-          ),
-          const Gap(DesignTokens.spacingSm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  transaction.description,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  _formatDate(transaction.transactionDate),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '${isDebit ? '-' : '+'}£${transaction.amount.abs().toStringAsFixed(2)}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isDebit 
-                  ? theme.colorScheme.error 
-                  : theme.colorScheme.primary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    final DateTime now = DateTime.now();
-    final Duration difference = now.difference(date);
-    
-    if (difference.inDays == 0) {
-      return 'Today';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
   }
 }
 
@@ -192,7 +122,9 @@ class _TransactionSkeleton extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
+class _EmptyTransactionsState extends StatelessWidget {
+  const _EmptyTransactionsState();
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
