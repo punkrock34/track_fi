@@ -24,7 +24,7 @@ class TransactionsScreen extends ConsumerStatefulWidget {
   ConsumerState<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionsScreenState extends ConsumerState<TransactionsScreen> 
+class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _selectedAccountId;
@@ -165,7 +165,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
 
   Widget _buildTransactionsListView(List<Transaction> transactions) {
     // Group transactions by date
-    final Map<String, List<Transaction>> groupedTransactions = 
+    final Map<String, List<Transaction>> groupedTransactions =
         TransactionUtils.groupTransactionsByDate(transactions);
 
     final List<String> sortedDates = groupedTransactions.keys.toList()

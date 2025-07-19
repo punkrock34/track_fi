@@ -45,5 +45,4 @@ class DashboardState {
   }
 
   bool get hasData => accounts.isNotEmpty || recentTransactions.isNotEmpty;
-  bool get isFirstLoad => !hasData && !isLoading;
 }

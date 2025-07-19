@@ -9,12 +9,10 @@ class QuickActionsRow extends StatelessWidget {
     super.key,
     required this.onViewAccounts,
     required this.onViewTransactions,
-    required this.onAddTransaction,
   });
 
   final VoidCallback onViewAccounts;
   final VoidCallback onViewTransactions;
-  final VoidCallback onAddTransaction;
 
   @override
   Widget build(BuildContext context) {
@@ -45,15 +43,6 @@ class QuickActionsRow extends StatelessWidget {
                 icon: Icons.receipt_long_rounded,
                 label: 'Transactions',
                 onTap: onViewTransactions,
-              ),
-            ),
-            const Gap(DesignTokens.spacingSm),
-            Expanded(
-              child: QuickActionButton(
-                icon: Icons.add_rounded,
-                label: 'Add',
-                onTap: onAddTransaction,
-                isPrimary: true,
               ),
             ),
           ],

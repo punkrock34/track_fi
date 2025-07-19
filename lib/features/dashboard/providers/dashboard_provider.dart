@@ -28,7 +28,6 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Load all data concurrently
       final (
         List<Account> accounts,
         List<Transaction> recentTransactions,
@@ -39,7 +38,6 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         _loadSyncStatus(),
       ).wait;
 
-      // Calculate totals
       final double totalBalance = _calculateTotalBalance(accounts);
       final double monthlySpending = _calculateMonthlySpending(recentTransactions);
 
@@ -76,13 +74,13 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     final List<Transaction> allTransactions = <Transaction>[];
 
     for (final Account account in accounts) {
-      final List<Transaction> accountTransactions = 
+      final List<Transaction> accountTransactions =
           await _transactionStorage.getAllByAccount(account.id);
       allTransactions.addAll(accountTransactions);
     }
 
     // Sort by date and take recent 10
-    allTransactions.sort((Transaction a, Transaction b) => 
+    allTransactions.sort((Transaction a, Transaction b) =>
         b.transactionDate.compareTo(a.transactionDate));
     
     return allTransactions.take(10).toList();
@@ -101,8 +99,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     final DateTime monthStart = DateTime(now.year, now.month);
 
     return transactions
-        .where((Transaction t) => 
-            t.type == TransactionType.debit && 
+        .where((Transaction t) =>
+            t.type == TransactionType.debit &&
             t.transactionDate.isAfter(monthStart))
         .fold(0.0, (double sum, Transaction t) => sum + t.amount.abs());
   }

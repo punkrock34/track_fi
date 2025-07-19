@@ -9,7 +9,10 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/trackfi_app.dart';
 import 'core/config/app_config.dart';
+import 'core/contracts/services/database/i_database_service.dart';
 import 'core/logging/log.dart';
+import 'core/providers/database/database_service_provider.dart';
+import 'core/services/database/database_service.dart';
 
 Future<void> main() async {
   SentryWidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +45,18 @@ Future<void> main() async {
         options.enableWatchdogTerminationTracking = false;
       }
     },
-    appRunner: () => runApp(
-      const ProviderScope(
-        child: TrackFiApp(),
-      ),
-    ),
+    appRunner: () async {
+      final IDatabaseService db = DatabaseService();
+      await db.init();
+
+      runApp(
+        ProviderScope(
+          overrides: <Override>[
+            databaseServiceProvider.overrideWithValue(db),
+          ],
+          child: const TrackFiApp(),
+        ),
+      );
+    },
   );
 }

@@ -91,7 +91,7 @@ class UiUtils {
 
   /// Format account type for display
   static String formatAccountType(String type) {
-    return type.split('_').map((String word) => 
+    return type.split('_').map((String word) =>
         word[0].toUpperCase() + word.substring(1).toLowerCase()).join(' ');
   }
 

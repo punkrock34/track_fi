@@ -68,7 +68,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildContent(BuildContext context, DashboardState state, ThemeData theme) {
-    if (state.isFirstLoad) {
+    if (state.isLoading && state.error == null) {
       return const LoadingState(message: 'Loading your financial data...');
     }
 
@@ -133,7 +133,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 QuickActionsRow(
                   onViewAccounts: () => context.go('/accounts'),
                   onViewTransactions: () => context.go('/transactions'),
-                  onAddTransaction: () => UiUtils.showComingSoon(context, 'Add Transaction'),
                 ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
                 
                 const Gap(DesignTokens.spacingMd),
