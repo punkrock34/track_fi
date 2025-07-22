@@ -10,7 +10,6 @@ import '../../../../shared/widgets/input/currency_input_field.dart';
 import '../../../../shared/widgets/input/dropdown_field.dart';
 import '../../../../shared/widgets/input/text_input_field_widget.dart';
 import '../../models/add_account_state.dart';
-import '../../providers/accounts_provider.dart';
 import '../../providers/add_account_provider.dart';
 import '../widgets/account_type_selector.dart';
 import '../widgets/sort_code_formatter.dart';
@@ -279,16 +278,13 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     }
 
     if (success) {
-      // Refresh accounts list
-      ref.invalidate(accountsProvider);
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Account created successfully!'),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
-      
+
       context.pop();
     }
   }

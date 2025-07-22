@@ -13,10 +13,18 @@ class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
   IAccountStorageService get _storage => _ref.read(accountStorageProvider);
 
   Future<void> loadAccounts() async {
+    if (!mounted) {
+      return;
+    }
+    
     state = const AsyncValue<List<Account>>.loading();
 
     try {
       final List<Account> accounts = await _storage.getAll();
+      
+      if (!mounted) {
+        return;
+      }
       state = AsyncValue<List<Account>>.data(accounts);
     } catch (e, stackTrace) {
       await log(
@@ -24,11 +32,19 @@ class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
         error: e,
         stackTrace: stackTrace,
       );
+      
+      if (!mounted) {
+        return;
+      }
       state = AsyncValue<List<Account>>.error(e, stackTrace);
     }
   }
 
   Future<void> deleteAccount(String accountId) async {
+    if (!mounted) {
+      return;
+    }
+
     try {
       await _storage.delete(accountId);
       await loadAccounts();
@@ -52,7 +68,6 @@ final StateNotifierProvider<AccountsNotifier, AsyncValue<List<Account>>> account
   (StateNotifierProviderRef<AccountsNotifier, AsyncValue<List<Account>>> ref) => AccountsNotifier(ref),
 );
 
-// Individual account provider
 final FutureProviderFamily<Account?, String> accountProvider =
     FutureProviderFamily<Account?, String>((FutureProviderRef<Account?> ref, String accountId) async {
   final IAccountStorageService storage = ref.read(accountStorageProvider);

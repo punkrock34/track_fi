@@ -3,10 +3,10 @@ import 'package:http/http.dart' as http;
 
 import '../../config/app_config.dart';
 import '../../contracts/services/auth/jwt/i_jwt_auth_service.dart';
-import '../../contracts/services/http/i_authenticated_http_client.dart';
+import '../../contracts/services/http/i_base_http_client.dart';
 import '../../logging/log.dart';
 
-class AuthenticatedHttpClient implements IAuthenticatedHttpClient {
+class AuthenticatedHttpClient implements IBaseHttpClient {
   AuthenticatedHttpClient(this._jwtService);
 
   final IJwtAuthService _jwtService;
@@ -20,17 +20,17 @@ class AuthenticatedHttpClient implements IAuthenticatedHttpClient {
 
   @override
   Future<http.Response?> post(String endpoint, {Map<String, dynamic>? body}) {
-    return _makeRequest(http.post, endpoint, body: body);
+    return _makeRequest((Uri uri, {Map<String, String>? headers, Object? body}) => http.post(uri, headers: headers, body: body), endpoint, body: body);
   }
 
   @override
   Future<http.Response?> put(String endpoint, {Map<String, dynamic>? body}) {
-    return _makeRequest(http.put, endpoint, body: body);
+    return _makeRequest((Uri uri, {Map<String, String>? headers, Object? body}) => http.put(uri, headers: headers, body: body), endpoint, body: body);
   }
 
   @override
   Future<http.Response?> delete(String endpoint) {
-    return _makeRequest(http.delete, endpoint);
+    return _makeRequest((Uri uri, {Map<String, String>? headers, Object? body}) => http.delete(uri, headers: headers), endpoint);
   }
 
   Future<http.Response?> _makeRequest(

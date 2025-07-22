@@ -12,7 +12,6 @@ import '../../../../shared/widgets/input/text_input_field_widget.dart';
 import '../../../accounts/providers/accounts_provider.dart';
 import '../../models/add_transaction_state.dart';
 import '../../providers/add_transaction_provider.dart';
-import '../../providers/transactions_provider.dart';
 import '../widgets/account_selector.dart';
 import '../widgets/category_selector.dart';
 import '../widgets/transaction_type_toggle.dart';
@@ -336,8 +335,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     if (success) {
-      ref.invalidate(transactionsProvider);
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Transaction created successfully!'),

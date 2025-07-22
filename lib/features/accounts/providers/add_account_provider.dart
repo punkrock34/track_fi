@@ -5,7 +5,7 @@ import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../models/add_account_state.dart';
-import '../providers/accounts_provider.dart';
+import 'accounts_provider.dart';
 
 class AddAccountNotifier extends StateNotifier<AddAccountState> {
   AddAccountNotifier(this._ref) : super(const AddAccountState());
@@ -15,35 +15,63 @@ class AddAccountNotifier extends StateNotifier<AddAccountState> {
   IAccountStorageService get _accountStorage => _ref.read(accountStorageProvider);
 
   void updateName(String name) {
+    if (!mounted) {
+      return;
+    }
     state = state.copyWith(name: name);
   }
 
   void updateType(String type) {
+    if (!mounted) {
+      return;
+    }
     state = state.copyWith(type: type);
   }
 
   void updateBalance(double balance) {
+    if (!mounted) {
+      return;
+    }
     state = state.copyWith(balance: balance);
   }
 
   void updateCurrency(String currency) {
+    if (!mounted) {
+      return;
+    }
     state = state.copyWith(currency: currency);
   }
 
   void updateBankName(String? bankName) {
+    if (!mounted) {
+      return;
+    }
     state = state.copyWith(bankName: bankName);
   }
 
   void updateAccountNumber(String? accountNumber) {
+    if (!mounted) {
+      return;
+    }
     state = state.copyWith(accountNumber: accountNumber);
   }
 
   void updateSortCode(String? sortCode) {
+    if (!mounted) {
+      return;
+    }
     state = state.copyWith(sortCode: sortCode);
   }
 
   Future<bool> createAccount() async {
+    if (!mounted) {
+      return false;
+    }
+
     if (!state.isValid) {
+      if (!mounted) {
+        return false;
+      }
       state = state.error('Account name is required');
       return false;
     }
@@ -52,6 +80,9 @@ class AddAccountNotifier extends StateNotifier<AddAccountState> {
       return false;
     }
 
+    if (!mounted) {
+      return false;
+    }
     state = state.loading();
 
     try {
@@ -72,9 +103,12 @@ class AddAccountNotifier extends StateNotifier<AddAccountState> {
       );
 
       await _accountStorage.save(account);
-      
-      _ref.read(accountsProvider.notifier).loadAccounts();
-      
+      await _ref.read(accountsProvider.notifier).loadAccounts();
+
+      if (!mounted) {
+        return false;
+      }
+
       state = state.success();
       return true;
     } catch (e, stackTrace) {
@@ -83,12 +117,19 @@ class AddAccountNotifier extends StateNotifier<AddAccountState> {
         error: e,
         stackTrace: stackTrace,
       );
+      
+      if (!mounted) {
+        return false;
+      }
       state = state.error('Failed to create account. Please try again.');
       return false;
     }
   }
 
   void reset() {
+    if (!mounted) {
+      return;
+    }
     state = const AddAccountState();
   }
 }
