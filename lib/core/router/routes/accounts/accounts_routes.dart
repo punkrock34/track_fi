@@ -3,12 +3,18 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../features/accounts/ui/screens/account_details_screen.dart';
 import '../../../../features/accounts/ui/screens/accounts_screen.dart';
+import '../../../../features/accounts/ui/screens/add_account_screen.dart';
 
 final GoRoute accountsRoutes = GoRoute(
   name: 'accounts',
   path: '/accounts',
   builder: (BuildContext context, GoRouterState state) => const AccountsScreen(),
   routes: <RouteBase>[
+    GoRoute(
+      name: 'add-account',
+      path: '/add',
+      builder: (BuildContext context, GoRouterState state) => const AddAccountScreen(),
+    ),
     GoRoute(
       name: 'account-detail',
       path: '/:accountId',

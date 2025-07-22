@@ -1,26 +1,24 @@
-import '../../core/theme/design_tokens/design_tokens.dart';
-
 enum ThemeToggleSize {
   small(
-    padding: DesignTokens.spacingXs,
-    spacing: DesignTokens.spacingXs,
-    iconSize: DesignTokens.iconSizeSm,
-    buttonPadding: DesignTokens.spacingXs,
-    buttonMargin: DesignTokens.spacingXs,
+    padding: 8.0,
+    spacing: 8.0,
+    iconSize: 16.0,
+    buttonPadding: 6.0,
+    buttonMargin: 2.0,
   ),
   medium(
-    padding: DesignTokens.spacingSm,
-    spacing: DesignTokens.spacingSm,
-    iconSize: DesignTokens.iconSizeMd,
-    buttonPadding: DesignTokens.spacingSm,
-    buttonMargin: DesignTokens.spacingXs,
+    padding: 12.0,
+    spacing: 12.0,
+    iconSize: 20.0,
+    buttonPadding: 8.0,
+    buttonMargin: 2.0,
   ),
   large(
-    padding: DesignTokens.spacingLg,
-    spacing: DesignTokens.spacingLg,
-    iconSize: DesignTokens.iconSizeLg,
-    buttonPadding: DesignTokens.spacingMd,
-    buttonMargin: DesignTokens.spacingSm,
+    padding: 16.0,
+    spacing: 16.0,
+    iconSize: 24.0,
+    buttonPadding: 10.0,
+    buttonMargin: 3.0,
   );
 
   const ThemeToggleSize({

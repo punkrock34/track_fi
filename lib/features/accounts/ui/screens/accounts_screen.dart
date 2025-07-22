@@ -1,3 +1,4 @@
+// lib/features/accounts/ui/screens/accounts_screen.dart - Updated
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,6 @@ import '../../../../../core/models/database/account.dart';
 import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../../core/theme/design_tokens/typography.dart';
 import '../../../../../shared/utils/currency_utils.dart';
-import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/accounts/account_card.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/empty_state.dart';
@@ -45,7 +45,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.add_rounded),
-              onPressed: () => UiUtils.showComingSoon(context, 'Add Account'),
+              onPressed: () => context.push('/accounts/add'),
+              tooltip: 'Add Account',
             ),
           ],
         ),
@@ -61,21 +62,28 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             data: (List<Account> accounts) => _buildAccountsList(accounts, theme),
           ),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => context.push('/accounts/add'),
+          tooltip: 'Add Account',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
 
   Widget _buildAccountsList(List<Account> accounts, ThemeData theme) {
     if (accounts.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         title: 'No accounts yet',
         message: 'Add your first account to start tracking your finances',
         icon: Icons.account_balance_outlined,
         actionText: 'Add Account',
+        onAction: () => context.push('/accounts/add'),
       );
     }
 
     final double totalBalance = accounts.fold(0.0, (double sum, Account account) => sum + account.balance);
+    final List<Account> syncedAccounts = accounts.where((Account a) => !a.isManual).toList();
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -96,19 +104,42 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  'Total Balance',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Gap(DesignTokens.spacingXs),
-                Text(
-                  CurrencyUtils.formatAmount(totalBalance),
-                  style: AppTypography.moneyLarge.copyWith(
-                    color: Colors.white,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Total Balance',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Gap(DesignTokens.spacingXs),
+                        Text(
+                          CurrencyUtils.formatAmount(totalBalance),
+                          style: AppTypography.moneyLarge.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Future: Sync All button if there are synced accounts
+                    if (syncedAccounts.isNotEmpty)
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          // TODO(sync): Implement sync all functionality
+                        },
+                        icon: const Icon(Icons.sync, size: 16),
+                        label: const Text('Sync All'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white),
+                        ),
+                      ),
+                  ],
                 ),
                 const Gap(DesignTokens.spacingXs),
                 Text(

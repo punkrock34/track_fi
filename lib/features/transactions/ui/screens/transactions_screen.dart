@@ -1,3 +1,4 @@
+// lib/features/transactions/ui/screens/transactions_screen.dart - Updated
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,6 @@ import '../../../../../core/models/database/account.dart';
 import '../../../../../core/models/database/transaction.dart';
 import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../../shared/utils/transaction_utils.dart';
-import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/states/empty_state.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
@@ -65,7 +65,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       currentRoute: '/transactions',
       useTabLocking: true,
       currentTabIndex: _currentTabIndex,
-      totalTabs: 3, // All, Income, Expenses
+      totalTabs: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Transactions'),
@@ -78,7 +78,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ),
             IconButton(
               icon: const Icon(Icons.add_rounded),
-              onPressed: () => UiUtils.showComingSoon(context, 'Add Transaction'),
+              onPressed: () => context.push('/transactions/add'),
+              tooltip: 'Add Transaction',
             ),
           ],
           bottom: TabBar(
@@ -114,7 +115,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                // physics: const NeverScrollableScrollPhysics(),
                 children: <Widget>[
                   _buildTransactionsList(transactionsAsync, null),
                   _buildTransactionsList(transactionsAsync, TransactionType.credit),
@@ -123,6 +123,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
               ),
             ),
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => context.push('/transactions/add'),
+          tooltip: 'Add Transaction',
+          child: const Icon(Icons.add),
         ),
       ),
     );
@@ -177,7 +182,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       message: message,
       icon: Icons.receipt_long_outlined,
       actionText: 'Add Transaction',
-      onAction: () => UiUtils.showComingSoon(context, 'Add Transaction'),
+      onAction: () => context.push('/transactions/add'),
     );
   }
 

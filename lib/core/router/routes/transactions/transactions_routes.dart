@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../features/transactions/ui/screens/add_transaction_screen.dart';
 import '../../../../features/transactions/ui/screens/transaction_details_screen.dart';
 import '../../../../features/transactions/ui/screens/transactions_screen.dart';
 
@@ -9,6 +10,14 @@ final GoRoute transactionsRoutes = GoRoute(
   path: '/transactions',
   builder: (BuildContext context, GoRouterState state) => const TransactionsScreen(),
   routes: <RouteBase>[
+    GoRoute(
+      name: 'add-transaction',
+      path: '/add',
+      builder: (BuildContext context, GoRouterState state) {
+        final String? accountId = state.uri.queryParameters['accountId'];
+        return AddTransactionScreen(preselectedAccountId: accountId);
+      },
+    ),
     GoRoute(
       name: 'transaction-detail',
       path: '/:transactionId',

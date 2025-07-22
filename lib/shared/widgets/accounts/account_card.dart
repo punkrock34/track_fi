@@ -1,3 +1,4 @@
+// lib/shared/widgets/accounts/account_card.dart - Updated with sync status
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gap/gap.dart';
@@ -14,12 +15,14 @@ class AccountCard extends StatelessWidget {
     required this.onTap,
     this.animationDelay = Duration.zero,
     this.showBalance = true,
+    this.onSyncTap,
   });
 
   final Account account;
   final VoidCallback onTap;
   final Duration animationDelay;
   final bool showBalance;
+  final VoidCallback? onSyncTap;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +44,53 @@ class AccountCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
-                          account.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                account.name,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            // Source indicator
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: account.isManual
+                                    ? theme.colorScheme.surfaceVariant
+                                    : theme.colorScheme.primaryContainer.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Icon(
+                                    account.isManual ? Icons.edit_outlined : Icons.sync_outlined,
+                                    size: 12,
+                                    color: account.isManual
+                                        ? theme.colorScheme.onSurfaceVariant
+                                        : theme.colorScheme.primary,
+                                  ),
+                                  const Gap(2),
+                                  Text(
+                                    account.isManual ? 'Manual' : account.source.toUpperCase(),
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: account.isManual
+                                          ? theme.colorScheme.onSurfaceVariant
+                                          : theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                         if (account.bankName != null) ...<Widget>[
                           const Gap(2),
@@ -82,26 +127,47 @@ class AccountCard extends StatelessWidget {
                           ),
                         ),
                         const Gap(2),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: account.isActive
-                                ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                                : theme.colorScheme.errorContainer.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-                          ),
-                          child: Text(
-                            account.isActive ? 'Active' : 'Inactive',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: account.isActive
-                                  ? theme.colorScheme.onPrimaryContainer
-                                  : theme.colorScheme.onErrorContainer,
-                              fontWeight: FontWeight.w500,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: account.isActive
+                                    ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                                    : theme.colorScheme.errorContainer.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                              ),
+                              child: Text(
+                                account.isActive ? 'Active' : 'Inactive',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: account.isActive
+                                      ? theme.colorScheme.onPrimaryContainer
+                                      : theme.colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          ),
+                            // Future: Sync button for non-manual accounts
+                            if (!account.isManual && onSyncTap != null) ...<Widget>[
+                              const Gap(DesignTokens.spacingXs),
+                              InkWell(
+                                onTap: onSyncTap,
+                                borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Icon(
+                                    Icons.sync,
+                                    size: 16,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ],
                     ),

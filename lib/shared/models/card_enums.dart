@@ -1,27 +1,25 @@
-import '../../core/theme/design_tokens/design_tokens.dart';
-
 enum FeatureCardStyle {
   compact(
-    padding: DesignTokens.spacingSm,
-    iconPadding: DesignTokens.spacingXs,
-    iconSize: DesignTokens.iconSizeSm,
-    spacing: DesignTokens.spacingXs,
+    padding: 12.0,
+    iconPadding: 8.0,
+    iconSize: 20.0,
+    spacing: 8.0,
     elevation: 1.0,
     showIconShadow: false,
   ),
   standard(
-    padding: DesignTokens.spacingMd,
-    iconPadding: DesignTokens.spacingSm,
-    iconSize: DesignTokens.iconSizeMd,
-    spacing: DesignTokens.spacingSm,
+    padding: 24.0,
+    iconPadding: 12.0,
+    iconSize: 24.0,
+    spacing: 16.0,
     elevation: 2.0,
     showIconShadow: true,
   ),
   large(
-    padding: DesignTokens.spacingLg,
-    iconPadding: DesignTokens.spacingMd,
-    iconSize: DesignTokens.iconSizeLg,
-    spacing: DesignTokens.spacingMd,
+    padding: 32.0,
+    iconPadding: 16.0,
+    iconSize: 32.0,
+    spacing: 24.0,
     elevation: 4.0,
     showIconShadow: true,
   );

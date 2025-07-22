@@ -40,6 +40,7 @@ class DatabaseService implements IDatabaseService {
         bank_name TEXT,
         account_number TEXT,
         sort_code TEXT,
+        source TEXT NOT NULL DEFAULT 'manual',
         is_active INTEGER NOT NULL DEFAULT 1,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,

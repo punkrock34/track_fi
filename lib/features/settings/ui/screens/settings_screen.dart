@@ -10,7 +10,6 @@ import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/theme/theme_toggle.dart';
-import '../../../../shared/models/theme_enums.dart';
 import '../../models/settings_state.dart';
 import '../../providers/settings_providers.dart';
 import '../widgets/settings_group.dart';
@@ -97,7 +96,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     icon: Icons.palette_rounded,
                     trailing: const ThemeToggle(
                       showLabel: false,
-                      size: ThemeToggleSize.small,
                     ),
                   ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
                 ],

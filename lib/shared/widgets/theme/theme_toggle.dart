@@ -11,7 +11,7 @@ class ThemeToggle extends ConsumerWidget {
   const ThemeToggle({
     super.key,
     this.showLabel = true,
-    this.size = ThemeToggleSize.medium,
+    this.size = ThemeToggleSize.small,
   });
 
   final bool showLabel;
@@ -23,7 +23,7 @@ class ThemeToggle extends ConsumerWidget {
     final ThemeData theme = Theme.of(context);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 150), // Faster container animation
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       padding: EdgeInsets.all(size.padding),
       decoration: BoxDecoration(
@@ -53,11 +53,11 @@ class ThemeToggle extends ConsumerWidget {
             ),
             Gap(size.spacing),
           ],
-          // Fixed animation direction: outer container animates, inner buttons slide
           Stack(
             children: <Widget>[
-              // Background container
-              Container(
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
                 width: size.iconSize * 3 + size.buttonPadding * 6 + size.buttonMargin * 6,
                 height: size.iconSize + size.buttonPadding * 2 + size.buttonMargin * 2,
                 decoration: BoxDecoration(
@@ -65,13 +65,15 @@ class ThemeToggle extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                 ),
               ),
-              // Sliding indicator (outer to inner animation)
+              // Sliding indicator - synchronized timing
               AnimatedPositioned(
-                duration: const Duration(milliseconds: 200), // Faster slide
+                duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutCubic,
                 left: _getIndicatorPosition(themeMode, size),
                 top: size.buttonMargin,
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
                   width: size.iconSize + size.buttonPadding * 2,
                   height: size.iconSize + size.buttonPadding * 2,
                   decoration: BoxDecoration(

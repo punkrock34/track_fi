@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/providers/theme/theme_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/models/theme_enums.dart';
 import '../../../../shared/widgets/theme/theme_toggle.dart';
@@ -15,6 +16,7 @@ class ThemeCustomizationScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final OnboardingNotifier onboardingNotifier = ref.read(onboardingProvider.notifier);
     final ThemeData theme = Theme.of(context);
+    final ThemeMode currentThemeMode = ref.watch(themeProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -76,7 +78,7 @@ class ThemeCustomizationScreen extends ConsumerWidget {
               const Gap(DesignTokens.spacingMd),
               
               // Theme descriptions
-              _buildThemeDescription(context),
+              _buildThemeDescription(context, ref, currentThemeMode),
               
               const Gap(DesignTokens.spacingXl),
               
@@ -136,7 +138,7 @@ class ThemeCustomizationScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildThemeDescription(BuildContext context) {
+  Widget _buildThemeDescription(BuildContext context, WidgetRef ref, ThemeMode currentThemeMode) {
     final ThemeData theme = Theme.of(context);
     
     return Container(
@@ -152,23 +154,32 @@ class ThemeCustomizationScreen extends ConsumerWidget {
         children: <Widget>[
           _buildThemeDescriptionItem(
             context,
+            ref,
             Icons.light_mode_rounded,
             'Light Mode',
             'Clean and bright interface for daytime use',
+            ThemeMode.light,
+            currentThemeMode,
           ),
           const Gap(DesignTokens.spacingXs),
           _buildThemeDescriptionItem(
             context,
+            ref,
             Icons.auto_mode_rounded,
             'Auto Mode',
             'Automatically switches based on your device settings',
+            ThemeMode.system,
+            currentThemeMode,
           ),
           const Gap(DesignTokens.spacingXs),
           _buildThemeDescriptionItem(
             context,
+            ref,
             Icons.dark_mode_rounded,
             'Dark Mode',
             'Easy on the eyes for low-light environments',
+            ThemeMode.dark,
+            currentThemeMode,
           ),
         ],
       ),
@@ -177,40 +188,79 @@ class ThemeCustomizationScreen extends ConsumerWidget {
 
   Widget _buildThemeDescriptionItem(
     BuildContext context,
+    WidgetRef ref,
     IconData icon,
     String title,
     String description,
+    ThemeMode themeMode,
+    ThemeMode currentThemeMode,
   ) {
     final ThemeData theme = Theme.of(context);
+    final bool isSelected = currentThemeMode == themeMode;
     
-    return Row(
-      children: <Widget>[
-        Icon(
-          icon,
-          size: 20,
-          color: theme.colorScheme.primary,
+    return InkWell(
+      onTap: () => ref.read(themeProvider.notifier).setThemeMode(themeMode),
+      borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(DesignTokens.spacingXs),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+          border: isSelected
+              ? Border.all(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                )
+              : null,
         ),
-        const Gap(DesignTokens.spacingXs),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                title,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+        child: Row(
+          children: <Widget>[
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? theme.colorScheme.primary.withOpacity(0.1)
+                    : theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
               ),
-              Text(
-                description,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
               ),
-            ],
-          ),
+            ),
+            const Gap(DesignTokens.spacingXs),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: isSelected 
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

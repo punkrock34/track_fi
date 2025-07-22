@@ -1,5 +1,4 @@
 class Account {
-
   const Account({
     required this.id,
     required this.name,
@@ -9,6 +8,7 @@ class Account {
     this.bankName,
     this.accountNumber,
     this.sortCode,
+    this.source = 'manual', // Add source field
     this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
@@ -25,14 +25,16 @@ class Account {
       bankName: map['bank_name'] as String?,
       accountNumber: map['account_number'] as String?,
       sortCode: map['sort_code'] as String?,
+      source: map['source'] as String? ?? 'manual', // Handle existing data
       isActive: (map['is_active'] as int) == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
-      lastSyncedAt: map['last_synced_at'] != null 
+      lastSyncedAt: map['last_synced_at'] != null
         ? DateTime.parse(map['last_synced_at'] as String)
         : null,
     );
   }
+
   final String id;
   final String name;
   final String type;
@@ -41,6 +43,7 @@ class Account {
   final String? bankName;
   final String? accountNumber;
   final String? sortCode;
+  final String source; // 'manual', 'gocardless', 'pdf', etc.
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -56,6 +59,7 @@ class Account {
       'bank_name': bankName,
       'account_number': accountNumber,
       'sort_code': sortCode,
+      'source': source,
       'is_active': isActive ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -72,6 +76,7 @@ class Account {
     String? bankName,
     String? accountNumber,
     String? sortCode,
+    String? source,
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -86,10 +91,14 @@ class Account {
       bankName: bankName ?? this.bankName,
       accountNumber: accountNumber ?? this.accountNumber,
       sortCode: sortCode ?? this.sortCode,
+      source: source ?? this.source,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
     );
   }
+
+  bool get isManual => source == 'manual';
+  bool get isSynced => source != 'manual';
 }
