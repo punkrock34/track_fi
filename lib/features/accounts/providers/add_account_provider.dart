@@ -5,6 +5,7 @@ import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../models/add_account_state.dart';
+import '../providers/accounts_provider.dart';
 
 class AddAccountNotifier extends StateNotifier<AddAccountState> {
   AddAccountNotifier(this._ref) : super(const AddAccountState());
@@ -71,6 +72,9 @@ class AddAccountNotifier extends StateNotifier<AddAccountState> {
       );
 
       await _accountStorage.save(account);
+      
+      _ref.read(accountsProvider.notifier).loadAccounts();
+      
       state = state.success();
       return true;
     } catch (e, stackTrace) {

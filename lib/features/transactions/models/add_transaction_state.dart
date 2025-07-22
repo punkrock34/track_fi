@@ -51,7 +51,6 @@ class AddTransactionState {
       accountId != null &&
       accountId!.isNotEmpty &&
       amount > 0 &&
-      description.trim().isNotEmpty &&
       transactionDate != null;
 
   AddTransactionState loading() => copyWith(isLoading: true);

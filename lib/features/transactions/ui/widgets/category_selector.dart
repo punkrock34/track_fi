@@ -1,4 +1,3 @@
-// lib/features/transactions/ui/widgets/category_selector.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

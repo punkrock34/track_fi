@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/models/database/account.dart';
-import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../core/theme/design_tokens/typography.dart';
+import '../../../core/models/database/account.dart';
+import '../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../core/theme/design_tokens/typography.dart';
 
 class AccountBalanceCard extends StatelessWidget {
   const AccountBalanceCard({

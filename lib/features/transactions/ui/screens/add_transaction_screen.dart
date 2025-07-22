@@ -38,7 +38,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    // Reset state and set preselected account when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(addTransactionProvider.notifier).reset(
         preselectedAccountId: widget.preselectedAccountId,
@@ -143,58 +142,45 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
               const Gap(DesignTokens.spacingMd),
 
-              // Amount and Date
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    flex: 2,
-                    child: CurrencyInputField(
-                      controller: _amountController,
-                      label: 'Amount',
-                      hint: '0.00',
-                      currency: _getSelectedAccountCurrency(accountsAsync.value, state.accountId),
-                      onChanged: notifier.updateAmount,
-                      validator: (String? value) {
-                        if (value?.isEmpty ?? true) {
-                          return 'Amount is required';
-                        }
-                        final double? amount = double.tryParse(value!);
-                        if (amount == null || amount <= 0) {
-                          return 'Enter a valid amount';
-                        }
-                        return null;
-                      },
-                    ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
-                  ),
-                  const Gap(DesignTokens.spacingSm),
-                  Expanded(
-                    child: _buildDateField(theme, state, notifier)
-                        .animate().slideX(begin: 0.3, delay: 250.ms).fadeIn(),
-                  ),
-                ],
-              ),
-
-              const Gap(DesignTokens.spacingMd),
-
-              // Description
-              TextInputField(
-                controller: _descriptionController,
-                label: 'Description',
-                hint: 'e.g., Grocery shopping, Salary payment',
-                required: true,
-                onChanged: notifier.updateDescription,
-                prefixIcon: Icons.description_outlined,
+              // Amount Field (Full Width)
+              CurrencyInputField(
+                controller: _amountController,
+                label: 'Amount',
+                hint: '0.00',
+                currency: _getSelectedAccountCurrency(accountsAsync.value, state.accountId),
+                onChanged: notifier.updateAmount,
                 validator: (String? value) {
-                  if (value?.trim().isEmpty ?? true) {
-                    return 'Description is required';
+                  if (value?.isEmpty ?? true) {
+                    return 'Amount is required';
+                  }
+                  final double? amount = double.tryParse(value!);
+                  if (amount == null || amount <= 0) {
+                    return 'Enter a valid amount';
                   }
                   return null;
                 },
+              ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
+
+              const Gap(DesignTokens.spacingMd),
+
+              // Date Field (Full Width)
+              _buildDateField(theme, state, notifier)
+                  .animate().slideX(begin: 0.3, delay: 250.ms).fadeIn(),
+
+              const Gap(DesignTokens.spacingMd),
+
+              // Description Field
+              TextInputField(
+                controller: _descriptionController,
+                label: 'Description',
+                hint: 'e.g., Grocery shopping, Salary payment (optional)',
+                onChanged: notifier.updateDescription,
+                prefixIcon: Icons.description_outlined,
               ).animate().slideX(begin: 0.3, delay: 300.ms).fadeIn(),
 
               const Gap(DesignTokens.spacingMd),
 
-              // Reference (Optional)
+              // Reference Field
               TextInputField(
                 controller: _referenceController,
                 label: 'Reference',
@@ -272,10 +258,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spacingSm,
-              vertical: DesignTokens.spacingSm + 2,
-            ),
+            padding: const EdgeInsets.all(DesignTokens.spacingSm),
             decoration: BoxDecoration(
               color: theme.inputDecorationTheme.fillColor,
               borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
@@ -290,7 +273,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   size: 20,
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
-                const Gap(DesignTokens.spacingXs),
+                const Gap(DesignTokens.spacingSm),
                 Expanded(
                   child: Text(
                     state.transactionDate != null
@@ -302,6 +285,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           : theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
+                ),
+                Icon(
+                  Icons.expand_more,
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ],
             ),

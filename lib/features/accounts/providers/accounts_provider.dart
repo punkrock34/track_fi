@@ -28,6 +28,20 @@ class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
     }
   }
 
+  Future<void> deleteAccount(String accountId) async {
+    try {
+      await _storage.delete(accountId);
+      await loadAccounts();
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Failed to delete account',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
   Future<void> refresh() async {
     await loadAccounts();
   }

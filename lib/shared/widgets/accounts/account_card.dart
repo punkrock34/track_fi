@@ -1,4 +1,3 @@
-// lib/shared/widgets/accounts/account_card.dart - Updated with sync status
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gap/gap.dart';
