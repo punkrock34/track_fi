@@ -26,9 +26,9 @@ abstract class DesignTokens {
   static const double opacityMedium = 0.6;
   static const double opacityHigh = 0.87;
   
-  static const Duration durationFast = Duration(milliseconds: 150);
-  static const Duration durationMedium = Duration(milliseconds: 300);
-  static const Duration durationSlow = Duration(milliseconds: 500);
+  static const Duration durationFast = Duration(milliseconds: 100);
+  static const Duration durationMedium = Duration(milliseconds: 200);
+  static const Duration durationSlow = Duration(milliseconds: 300);
   
   static const double iconSizeSm = 16.0;
   static const double iconSizeMd = 24.0;

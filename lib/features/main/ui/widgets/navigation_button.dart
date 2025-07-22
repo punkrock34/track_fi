@@ -28,7 +28,7 @@ class NavigationButton extends StatelessWidget {
       child: Container(
         constraints: const BoxConstraints(
           minHeight: 56,
-          maxWidth: 80, // Prevent labels from getting too wide
+          maxWidth: 80,
         ),
         padding: const EdgeInsets.symmetric(
           vertical: 4,
@@ -39,7 +39,7 @@ class NavigationButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             AnimatedContainer(
-              duration: DesignTokens.durationMedium,
+              duration: DesignTokens.durationMedium, // Using updated faster duration
               curve: Curves.easeInOut,
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
@@ -48,20 +48,24 @@ class NavigationButton extends StatelessWidget {
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
               ),
-              child: Icon(
-                isSelected ? item.activeIcon : item.icon,
-                size: 22, // Slightly smaller to prevent overflow
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withOpacity(0.6),
+              child: AnimatedSwitcher(
+                duration: DesignTokens.durationFast, // Faster icon transition
+                child: Icon(
+                  isSelected ? item.activeIcon : item.icon,
+                  key: ValueKey<bool>(isSelected),
+                  size: 22,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
             ),
             const SizedBox(height: 2),
             AnimatedDefaultTextStyle(
-              duration: DesignTokens.durationMedium,
+              duration: DesignTokens.durationMedium, // Using updated duration
               curve: Curves.easeInOut,
               style: theme.textTheme.labelSmall!.copyWith(
-                fontSize: 10, // Smaller font to prevent overflow
+                fontSize: 10,
                 color: isSelected
                     ? theme.colorScheme.primary
                     : theme.colorScheme.onSurface.withOpacity(0.6),
@@ -77,8 +81,8 @@ class NavigationButton extends StatelessWidget {
           ],
         ),
       ).animate(delay: animationDelay)
-       .slideY(begin: 0.3)
-       .fadeIn(),
+       .slideY(begin: 0.3, duration: 150.ms) // Faster slide animation
+       .fadeIn(duration: 150.ms), // Faster fade in
     );
   }
 }

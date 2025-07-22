@@ -14,6 +14,7 @@ import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
 import '../../../../../shared/widgets/transactions/date_header.dart';
 import '../../../../../shared/widgets/transactions/transaction_list_item.dart';
+import '../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../accounts/providers/accounts_provider.dart';
 import '../../providers/transactions_provider.dart';
 
@@ -27,12 +28,22 @@ class TransactionsScreen extends ConsumerStatefulWidget {
 class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _currentTabIndex = 0;
   String? _selectedAccountId;
 
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          _currentTabIndex = _tabController.index;
+        });
+      }
+    });
+
     Future<void>.microtask(() {
       ref.read(transactionsProvider.notifier).loadTransactions();
       ref.read(accountsProvider.notifier).loadAccounts();
@@ -50,62 +61,69 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final AsyncValue<List<Transaction>> transactionsAsync = ref.watch(transactionsProvider);
     final AsyncValue<List<Account>> accountsAsync = ref.watch(accountsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transactions'),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.filter_list_rounded),
-            onPressed: () => _showFilterDialog(context, accountsAsync.value ?? <Account>[]),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_rounded),
-            onPressed: () => UiUtils.showComingSoon(context, 'Add Transaction'),
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const <Widget>[
-            Tab(text: 'All'),
-            Tab(text: 'Income'),
-            Tab(text: 'Expenses'),
+    return SwipeNavigationWrapper(
+      currentRoute: '/transactions',
+      useTabLocking: true,
+      currentTabIndex: _currentTabIndex,
+      totalTabs: 3, // All, Income, Expenses
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Transactions'),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.filter_list_rounded),
+              onPressed: () => _showFilterDialog(context, accountsAsync.value ?? <Account>[]),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () => UiUtils.showComingSoon(context, 'Add Transaction'),
+            ),
           ],
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const <Widget>[
+              Tab(text: 'All'),
+              Tab(text: 'Income'),
+              Tab(text: 'Expenses'),
+            ],
+          ),
         ),
-      ),
-      body: Column(
-        children: <Widget>[
-          // Filter Chip
-          if (_selectedAccountId != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(DesignTokens.spacingMd),
-              child: Wrap(
+        body: Column(
+          children: <Widget>[
+            // Filter Chip
+            if (_selectedAccountId != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(DesignTokens.spacingMd),
+                child: Wrap(
+                  children: <Widget>[
+                    FilterChip(
+                      label: Text(_getAccountName(accountsAsync.value, _selectedAccountId!)),
+                      selected: true,
+                      onSelected: (_) => setState(() => _selectedAccountId = null),
+                      deleteIcon: const Icon(Icons.close, size: 18),
+                      onDeleted: () => setState(() => _selectedAccountId = null),
+                    ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+                  ],
+                ),
+              ),
+
+            // Transactions List
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                // physics: const NeverScrollableScrollPhysics(),
                 children: <Widget>[
-                  FilterChip(
-                    label: Text(_getAccountName(accountsAsync.value, _selectedAccountId!)),
-                    selected: true,
-                    onSelected: (_) => setState(() => _selectedAccountId = null),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    onDeleted: () => setState(() => _selectedAccountId = null),
-                  ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+                  _buildTransactionsList(transactionsAsync, null),
+                  _buildTransactionsList(transactionsAsync, TransactionType.credit),
+                  _buildTransactionsList(transactionsAsync, TransactionType.debit),
                 ],
               ),
             ),
-
-          // Transactions List
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: <Widget>[
-                _buildTransactionsList(transactionsAsync, null),
-                _buildTransactionsList(transactionsAsync, TransactionType.credit),
-                _buildTransactionsList(transactionsAsync, TransactionType.debit),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

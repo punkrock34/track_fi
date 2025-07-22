@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../../shared/utils/date_utils.dart';
 import '../../../../../shared/utils/ui_utils.dart';
+import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
 import '../../models/dashboard_state.dart';
@@ -38,31 +39,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final DashboardState state = ref.watch(dashboardProvider);
     final ThemeData theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'TrackFi',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
+    return SwipeNavigationWrapper(
+      currentRoute: '/dashboard',
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'TrackFi',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
+          backgroundColor: theme.colorScheme.surface,
+          elevation: 0,
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () => UiUtils.showComingSoon(context, 'Notifications'),
+            ),
+            IconButton(
+              icon: const Icon(Icons.account_circle_outlined),
+              onPressed: () => context.go('/settings'),
+            ),
+          ],
         ),
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => UiUtils.showComingSoon(context, 'Notifications'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () => context.go('/settings'),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: () => ref.read(dashboardProvider.notifier).refresh(),
-        child: _buildContent(context, state, theme),
+        body: RefreshIndicator(
+          key: _refreshIndicatorKey,
+          onRefresh: () => ref.read(dashboardProvider.notifier).refresh(),
+          child: _buildContent(context, state, theme),
+        ),
       ),
     );
   }

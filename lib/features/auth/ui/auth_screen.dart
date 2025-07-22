@@ -94,8 +94,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               size: 48,
                               color: theme.colorScheme.onPrimary,
                             ),
-                          ).animate().scale(delay: 200.ms, curve: Curves.easeOutBack),
-                          
+                          ).animate().scale(delay: DesignTokens.durationFast, curve: Curves.easeOutBack),
+
                           const Gap(DesignTokens.spacingMd),
                           
                           Text(
@@ -104,8 +104,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               color: theme.colorScheme.onBackground,
                               fontWeight: FontWeight.w800,
                             ),
-                          ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(delay: 400.ms),
-                          
+                          ).animate().slideY(begin: 0.3, delay: DesignTokens.durationMedium).fadeIn(delay: DesignTokens.durationMedium),
+
                           const Gap(DesignTokens.spacingXs),
                           
                           Text(
@@ -116,8 +116,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               color: theme.colorScheme.onBackground.withOpacity(0.7),
                             ),
                             textAlign: TextAlign.center,
-                          ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(delay: 600.ms),
-                          
+                          ).animate().slideY(begin: 0.3, delay: DesignTokens.durationSlow).fadeIn(delay: DesignTokens.durationSlow),
+
                           // Biometric progress indicator
                           if (authState.isBiometricInProgress) ...<Widget>[
                             const Gap(DesignTokens.spacingSm),
@@ -280,8 +280,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                 fontWeight: FontWeight.w700,
                                 color: theme.colorScheme.primary,
                               ),
-                            ).animate().slideY(begin: 0.3, delay: 200.ms).fadeIn(delay: 200.ms),
-                            
+                            ).animate().slideY(begin: 0.3, delay: DesignTokens.durationFast).fadeIn(delay: DesignTokens.durationFast),
+
                             const Gap(DesignTokens.spacingSm),
                             
                             Text(
@@ -289,7 +289,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurface.withOpacity(0.7),
                               ),
-                            ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(delay: 400.ms),
+                            ).animate().slideY(begin: 0.3, delay: DesignTokens.durationMedium).fadeIn(delay: DesignTokens.durationMedium),
                           ],
                         ),
                       ),

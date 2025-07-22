@@ -10,6 +10,7 @@ import '../../../../../core/theme/design_tokens/typography.dart';
 import '../../../../../shared/utils/currency_utils.dart';
 import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/accounts/account_card.dart';
+import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/empty_state.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
@@ -34,28 +35,31 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final AsyncValue<List<Account>> accountsAsync = ref.watch(accountsProvider);
     final ThemeData theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Accounts'),
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.add_rounded),
-            onPressed: () => UiUtils.showComingSoon(context, 'Add Account'),
+    return SwipeNavigationWrapper(
+      currentRoute: '/accounts',
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Accounts'),
+          backgroundColor: theme.colorScheme.surface,
+          elevation: 0,
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () => UiUtils.showComingSoon(context, 'Add Account'),
+            ),
+          ],
+        ),
+        body: RefreshIndicator(
+          onRefresh: () => ref.read(accountsProvider.notifier).refresh(),
+          child: accountsAsync.when(
+            loading: () => const LoadingState(message: 'Loading accounts...'),
+            error: (Object error, StackTrace stackTrace) => ErrorState(
+              title: 'Failed to load accounts',
+              message: error.toString(),
+              onRetry: () => ref.read(accountsProvider.notifier).loadAccounts(),
+            ),
+            data: (List<Account> accounts) => _buildAccountsList(accounts, theme),
           ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(accountsProvider.notifier).refresh(),
-        child: accountsAsync.when(
-          loading: () => const LoadingState(message: 'Loading accounts...'),
-          error: (Object error, StackTrace stackTrace) => ErrorState(
-            title: 'Failed to load accounts',
-            message: error.toString(),
-            onRetry: () => ref.read(accountsProvider.notifier).loadAccounts(),
-          ),
-          data: (List<Account> accounts) => _buildAccountsList(accounts, theme),
         ),
       ),
     );
@@ -139,7 +143,6 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           ),
         ),
 
-        // Bottom padding
         const SliverToBoxAdapter(
           child: Gap(DesignTokens.spacingXl),
         ),

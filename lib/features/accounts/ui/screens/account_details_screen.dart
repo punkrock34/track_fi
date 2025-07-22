@@ -118,7 +118,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
                           ),
-                        ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+                        ).animate().slideX(begin: -0.3, delay: DesignTokens.durationFast).fadeIn(),
                         const Gap(DesignTokens.spacingXs),
                         if (account.bankName != null)
                           Text(
@@ -126,7 +126,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: Colors.white.withOpacity(0.9),
                             ),
-                          ).animate().slideX(begin: -0.3, delay: 200.ms).fadeIn(),
+                          ).animate().slideX(begin: -0.3, delay: DesignTokens.durationMedium).fadeIn(),
                         const Gap(DesignTokens.spacingSm),
                         Text(
                           CurrencyUtils.formatAmount(
@@ -136,7 +136,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                           style: AppTypography.moneyLarge.copyWith(
                             color: Colors.white,
                           ),
-                        ).animate().slideX(begin: -0.3, delay: 300.ms).fadeIn(),
+                        ).animate().slideX(begin: -0.3, delay: DesignTokens.durationSlow).fadeIn(),
                       ],
                     ),
                   ),
@@ -157,7 +157,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
-                  ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
+                  ).animate().slideY(begin: 0.3, delay: DesignTokens.durationSlow).fadeIn(),
                   const Gap(DesignTokens.spacingSm),
                   Card(
                     child: Padding(
@@ -194,7 +194,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                         ],
                       ),
                     ),
-                  ).animate().slideY(begin: 0.3, delay: 500.ms).fadeIn(),
+                  ).animate().slideY(begin: 0.3, delay: DesignTokens.durationSlow).fadeIn(),
                 ],
               ),
             ),
@@ -209,7 +209,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
-              ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(),
+              ).animate().slideY(begin: 0.3, delay: DesignTokens.durationSlow).fadeIn(),
             ),
           ),
 

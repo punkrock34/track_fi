@@ -1,240 +1,272 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 abstract class AppTypography {
   
-  static String get fontFamily => GoogleFonts.inter().fontFamily!;
+  static String get fontFamily => 'Roboto';
   
-  static TextTheme get lightTextTheme => GoogleFonts.interTextTheme().copyWith(
-    displayLarge: GoogleFonts.inter(
+  static TextTheme get lightTextTheme => const TextTheme(
+    displayLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 57,
       fontWeight: FontWeight.w400,
       height: 1.12,
       letterSpacing: -0.25,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    displayMedium: GoogleFonts.inter(
+    displayMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 45,
       fontWeight: FontWeight.w400,
       height: 1.16,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    displaySmall: GoogleFonts.inter(
+    displaySmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 36,
       fontWeight: FontWeight.w400,
       height: 1.22,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
     
-    headlineLarge: GoogleFonts.inter(
+    headlineLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 32,
       fontWeight: FontWeight.w600,
       height: 1.25,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    headlineMedium: GoogleFonts.inter(
+    headlineMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 28,
       fontWeight: FontWeight.w600,
       height: 1.29,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    headlineSmall: GoogleFonts.inter(
+    headlineSmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 24,
       fontWeight: FontWeight.w600,
       height: 1.33,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
     
-    titleLarge: GoogleFonts.inter(
+    titleLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 22,
       fontWeight: FontWeight.w600,
       height: 1.27,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    titleMedium: GoogleFonts.inter(
+    titleMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 16,
       fontWeight: FontWeight.w600,
       height: 1.50,
       letterSpacing: 0.15,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    titleSmall: GoogleFonts.inter(
+    titleSmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 14,
       fontWeight: FontWeight.w600,
       height: 1.43,
       letterSpacing: 0.1,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
     
-    bodyLarge: GoogleFonts.inter(
+    bodyLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 16,
       fontWeight: FontWeight.w400,
       height: 1.50,
       letterSpacing: 0.5,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    bodyMedium: GoogleFonts.inter(
+    bodyMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 14,
       fontWeight: FontWeight.w400,
       height: 1.43,
       letterSpacing: 0.25,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    bodySmall: GoogleFonts.inter(
+    bodySmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 12,
       fontWeight: FontWeight.w400,
       height: 1.33,
       letterSpacing: 0.4,
-      color: const Color(0xFF6B7280),
+      color: Color(0xFF6B7280),
     ),
     
-    labelLarge: GoogleFonts.inter(
+    labelLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 14,
       fontWeight: FontWeight.w600,
       height: 1.43,
       letterSpacing: 0.1,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    labelMedium: GoogleFonts.inter(
+    labelMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 12,
       fontWeight: FontWeight.w600,
       height: 1.33,
       letterSpacing: 0.5,
-      color: const Color(0xFF0A0A0A),
+      color: Color(0xFF0A0A0A),
     ),
-    labelSmall: GoogleFonts.inter(
+    labelSmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 11,
       fontWeight: FontWeight.w600,
       height: 1.45,
       letterSpacing: 0.5,
-      color: const Color(0xFF6B7280),
+      color: Color(0xFF6B7280),
     ),
   );
   
-  static TextTheme get darkTextTheme => GoogleFonts.interTextTheme().copyWith(
-    displayLarge: GoogleFonts.inter(
+  static TextTheme get darkTextTheme => const TextTheme(
+    displayLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 57,
       fontWeight: FontWeight.w400,
       height: 1.12,
       letterSpacing: -0.25,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    displayMedium: GoogleFonts.inter(
+    displayMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 45,
       fontWeight: FontWeight.w400,
       height: 1.16,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    displaySmall: GoogleFonts.inter(
+    displaySmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 36,
       fontWeight: FontWeight.w400,
       height: 1.22,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
     
-    headlineLarge: GoogleFonts.inter(
+    headlineLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 32,
       fontWeight: FontWeight.w600,
       height: 1.25,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    headlineMedium: GoogleFonts.inter(
+    headlineMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 28,
       fontWeight: FontWeight.w600,
       height: 1.29,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    headlineSmall: GoogleFonts.inter(
+    headlineSmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 24,
       fontWeight: FontWeight.w600,
       height: 1.33,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
 
-    titleLarge: GoogleFonts.inter(
+    titleLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 22,
       fontWeight: FontWeight.w600,
       height: 1.27,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    titleMedium: GoogleFonts.inter(
+    titleMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 16,
       fontWeight: FontWeight.w600,
       height: 1.50,
       letterSpacing: 0.15,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    titleSmall: GoogleFonts.inter(
+    titleSmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 14,
       fontWeight: FontWeight.w600,
       height: 1.43,
       letterSpacing: 0.1,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
     
-    bodyLarge: GoogleFonts.inter(
+    bodyLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 16,
       fontWeight: FontWeight.w400,
       height: 1.50,
       letterSpacing: 0.5,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    bodyMedium: GoogleFonts.inter(
+    bodyMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 14,
       fontWeight: FontWeight.w400,
       height: 1.43,
       letterSpacing: 0.25,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    bodySmall: GoogleFonts.inter(
+    bodySmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 12,
       fontWeight: FontWeight.w400,
       height: 1.33,
       letterSpacing: 0.4,
-      color: const Color(0xFF9CA3AF),
+      color: Color(0xFF9CA3AF),
     ),
     
-    labelLarge: GoogleFonts.inter(
+    labelLarge: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 14,
       fontWeight: FontWeight.w600,
       height: 1.43,
       letterSpacing: 0.1,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    labelMedium: GoogleFonts.inter(
+    labelMedium: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 12,
       fontWeight: FontWeight.w600,
       height: 1.33,
       letterSpacing: 0.5,
-      color: const Color(0xFFFAFAFA),
+      color: Color(0xFFFAFAFA),
     ),
-    labelSmall: GoogleFonts.inter(
+    labelSmall: TextStyle(
+      fontFamily: 'Roboto',
       fontSize: 11,
       fontWeight: FontWeight.w600,
       height: 1.45,
       letterSpacing: 0.5,
-      color: const Color(0xFF9CA3AF),
+      color: Color(0xFF9CA3AF),
     ),
   );
   
-  static TextStyle get moneyLarge => GoogleFonts.inter(
+  static TextStyle get moneyLarge => const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 32,
     fontWeight: FontWeight.w700,
     height: 1.25,
-    fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
   );
   
-  static TextStyle get moneyMedium => GoogleFonts.inter(
+  static TextStyle get moneyMedium => const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1.40,
-    fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
   );
   
-  static TextStyle get moneySmall => GoogleFonts.inter(
+  static TextStyle get moneySmall => const TextStyle(
+    fontFamily: 'Roboto',
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 1.50,
-    fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+    fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
   );
 }
