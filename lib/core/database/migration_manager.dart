@@ -1,10 +1,14 @@
 import 'package:sqflite/sqflite.dart';
 import 'migrations/migration.dart';
 import 'migrations/migration_v1.dart';
+import 'migrations/migration_v2.dart';
+import 'migrations/migration_v3.dart';
 
 class MigrationManager {
   static final List<Migration> _migrations = <Migration>[
     const MigrationV1(),
+    const MigrationV2(),
+    const MigrationV3(),
   ];
 
   static Future<void> onCreate(Database db, int version) async {

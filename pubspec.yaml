@@ -2,7 +2,7 @@ name: trackfi
 description: "A premium Flutter fintech application."
 publish_to: 'none'
 
-version: 1.10.0+15
+version: 1.12.0+17
 
 environment:
   sdk: ^3.7.2

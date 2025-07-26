@@ -310,12 +310,44 @@ class CategoryUtils {
     return categoryId.startsWith('cat_transfer_');
   }
 
-  static IconData resolveIcon(String codePoint) {
-    return IconData(
-      int.tryParse(codePoint) ?? Icons.category.codePoint,
-      fontFamily: 'MaterialIcons',
-    );
-  }
+  static const Map<String, IconData> iconMap = <String, IconData>{
+    'salary': Icons.work_rounded,
+    'freelance': Icons.laptop_mac_rounded,
+    'business': Icons.business_rounded,
+    'investment': Icons.trending_up_rounded,
+    'rental': Icons.home_work_rounded,
+    'pension': Icons.elderly_rounded,
+    'bonus': Icons.card_giftcard_rounded,
+    'refund': Icons.money_rounded,
+    'gift': Icons.redeem_rounded,
+    'other_income': Icons.attach_money_rounded,
+
+    'groceries': Icons.shopping_cart_rounded,
+    'transport': Icons.directions_car_rounded,
+    'dining': Icons.restaurant_rounded,
+    'utilities': Icons.flash_on_rounded,
+    'rent': Icons.home_rounded,
+    'insurance': Icons.security_rounded,
+    'healthcare': Icons.local_hospital_rounded,
+    'entertainment': Icons.movie_rounded,
+    'shopping': Icons.shopping_bag_rounded,
+    'education': Icons.school_rounded,
+    'fitness': Icons.fitness_center_rounded,
+    'travel': Icons.flight_rounded,
+    'subscriptions': Icons.subscriptions_rounded,
+    'fuel': Icons.local_gas_station_rounded,
+    'phone': Icons.phone_android_rounded,
+    'internet': Icons.wifi_rounded,
+    'childcare': Icons.child_care_rounded,
+    'pet': Icons.pets_rounded,
+    'gifts': Icons.card_giftcard_rounded,
+    'charity': Icons.favorite_rounded,
+    'taxes': Icons.receipt_long_rounded,
+    'other_expense': Icons.more_horiz_rounded,
+
+    'transfer': Icons.swap_horiz_rounded,
+    'default': Icons.category_rounded,
+  };
 
   static Color resolveColor(String hex) {
     try {

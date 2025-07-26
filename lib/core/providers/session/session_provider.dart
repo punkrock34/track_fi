@@ -4,7 +4,6 @@ import '../../models/session/session_state.dart';
 
 class SessionNotifier extends StateNotifier<SessionState> {
   SessionNotifier() : super(const SessionState()) {
-    // Start the session checker timer
     _startSessionChecker();
   }
 
@@ -36,7 +35,7 @@ class SessionNotifier extends StateNotifier<SessionState> {
 
   void _startSessionChecker() {
     _sessionTimer?.cancel();
-    _sessionTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+    _sessionTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       checkExpiration();
     });
   }

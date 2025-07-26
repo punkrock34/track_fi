@@ -27,11 +27,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+@override
+Widget build(BuildContext context) {
     final AuthenticationState authState = ref.watch(authServiceProvider);
     final IAuthService authNotifier = ref.read(authServiceProvider.notifier);
+    final bool isAuthenticated = ref.watch(sessionProvider).isAuthenticated;
     final ThemeData theme = Theme.of(context);
+
+    if (!isAuthenticated && authState.currentStep == AuthenticationStep.success) {
+      Future<void>.microtask(() => authNotifier.reset());
+    }
 
     ref.listen<AuthenticationState>(authServiceProvider, (
       AuthenticationState? previous,

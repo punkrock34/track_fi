@@ -7,6 +7,7 @@ class Category {
     required this.id,
     required this.name,
     required this.type,
+    required this.iconKey,
     required this.icon,
     required this.color,
     required this.isDefault,
@@ -14,11 +15,14 @@ class Category {
   });
 
   factory Category.fromDb(Map<String, dynamic> data) {
+    final String iconKey = data['icon'] as String;
+
     return Category(
       id: data['id'] as String,
       name: data['name'] as String,
       type: data['type'] as String,
-      icon: CategoryUtils.resolveIcon(data['icon'] as String),
+      iconKey: iconKey,
+      icon: CategoryUtils.iconMap[iconKey] ?? CategoryUtils.iconMap['default']!,
       color: CategoryUtils.resolveColor(data['color'] as String),
       isDefault: (data['is_default'] as int) == 1,
       createdAt: DateTime.parse(data['created_at'] as String),
@@ -27,6 +31,7 @@ class Category {
   final String id;
   final String name;
   final String type;
+  final String iconKey;
   final IconData icon;
   final Color color;
   final bool isDefault;
@@ -37,7 +42,7 @@ class Category {
       'id': id,
       'name': name,
       'type': type,
-      'icon': icon.codePoint.toString(),
+      'icon': iconKey,
       'color': '#${color.value.toRadixString(16).padLeft(8, '0')}',
       'is_default': isDefault ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
