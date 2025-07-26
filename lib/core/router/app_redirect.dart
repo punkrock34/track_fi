@@ -22,7 +22,6 @@ class AppRedirect {
       
       final SessionState sessionState = ref.read(sessionProvider);
 
-      // Handle expired sessions
       if (sessionState.isExpired) {
         ref.read(sessionProvider.notifier).logout();
       }

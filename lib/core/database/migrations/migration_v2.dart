@@ -9,16 +9,21 @@ class MigrationV2 implements Migration {
 
   @override
   Future<void> upgrade(Database db) async {
-    await db.execute('''
-      ALTER TABLE accounts
-      ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'
-    ''');
+    final List<Map<String, Object?>> tableInfo = await db.rawQuery('PRAGMA table_info(accounts)');
+    final bool columnExists = tableInfo.any((Map<String, Object?> column) => column['name'] == 'source');
 
-    await db.execute('''
-      UPDATE accounts
-      SET source = 'manual'
-      WHERE source IS NULL OR source = ''
-    ''');
+    if (!columnExists) {
+      await db.execute('''
+        ALTER TABLE accounts
+        ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'
+      ''');
+
+      await db.execute('''
+        UPDATE accounts
+        SET source = 'manual'
+        WHERE source IS NULL OR source = ''
+      ''');
+    }
   }
 
   @override

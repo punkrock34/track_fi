@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/contracts/services/database/i_database_service.dart';
 import '../../../core/contracts/services/database/storage/i_account_storage_service.dart';
 import '../../../core/contracts/services/database/storage/i_transaction_storage_service.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/models/database/transaction.dart';
+import '../../../core/providers/database/database_service_provider.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../../../core/providers/database/storage/transaction_storage_service_provider.dart';
 import '../../../features/accounts/providers/accounts_provider.dart';
@@ -19,6 +21,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
 
   ITransactionStorageService get _transactionStorage => _ref.read(transactionStorageProvider);
   IAccountStorageService get _accountStorage => _ref.read(accountStorageProvider);
+  IDatabaseService get _database => _ref.read(databaseServiceProvider);
 
   void updateAccountId(String accountId) {
     state = state.copyWith(accountId: accountId);
@@ -48,17 +51,9 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = state.copyWith(categoryId: categoryId);
   }
 
-  Future<bool> createTransaction() async {
+Future<bool> createTransaction() async {
     if (!state.isValid) {
-      if (state.accountId == null || state.accountId!.isEmpty) {
-        state = state.error('Please select an account');
-      } else if (state.amount <= 0) {
-        state = state.error('Amount must be greater than 0');
-      } else if (state.description.trim().isEmpty) {
-        state = state.error('Description is required');
-      } else if (state.transactionDate == null) {
-        state = state.error('Transaction date is required');
-      }
+      state = state.error(state.validationError!);
       return false;
     }
 
@@ -74,7 +69,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
 
       final Account? currentAccount = await _accountStorage.get(state.accountId!);
       if (currentAccount == null) {
-        state = state.error('Account not found');
+        state = state.error('Selected account no longer exists');
         return false;
       }
 
@@ -82,13 +77,18 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
           ? currentAccount.balance + state.amount
           : currentAccount.balance - state.amount;
 
+      if (state.type == TransactionType.debit && newBalance < 0) {
+        state = state.error('Insufficient funds. This transaction would result in a negative balance.');
+        return false;
+      }
+
       final Transaction transaction = Transaction(
         id: transactionId,
         accountId: state.accountId!,
         categoryId: state.categoryId,
         amount: state.amount,
         description: state.description.trim(),
-        reference: (state.reference?.trim().isEmpty ?? true) ? null : state.reference?.trim(),
+        reference: (state.reference?.trim().isNotEmpty ?? false) ? state.reference!.trim() : null,
         transactionDate: state.transactionDate!,
         balanceAfter: newBalance,
         type: state.type,
@@ -96,13 +96,21 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
         updatedAt: now,
       );
 
-      await _transactionStorage.save(transaction);
-
       final Account updatedAccount = currentAccount.copyWith(
         balance: newBalance,
         updatedAt: now,
       );
-      await _accountStorage.update(updatedAccount);
+
+      await _database.rawQuery('BEGIN TRANSACTION');
+      
+      try {
+        await _transactionStorage.save(transaction);
+        await _accountStorage.update(updatedAccount);
+        await _database.rawQuery('COMMIT');
+      } catch (e) {
+        await _database.rawQuery('ROLLBACK');
+        rethrow;
+      }
 
       _ref.read(transactionsProvider.notifier).loadTransactions();
       _ref.read(accountsProvider.notifier).loadAccounts();

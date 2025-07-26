@@ -12,6 +12,8 @@ import '../../../models/auth/biometric/biometric_result.dart';
 class BiometricService implements IBiometricService {
   final LocalAuthentication _localAuth = LocalAuthentication();
 
+  bool _isAuthenticating = false;
+
   @override
   Future<bool> isAvailable() async {
     try {
@@ -98,6 +100,14 @@ class BiometricService implements IBiometricService {
     bool biometricOnly = true,
     bool allowFallbackToPin = true,
   }) async {
+    if (_isAuthenticating) {
+      await log(message: 'Authentication already in progress, rejecting new request');
+      return const BiometricAuthResult(
+        result: BiometricResult.failed,
+        error: 'Authentication already in progress',
+      );
+    }
+
     final bool available = await isAvailable();
     if (!available) {
       return const BiometricAuthResult(
@@ -105,7 +115,8 @@ class BiometricService implements IBiometricService {
         shouldFallbackToPin: true,
       );
     }
-
+    
+    _isAuthenticating = true;
     try {
       final bool authenticated = await _localAuth.authenticate(
         localizedReason: reason,
@@ -132,6 +143,8 @@ class BiometricService implements IBiometricService {
         error: 'Unexpected error occurred.',
         shouldFallbackToPin: allowFallbackToPin,
       );
+    } finally {
+      _isAuthenticating = false;
     }
   }
 
@@ -143,6 +156,14 @@ class BiometricService implements IBiometricService {
     bool allowIris = false,
     bool allowFallbackToPin = true,
   }) async {
+    if (_isAuthenticating) {
+      await log(message: 'Authentication already in progress, rejecting new request');
+      return const BiometricAuthResult(
+        result: BiometricResult.failed,
+        error: 'Authentication already in progress',
+      );
+    }
+
     final bool ok = await isSpecificBiometricAvailable(
       allowFingerprint: allowFingerprint,
       allowFaceID: allowFaceID,
@@ -156,6 +177,7 @@ class BiometricService implements IBiometricService {
       );
     }
 
+    _isAuthenticating = true;
     try {
       final bool authenticated = await _localAuth.authenticate(
         localizedReason: reason,
@@ -185,6 +207,8 @@ class BiometricService implements IBiometricService {
         error: 'Unexpected error occurred.',
         shouldFallbackToPin: allowFallbackToPin,
       );
+    } finally {
+      _isAuthenticating = false;
     }
   }
 
@@ -265,5 +289,11 @@ class BiometricService implements IBiometricService {
       default:
         return BiometricAuthResult(result: BiometricResult.unknown, shouldFallbackToPin: allowFallbackToPin);
     }
+  }
+
+  @override
+  Future<void> resetAuthenticationState() async {
+    _isAuthenticating = false;
+    await _localAuth.stopAuthentication();
   }
 }

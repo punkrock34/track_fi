@@ -25,7 +25,7 @@ class Account {
       bankName: map['bank_name'] as String?,
       accountNumber: map['account_number'] as String?,
       sortCode: map['sort_code'] as String?,
-      source: map['source'] as String? ?? 'manual', // Handle existing data
+      source: map['source'] as String? ?? 'manual',
       isActive: (map['is_active'] as int) == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
@@ -43,7 +43,7 @@ class Account {
   final String? bankName;
   final String? accountNumber;
   final String? sortCode;
-  final String source; // 'manual', 'gocardless', 'pdf', etc.
+  final String source;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;

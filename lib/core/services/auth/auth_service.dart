@@ -12,6 +12,7 @@ import '../../../core/logging/log.dart';
 import '../../../core/models/auth/biometric/biometric_auth_result.dart';
 import '../../../features/auth/models/auth_state.dart';
 import '../../../features/auth/models/biometric_setup.dart';
+import 'biometric/biometric_service.dart';
 
 class AuthService extends StateNotifier<AuthenticationState> implements IAuthService {
   AuthService({
@@ -28,10 +29,14 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   Timer? _lockoutTimer;
   Timer? _countdownTimer;
+  bool _isDisposed = false;
+  bool _isInitializing = false;
 
   @override
   set state(AuthenticationState state) {
-    super.state = state;
+    if (!_isDisposed) {
+      super.state = state;
+    }
   }
 
   @override
@@ -39,16 +44,27 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   @override
   Future<void> init() async {
-    await perform(() async {
-      final bool hasPin = await pinStorage.hasPinSet();
-      if (!hasPin) {
-        return;
-      }
-      if (await _handleExistingLockout()) {
-        return;
-      }
-      await _setupAuthenticationFlow();
-    }, failMessage: 'Failed to initialize authentication.');
+    if (_isDisposed || _isInitializing) {
+      return;
+    }
+    
+    _isInitializing = true;
+    try {
+      await perform(() async {
+        final bool hasPin = await pinStorage.hasPinSet();
+        if (!hasPin) {
+          return;
+        }
+        
+        if (await _handleExistingLockout()) {
+          return;
+        }
+        
+        await _setupAuthenticationFlow();
+      }, failMessage: 'Failed to initialize authentication.');
+    } finally {
+      _isInitializing = false;
+    }
   }
 
   Future<bool> _handleExistingLockout() async {
@@ -71,6 +87,10 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
   }
 
   Future<void> _setupAuthenticationFlow() async {
+    if (_isDisposed) {
+      return;
+    }
+    
     final int? expectedPinLength = await pinStorage.getPinLength();
     final int failedAttempts = await authAttemptStorage.getFailedAttempts();
     final BiometricSetup biometricSetup = await _getBiometricSetup();
@@ -100,6 +120,10 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
     int failedAttempts,
     BiometricSetup setup,
   ) async {
+    if (_isDisposed) {
+      return;
+    }
+    
     state = state.biometricStep().copyWith(
       expectedPinLength: expectedPinLength,
       biometricAvailable: true,
@@ -115,6 +139,10 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
     int failedAttempts,
     BiometricSetup setup,
   ) {
+    if (_isDisposed) {
+      return;
+    }
+    
     state = state.pinStep().copyWith(
       expectedPinLength: expectedPinLength,
       biometricAvailable: setup.isBiometricAvailable,
@@ -124,6 +152,10 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
   }
 
   Future<void> _authenticateWithBiometric() async {
+    if (_isDisposed || state.isLocked) {
+      return;
+    }
+    
     state = state.copyWith(isBiometricInProgress: true);
 
     await perform(() async {
@@ -131,9 +163,28 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
         reason: 'Authenticate to access TrackFi',
       );
 
+      if (_isDisposed) {
+        return;
+      }
+
       if (result.isSuccess) {
         await authAttemptStorage.clearAllAttemptData();
         state = state.success();
+        return;
+      }
+
+      if (result.error?.contains('already in progress') ?? false) {
+        
+        if (biometricService is BiometricService) {
+          (biometricService as BiometricService).resetAuthenticationState();
+        }
+
+        state = state.pinStep().copyWith(
+          expectedPinLength: state.expectedPinLength,
+          biometricAvailable: state.biometricAvailable,
+          availableBiometrics: state.availableBiometrics,
+          isBiometricInProgress: false,
+        );
         return;
       }
 
@@ -148,7 +199,7 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   @override
   void updatePin(String pin) {
-    if (state.isLocked) {
+    if (_isDisposed || state.isLocked) {
       return;
     }
     state = state.copyWith(pin: pin);
@@ -156,7 +207,7 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   @override
   Future<void> authenticateWithPin() async {
-    if (!state.canAttemptAuth || !state.isPinComplete) {
+    if (_isDisposed || !state.canAttemptAuth || !state.isPinComplete) {
       return;
     }
 
@@ -173,6 +224,10 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
   }
 
   Future<void> _handleFailedPin() async {
+    if (_isDisposed) {
+      return;
+    }
+    
     await authAttemptStorage.incrementFailedAttempts();
     final int newAttempt = await authAttemptStorage.getFailedAttempts();
 
@@ -194,7 +249,16 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   void _scheduleUnlock(DateTime unlockTime) {
     _lockoutTimer?.cancel();
+    
+    if (_isDisposed) {
+      return;
+    }
+    
     _lockoutTimer = Timer(unlockTime.difference(DateTime.now()), () async {
+      if (_isDisposed) {
+        return;
+      }
+      
       await authAttemptStorage.clearAllAttemptData();
       state = state.copyWith(isLocked: false, attemptCount: 0);
       await init();
@@ -203,7 +267,17 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   void _setupCountdownTimer(DateTime unlockTime) {
     _countdownTimer?.cancel();
+    
+    if (_isDisposed) {
+      return;
+    }
+    
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      if (_isDisposed) {
+        timer.cancel();
+        return;
+      }
+      
       final Duration remaining = unlockTime.difference(DateTime.now());
       if (remaining.isNegative || remaining.inSeconds <= 0) {
         timer.cancel();
@@ -216,7 +290,7 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   @override
   void retryBiometric() {
-    if (state.isLocked || state.isBiometricInProgress) {
+    if (_isDisposed || state.isLocked || state.isBiometricInProgress) {
       return;
     }
 
@@ -228,6 +302,10 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   @override
   void fallbackToPin() {
+    if (_isDisposed) {
+      return;
+    }
+    
     state = state.pinStep().copyWith(
       expectedPinLength: state.expectedPinLength,
       biometricAvailable: state.biometricAvailable,
@@ -238,27 +316,42 @@ class AuthService extends StateNotifier<AuthenticationState> implements IAuthSer
 
   @override
   void reset() {
+    if (_isDisposed) {
+      return;
+    }
+    
     state = const AuthenticationState();
     init();
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     _lockoutTimer?.cancel();
     _countdownTimer?.cancel();
     super.dispose();
   }
 
   Future<void> perform(Future<void> Function() action, {String? failMessage}) async {
+    if (_isDisposed) {
+      return;
+    }
+    
     try {
       state = state.loading();
       await action();
     } catch (e, st) {
+      if (_isDisposed) {
+        return;
+      }
+      
       await log(
         message: failMessage ?? 'Unexpected error',
         error: e,
         stackTrace: st,
       );
+      
+      state = state.copyWith(isLoading: false);
     }
   }
 }

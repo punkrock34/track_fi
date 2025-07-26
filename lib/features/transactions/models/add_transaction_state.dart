@@ -47,11 +47,33 @@ class AddTransactionState {
     );
   }
 
-  bool get isValid =>
-      accountId != null &&
-      accountId!.isNotEmpty &&
-      amount > 0 &&
-      transactionDate != null;
+  // Improved validation with specific error messages
+  bool get isValid => validationError == null;
+
+  String? get validationError {
+    if (accountId == null || accountId!.isEmpty) {
+      return 'Please select an account';
+    }
+    if (amount <= 0) {
+      return 'Amount must be greater than £0.00';
+    }
+    if (description.trim().isEmpty) {
+      return 'Description is required';
+    }
+    if (description.trim().length < 3) {
+      return 'Description must be at least 3 characters';
+    }
+    if (description.length > 100) {
+      return 'Description must be less than 100 characters';
+    }
+    if (transactionDate == null) {
+      return 'Transaction date is required';
+    }
+    if (transactionDate!.isAfter(DateTime.now().add(const Duration(days: 1)))) {
+      return 'Transaction date cannot be in the future';
+    }
+    return null;
+  }
 
   AddTransactionState loading() => copyWith(isLoading: true);
   AddTransactionState error(String message) => copyWith(isLoading: false, errorMessage: message);

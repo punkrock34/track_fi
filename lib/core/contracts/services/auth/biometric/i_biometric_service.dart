@@ -27,4 +27,5 @@ abstract class IBiometricService {
 
   String getBiometricTypeString(List<BiometricType> types);
   IconData getBiometricIcon(List<BiometricType> types);
+  Future<void> resetAuthenticationState();
 }
