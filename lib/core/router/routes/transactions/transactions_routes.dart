@@ -8,7 +8,10 @@ import '../../../../features/transactions/ui/screens/transactions_screen.dart';
 final GoRoute transactionsRoutes = GoRoute(
   name: 'transactions',
   path: '/transactions',
-  builder: (BuildContext context, GoRouterState state) => const TransactionsScreen(),
+  builder: (BuildContext context, GoRouterState state) {
+    final String? accountId = state.uri.queryParameters['accountId'];
+    return TransactionsScreen(accountId: accountId);
+  },
   routes: <RouteBase>[
     GoRoute(
       name: 'add-transaction',

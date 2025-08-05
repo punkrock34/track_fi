@@ -5,8 +5,11 @@ import '../../../core/contracts/services/database/storage/i_transaction_storage_
 import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/models/database/transaction.dart';
+import '../../../core/providers/database/database_service_provider.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../../../core/providers/database/storage/transaction_storage_service_provider.dart';
+import '../../accounts/providers/accounts_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 
 class TransactionsNotifier extends StateNotifier<AsyncValue<List<Transaction>>> {
   TransactionsNotifier(this._ref) : super(const AsyncValue<List<Transaction>>.loading());
@@ -40,6 +43,57 @@ class TransactionsNotifier extends StateNotifier<AsyncValue<List<Transaction>>> 
         stackTrace: stackTrace,
       );
       state = AsyncValue<List<Transaction>>.error(e, stackTrace);
+    }
+  }
+
+  Future<bool> deleteTransaction(String transactionId) async {
+    try {
+      final Transaction? transaction = await _transactionStorage.get(transactionId);
+      if (transaction == null) {
+        return false;
+      }
+
+      final Account? account = await _accountStorage.get(transaction.accountId);
+      if (account == null) {
+        return false;
+      }
+
+      double newBalance;
+      if (transaction.type == TransactionType.debit) {
+        newBalance = account.balance + transaction.amount;
+      } else {
+        newBalance = account.balance - transaction.amount;
+      }
+
+      await _ref.read(databaseServiceProvider).rawQuery('BEGIN TRANSACTION');
+      
+      try {
+        await _transactionStorage.delete(transactionId);
+        
+        final Account updatedAccount = account.copyWith(
+          balance: newBalance,
+          updatedAt: DateTime.now(),
+        );
+        await _accountStorage.update(updatedAccount);
+        
+        await _ref.read(databaseServiceProvider).rawQuery('COMMIT');
+        
+        await loadTransactions();
+        _ref.read(accountsProvider.notifier).loadAccounts();
+        _ref.read(dashboardProvider.notifier).loadDashboardData();
+        
+        return true;
+      } catch (e) {
+        await _ref.read(databaseServiceProvider).rawQuery('ROLLBACK');
+        rethrow;
+      }
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Failed to delete transaction',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return false;
     }
   }
 

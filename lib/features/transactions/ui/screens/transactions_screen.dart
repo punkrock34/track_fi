@@ -18,7 +18,9 @@ import '../../../accounts/providers/accounts_provider.dart';
 import '../../providers/transactions_provider.dart';
 
 class TransactionsScreen extends ConsumerStatefulWidget {
-  const TransactionsScreen({super.key});
+  const TransactionsScreen({super.key, this.accountId});
+
+  final String? accountId;
 
   @override
   ConsumerState<TransactionsScreen> createState() => _TransactionsScreenState();
@@ -34,6 +36,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   void initState() {
     super.initState();
 
+    _selectedAccountId = widget.accountId;
+
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
@@ -48,7 +52,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       ref.read(accountsProvider.notifier).loadAccounts();
     });
   }
-
+  
   @override
   void dispose() {
     _tabController.dispose();

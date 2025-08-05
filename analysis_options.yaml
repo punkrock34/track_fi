@@ -1,37 +1,103 @@
-# Specify analysis options.
-#
-# For a list of lints, see: https://dart.dev/tools/linter-rules
-# For guidelines on configuring static analysis, see:
-# https://dart.dev/tools/analysis
-#
-# There are other similar analysis options files in the flutter repos,
-# which should be kept in sync with this file:
-#
-#   - analysis_options.yaml (this file)
-#   - https://github.com/flutter/packages/blob/main/analysis_options.yaml
-#
-# This file contains the analysis options used for code in the flutter/flutter
-# repository.
+include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  language:
-    strict-casts: true
-    strict-inference: true
-    strict-raw-types: true
+  plugins:
+    - dart_code_metrics
+  
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  
   errors:
-    # allow deprecated members (we do this because otherwise we have to annotate
-    # every member in every test, assert, etc, when we or the Dart SDK deprecates
-    # something (https://github.com/flutter/flutter/issues/143312)
+    invalid_annotation_target: error
+    missing_required_param: error
+    missing_return: error
+    dead_code: error
+    unused_import: error
+    unused_local_variable: error
     deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore
+    
   exclude:
-    - "bin/cache/**"
-      # Ignore protoc generated files
-    - "dev/conductor/lib/proto/*"
-    - "engine/**"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/generated_plugin_registrant.dart"
+    - "build/**"
+    - "lib/generated/**"
 
-formatter:
-  page_width: 100
+dart_code_metrics:
+  metrics:
+    # Stricter limits for financial applications
+    cyclomatic-complexity: 10
+    maximum-nesting-level: 3
+    number-of-parameters: 3
+    source-lines-of-code: 100
+    number-of-methods: 15
+    weight-of-class: 0.33
+    
+  metrics-exclude:
+    - test/**
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    
+  rules:
+    # Security and safety rules
+    - avoid-unused-generics
+    - avoid-unused-assignment
+    - no-equal-conditions
+    - prefer-conditional-expressions
+    - avoid-redundant-async
+    - avoid-unnecessary-type-casts
+    - avoid-unnecessary-type-assertions
+    - binary-expression-operand-order
+    - double-literal-format
+    - newline-before-return
+    - no-boolean-literal-compare
+    - no-empty-block
+    - prefer-trailing-comma
+    - prefer-const-border-radius
+    - prefer-extracting-callbacks
+    - prefer-single-widget-per-file:
+        ignore-private-widgets: true
+    
+    # Performance rules
+    - avoid-shrink-wrap-in-lists
+    - avoid-unnecessary-setstate
+    - avoid-wrapping-in-padding
+    - prefer-const-constructor-declarations
+    - prefer-correct-identifier-length:
+        exceptions: [ 'id', 'db', 'ui', 'ix' ]
+        max-identifier-length: 30
+        min-identifier-length: 2
+    
+    # Maintainability rules
+    - member-ordering:
+        alphabetize: false
+        order:
+          - public-fields
+          - private-fields
+          - constructors
+          - public-getters
+          - private-getters
+          - public-setters
+          - private-setters
+          - public-methods
+          - private-methods
+    
+    # Financial app specific rules
+    - avoid-dynamic
+    - avoid-missing-enum-constant-in-map
+    - avoid-non-null-assertion
+    - avoid-throw-in-catch-block
+    - check-for-equals-in-render-object-setters
+    - consistent-update-render-object
+    - prefer-async-await
+    - prefer-immediate-return
+    - prefer-match-file-name
+    
+  anti-patterns:
+    - long-method
+    - long-parameter-list
 
 linter:
   rules:

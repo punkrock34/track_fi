@@ -4,6 +4,8 @@ import '../../../core/contracts/services/database/storage/i_account_storage_serv
 import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../transactions/providers/transactions_provider.dart';
 
 class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
   AccountsNotifier(this._ref) : super(const AsyncValue<List<Account>>.loading());
@@ -40,21 +42,32 @@ class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
     }
   }
 
-  Future<void> deleteAccount(String accountId) async {
+  Future<bool> deleteAccount(String accountId) async {
     if (!mounted) {
-      return;
+      return false;
     }
 
     try {
+      final Account? account = await _storage.get(accountId);
+      if (account == null) {
+        return false;
+      }
+
       await _storage.delete(accountId);
+      
       await loadAccounts();
+      
+      _ref.read(dashboardProvider.notifier).loadDashboardData();
+      _ref.read(transactionsProvider.notifier).loadTransactions();
+      
+      return true;
     } catch (e, stackTrace) {
       await log(
         message: 'Failed to delete account',
         error: e,
         stackTrace: stackTrace,
       );
-      rethrow;
+      return false;
     }
   }
 

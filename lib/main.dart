@@ -12,7 +12,6 @@ import 'core/config/app_config.dart';
 import 'core/contracts/services/database/i_database_service.dart';
 import 'core/logging/log.dart';
 import 'core/providers/database/database_service_provider.dart';
-import 'core/services/database/database_service.dart';
 
 Future<void> main() async {
   SentryWidgetsFlutterBinding.ensureInitialized();
@@ -46,17 +45,17 @@ Future<void> main() async {
       }
     },
     appRunner: () async {
-      final IDatabaseService db = DatabaseService();
+      final ProviderContainer container = ProviderContainer();
+      final IDatabaseService db = container.read(databaseServiceProvider);
+
       await db.init();
 
       runApp(
-        ProviderScope(
-          overrides: <Override>[
-            databaseServiceProvider.overrideWithValue(db),
-          ],
+        UncontrolledProviderScope(
+          container: container,
           child: const TrackFiApp(),
         ),
       );
-    },
+    }
   );
 }

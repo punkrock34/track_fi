@@ -181,20 +181,33 @@ class SecuritySettingsScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  '🔐 Local Storage\n'
-                  'Your data is stored securely on your device and never uploaded to external servers.\n\n'
+                  'Local Data Storage\n'
+                  'All your financial data is stored locally on your device using encrypted SQLite databases. '
+                  'No data is transmitted to external servers or cloud services.\n\n'
                   
-                  '🔒 Encryption\n'
-                  'All sensitive data is encrypted using industry-standard algorithms.\n\n'
+                  'Database Encryption\n'
+                  'Your transaction and account data is protected using SQLite encryption with '
+                  'configurable encryption keys stored in secure storage.\n\n'
                   
-                  '👆 Biometric Authentication\n'
-                  'Use your fingerprint or face recognition for quick, secure access.\n\n'
+                  'PIN Security\n'
+                  'Your PIN is never stored in plain text. It is hashed using SHA-256 with '
+                  'a cryptographic salt, making it computationally infeasible to reverse.\n\n'
                   
-                  '🛡️ PIN Protection\n'
-                  'Your PIN is hashed and salted - it cannot be recovered if forgotten.\n\n'
+                  'Biometric Integration\n'
+                  "When enabled, biometric authentication uses your device's secure hardware "
+                  'and never stores biometric data within the app.\n\n'
                   
-                  '⏰ Auto-lock\n'
-                  'The app automatically locks after 5 minutes of inactivity.',
+                  'Secure Key Storage\n'
+                  'Sensitive configuration data is stored using platform-specific secure storage: '
+                  'iOS Keychain and Android EncryptedSharedPreferences.\n\n'
+                  
+                  'Authentication Controls\n'
+                  'The app implements progressive lockout after failed PIN attempts and '
+                  'automatic session timeout after 5 minutes of inactivity.\n\n'
+                  
+                  'Development Security\n'
+                  'The app follows secure coding practices including input validation, '
+                  'proper error handling, and separation of concerns through clean architecture.',
                 ),
               ],
             ),

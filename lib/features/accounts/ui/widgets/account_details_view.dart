@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide DateUtils;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/models/database/account.dart';
 import '../../../../core/models/database/transaction.dart';
@@ -102,7 +103,10 @@ class AccountDetailsView extends ConsumerWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () => UiUtils.showComingSoon(context, 'View All Transactions'),
+                        onPressed: () => context.pushNamed(
+                          'transactions',
+                          queryParameters: <String, String>{'accountId': account.id},
+                        ),
                         child: const Text('View All'),
                       ),
                     ],

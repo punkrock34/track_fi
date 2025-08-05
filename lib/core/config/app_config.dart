@@ -16,11 +16,6 @@ class AppConfig {
         (throw Exception('SENTRY_DSN is missing in your .env file!'));
   }
 
-  static String get sqliteEncryptionKey {
-    return dotenv.env['SQLITE_ENCRYPTION_KEY'] ??
-        (throw Exception('SQLITE_ENCRYPTION_KEY is missing in your .env file!'));
-  }
-
   static bool get isProduction {
     return dotenv.env['ENVIRONMENT'] == 'production';
   }
