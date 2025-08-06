@@ -93,6 +93,72 @@ class UiUtils {
     );
   }
 
+  /// Show a loading dialog
+  static void showLoadingDialog(
+    BuildContext context, {
+    String message = 'Loading...',
+    bool barrierDismissible = false,
+  }) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: (BuildContext context) => PopScope(
+        canPop: barrierDismissible,
+        child: AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Hide the currently showing dialog
+  static void hideDialog(BuildContext context) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  /// Show loading dialog with automatic error handling
+  static Future<T?> showLoadingDialogWithFuture<T>(
+    BuildContext context,
+    Future<T> future, {
+    String message = 'Loading...',
+    String? successMessage,
+    String? errorMessage,
+  }) async {
+    showLoadingDialog(context, message: message);
+
+    try {
+      final T result = await future;
+      
+      if (context.mounted) {
+        hideDialog(context);
+        if (successMessage != null) {
+          showSuccess(context, successMessage);
+        }
+      }
+      
+      return result;
+    } catch (e) {
+      if (context.mounted) {
+        hideDialog(context);
+        showError(context, errorMessage ?? 'An error occurred. Please try again.');
+      }
+      return null;
+    }
+  }
+
   /// Format account type for display
   static String formatAccountType(String type) {
     return type.split('_').map((String word) =>

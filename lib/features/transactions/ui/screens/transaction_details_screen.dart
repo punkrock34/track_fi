@@ -85,64 +85,28 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
   }
 
   Future<void> _showDeleteConfirmation(BuildContext context, Transaction transaction) async {
-    final NavigatorState navigator = Navigator.of(context);
-    final bool confirmed = (await UiUtils.showConfirmationDialog(
-      navigator.context,
+    final bool? confirmed = await UiUtils.showConfirmationDialog(
+      context,
       title: 'Delete Transaction',
       message: 'Are you sure you want to delete "${transaction.description}"? This will also update your account balance. This action cannot be undone.',
       confirmText: 'Delete',
       isDestructive: true,
-    )) ?? false;
+    );
 
-    if (!confirmed || !navigator.mounted) {
+    if (confirmed != true || !context.mounted) {
       return;
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog<void>(
-        context: navigator.context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    });
+    final bool? success = await UiUtils.showLoadingDialogWithFuture<bool>(
+      context,
+      ref.read(transactionsProvider.notifier).deleteTransaction(transaction.id),
+      message: 'Deleting transaction...',
+      successMessage: 'Transaction deleted successfully',
+      errorMessage: 'Failed to delete transaction. Please try again.',
+    );
 
-    try {
-      final bool success = await ref.read(transactionsProvider.notifier)
-          .deleteTransaction(transaction.id);
-      
-      if (navigator.mounted) {
-        Navigator.of(navigator.context).pop();
-      }
-      
-      if (success && navigator.mounted) {
-        ScaffoldMessenger.of(navigator.context).showSnackBar(
-          SnackBar(
-            content: const Text('Transaction deleted successfully'),
-            backgroundColor: Theme.of(navigator.context).colorScheme.primary,
-          ),
-        );
-        
-        navigator.pop();
-      } else if (navigator.mounted) {
-        ScaffoldMessenger.of(navigator.context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to delete transaction'),
-            backgroundColor: Theme.of(navigator.context).colorScheme.error,
-          ),
-        );
-      }
-    } catch (e) {
-      if (navigator.mounted) {
-        Navigator.of(navigator.context).pop();
-        ScaffoldMessenger.of(navigator.context).showSnackBar(
-          SnackBar(
-            content: const Text('An error occurred while deleting the transaction'),
-            backgroundColor: Theme.of(navigator.context).colorScheme.error,
-          ),
-        );
-      }
+    if ((success ?? false) && context.mounted) {
+      context.pop();
     }
   }
 }

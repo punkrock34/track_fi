@@ -84,8 +84,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
   }
 
   Future<void> _showDeleteConfirmation(BuildContext context, Account account) async {
-    final NavigatorState navigator = Navigator.of(context);
-    
     final List<Transaction> transactions = await ref.read(transactionStorageProvider)
         .getAllByAccount(account.id);
     
@@ -93,64 +91,32 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
         ? 'Are you sure you want to delete "${account.name}"? This action cannot be undone.'
         : 'Are you sure you want to delete "${account.name}"? This will also delete ${transactions.length} associated transaction${transactions.length == 1 ? '' : 's'}. This action cannot be undone.';
 
-    if(!navigator.mounted) {
+    if (!context.mounted) {
       return;
     }
 
-    final bool confirmed = (await UiUtils.showConfirmationDialog(
-      navigator.context,
+    final bool? confirmed = await UiUtils.showConfirmationDialog(
+      context,
       title: 'Delete Account',
       message: message,
       confirmText: 'Delete',
       isDestructive: true,
-    )) ?? false;
+    );
 
-    if (!confirmed || !navigator.mounted) {
+    if (confirmed != true || !context.mounted) {
       return;
     }
 
-    showDialog<void>(
-      context: navigator.context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+    final bool? success = await UiUtils.showLoadingDialogWithFuture<bool>(
+      context,
+      ref.read(accountsProvider.notifier).deleteAccount(account.id),
+      message: 'Deleting account...',
+      successMessage: 'Account "${account.name}" deleted successfully',
+      errorMessage: 'Failed to delete account. Please try again.',
     );
 
-    try {
-      final bool success = await ref.read(accountsProvider.notifier).deleteAccount(account.id);
-
-      if (navigator.mounted) {
-        Navigator.of(navigator.context).pop();
-      }
-      
-      if (success && navigator.mounted) {
-        ScaffoldMessenger.of(navigator.context).showSnackBar(
-          SnackBar(
-            content: Text('Account "${account.name}" deleted successfully'),
-            backgroundColor: Theme.of(navigator.context).colorScheme.primary,
-          ),
-        );
-
-        navigator.pop();
-      } else if (navigator.mounted) {
-        ScaffoldMessenger.of(navigator.context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to delete account'),
-            backgroundColor: Theme.of(navigator.context).colorScheme.error,
-          ),
-        );
-      }
-    } catch (e) {
-      if (navigator.mounted) {
-        Navigator.of(navigator.context).pop();
-        ScaffoldMessenger.of(navigator.context).showSnackBar(
-          SnackBar(
-            content: const Text('An error occurred while deleting the account'),
-            backgroundColor: Theme.of(navigator.context).colorScheme.error,
-          ),
-        );
-      }
+    if ((success ?? false) && context.mounted) {
+      context.pop();
     }
   }
 }
