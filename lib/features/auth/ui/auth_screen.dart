@@ -46,7 +46,7 @@ Widget build(BuildContext context) {
         ref.read(sessionProvider.notifier).setAuthenticated(true);
         Future<void>.delayed(const Duration(milliseconds: 500), () {
           if (context.mounted) {
-            context.go('/dashboard');
+            context.goNamed('dashboard');
           }
         });
       }

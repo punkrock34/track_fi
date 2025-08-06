@@ -16,6 +16,7 @@ class TransactionListItem extends StatelessWidget {
     this.animationDelay = Duration.zero,
     this.showCategory = true,
     this.compact = false,
+    this.visible = true,
   });
 
   final Transaction transaction;
@@ -23,6 +24,7 @@ class TransactionListItem extends StatelessWidget {
   final Duration animationDelay;
   final bool showCategory;
   final bool compact;
+  final bool visible;
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +104,7 @@ class TransactionListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Text(
-                    TransactionUtils.formatAmountWithSign(transaction),
+                    visible ? TransactionUtils.formatAmountWithSign(transaction) : '****',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: TransactionUtils.getTransactionColor(transaction.type, theme),

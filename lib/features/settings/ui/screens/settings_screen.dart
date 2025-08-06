@@ -44,7 +44,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final SettingsState settingsState = ref.watch(settingsProvider);
 
     return SwipeNavigationWrapper(
-      currentRoute: '/settings',
+      currentRoute: 'settings',
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Settings'),
@@ -64,7 +64,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     title: 'Security Settings',
                     subtitle: 'PIN, biometrics, and authentication',
                     icon: Icons.security_rounded,
-                    onTap: () => context.go('/settings/security'),
+                    onTap: () => context.goNamed('security-settings'),
                     showTrailing: true,
                   ).animate().slideX(begin: 0.3, delay: 100.ms).fadeIn(),
                   

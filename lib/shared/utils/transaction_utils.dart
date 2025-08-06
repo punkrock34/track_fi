@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/models/database/transaction.dart';
+import 'currency_utils.dart';
 
 class TransactionUtils {
   TransactionUtils._();
@@ -61,7 +62,8 @@ class TransactionUtils {
   /// Format transaction amount with sign
   static String formatAmountWithSign(Transaction transaction) {
     final bool isDebit = transaction.type == TransactionType.debit;
-    return '${isDebit ? '-' : '+'}£${transaction.amount.abs().toStringAsFixed(2)}';
+    final String amountFormatted = CurrencyUtils.formatAmount(transaction.amount.abs());
+    return '${isDebit ? '-' : '+'}$amountFormatted';
   }
 
   /// Format transaction status for display

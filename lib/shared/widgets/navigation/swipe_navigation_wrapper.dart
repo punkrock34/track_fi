@@ -28,11 +28,11 @@ class SwipeNavigationWrapper extends ConsumerWidget {
   final int? currentTabIndex;
   final int? totalTabs;
 
-  static const List<String> _routes = <String>[
-    '/dashboard',
-    '/accounts',
-    '/transactions',
-    '/settings',
+  static const List<String> _routeNames = <String>[
+    'dashboard',
+    'accounts',
+    'transactions',
+    'settings',
   ];
 
   @override
@@ -69,7 +69,7 @@ class SwipeNavigationWrapper extends ConsumerWidget {
   }
 
   int _getRouteIndex(String route) {
-    return _routes.indexWhere(route.startsWith).clamp(0, _routes.length - 1);
+    return _routeNames.indexWhere(route.startsWith).clamp(0, _routeNames.length - 1);
   }
 
   void _handleSwipe(BuildContext context, WidgetRef ref, double dx, int index) {
@@ -100,11 +100,11 @@ class SwipeNavigationWrapper extends ConsumerWidget {
     HapticFeedback.lightImpact();
     Future<void>.microtask(() => ref.read(sessionProvider.notifier).updateActivity());
     ref.read(navigationProvider.notifier).updateCurrentIndex(nextIndex);
-    context.go(_routes[nextIndex]);
+    context.goNamed(_routeNames[nextIndex]);
   }
 
   int? _nextIndex(int index) {
-    if (index < _routes.length - 1) {
+    if (index < _routeNames.length - 1) {
       return index + 1;
     }
     if (enableCircularNavigation) {
@@ -118,7 +118,7 @@ class SwipeNavigationWrapper extends ConsumerWidget {
       return index - 1;
     }
     if (enableCircularNavigation) {
-      return _routes.length - 1;
+      return _routeNames.length - 1;
     }
     return null;
   }

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../core/theme/design_tokens/typography.dart';
+import '../../../../shared/utils/currency_utils.dart';
 
 class SpendingMetric extends StatelessWidget {
   const SpendingMetric({
@@ -10,11 +11,13 @@ class SpendingMetric extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.currency,
+    required this.visible,
   });
 
   final String label;
   final double amount;
   final String currency;
+  final bool visible;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,7 @@ class SpendingMetric extends StatelessWidget {
         ),
         const Gap(DesignTokens.spacing2xs),
         Text(
-          '$currency${amount.toStringAsFixed(2)}',
+          visible ? CurrencyUtils.formatAmount(amount) : '****',
           style: AppTypography.moneyMedium.copyWith(
             color: theme.colorScheme.onSurface,
           ),

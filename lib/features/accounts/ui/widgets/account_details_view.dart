@@ -8,16 +8,16 @@ import '../../../../core/models/database/account.dart';
 import '../../../../core/models/database/transaction.dart';
 import '../../../../core/providers/database/storage/transaction_storage_service_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../core/theme/design_tokens/typography.dart';
-import '../../../../shared/utils/currency_utils.dart';
+import '../../../../shared/providers/ui/balance_visibility_provider.dart';
 import '../../../../shared/utils/date_utils.dart';
 import '../../../../shared/utils/ui_utils.dart';
+import '../../../../shared/widgets/dashboard/account_balance_card.dart';
 import '../../../../shared/widgets/states/empty_state.dart';
 import '../../../../shared/widgets/states/error_state.dart';
 import '../../../../shared/widgets/states/loading_state.dart';
 import '../../../../shared/widgets/transactions/transaction_list_item.dart';
 
-class AccountDetailsView extends ConsumerWidget {
+class AccountDetailsView extends ConsumerStatefulWidget {
   const AccountDetailsView({
     super.key,
     required this.account,
@@ -32,15 +32,27 @@ class AccountDetailsView extends ConsumerWidget {
   final VoidCallback onDeleteAccount;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountDetailsView> createState() => _AccountDetailsViewState();
+}
+
+class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> {
+  late final Future<List<Transaction>> _accountTransactions;
+
+  @override
+  void initState() {
+    super.initState();
+    _accountTransactions = ref.read(transactionStorageProvider).getAllByAccount(widget.account.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          // Clean App Bar
           SliverAppBar(
-            title: Text(account.name),
+            title: Text(widget.account.name),
             backgroundColor: theme.colorScheme.surface,
             foregroundColor: theme.colorScheme.onSurface,
             elevation: 0,
@@ -77,35 +89,34 @@ class AccountDetailsView extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  // Balance Card
-                  _buildBalanceCard(context, theme).animate().slideY(begin: -0.3, delay: 100.ms).fadeIn(),
-                  
+                  AccountBalanceCard(
+                    totalBalance: widget.account.balance,
+                    accounts: <Account>[widget.account],
+                    onToggleVisibility: () {
+                      final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                      current.state = !current.state;
+                    },
+                    showActiveAccountsCount: false,
+                  ).animate().slideY(begin: -0.3, delay: 100.ms).fadeIn(),
+
                   const Gap(DesignTokens.spacingMd),
-                  
-                  // Quick Actions
                   _buildQuickActions(context, theme).animate().slideY(begin: 0.3, delay: 200.ms).fadeIn(),
-                  
                   const Gap(DesignTokens.spacingMd),
-                  
-                  // Account Info Card
                   _buildAccountInfoCard(context, theme).animate().slideY(begin: 0.3, delay: 300.ms).fadeIn(),
-                  
                   const Gap(DesignTokens.spacingLg),
-                  
+
                   // Transactions Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
                         'Recent Transactions',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       TextButton(
                         onPressed: () => context.pushNamed(
                           'transactions',
-                          queryParameters: <String, String>{'accountId': account.id},
+                          queryParameters: <String, String>{'accountId': widget.account.id},
                         ),
                         child: const Text('View All'),
                       ),
@@ -119,75 +130,62 @@ class AccountDetailsView extends ConsumerWidget {
           // Transactions List
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingMd),
-            sliver: _buildTransactionsList(context, ref, theme),
+            sliver: FutureBuilder<List<Transaction>>(
+              future: _accountTransactions,
+              builder: (BuildContext context, AsyncSnapshot<List<Transaction>> snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const SliverToBoxAdapter(child: LoadingState());
+                }
+
+                if (snapshot.hasError) {
+                  return SliverToBoxAdapter(child: ErrorState(
+                    title: 'Error loading transactions',
+                    message: snapshot.error.toString(),
+                    onRetry: () => setState(() {
+                      _accountTransactions = ref.read(transactionStorageProvider).getAllByAccount(widget.account.id);
+                    }),
+                  ));
+                }
+
+                final List<Transaction> transactions = snapshot.data ?? <Transaction>[];
+
+                if (transactions.isEmpty) {
+                  return const SliverToBoxAdapter(
+                    child: EmptyState(
+                      title: 'No transactions yet',
+                      message: 'Add your first transaction to get started',
+                      icon: Icons.receipt_long_outlined,
+                    ),
+                  );
+                }
+
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      final Transaction transaction = transactions[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
+                        child: TransactionListItem(
+                          transaction: transaction,
+                          onTap: () => Navigator.of(context).pushNamed('/transactions/${transaction.id}'),
+                          animationDelay: Duration(milliseconds: 500 + (index * 100)),
+                          compact: true,
+                          visible: ref.watch(balanceVisibilityProvider),
+                        ),
+                      );
+                    },
+                    childCount: transactions.length,
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: onAddTransaction,
+        onPressed: widget.onAddTransaction,
         tooltip: 'Add Transaction',
         child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Widget _buildBalanceCard(BuildContext context, ThemeData theme) {
-    return Card(
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(DesignTokens.spacingLg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Container(
-                  padding: const EdgeInsets.all(DesignTokens.spacingXs),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-                  ),
-                  child: Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: theme.colorScheme.primary,
-                    size: 24,
-                  ),
-                ),
-                const Gap(DesignTokens.spacingSm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'Current Balance',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      if (account.bankName != null)
-                        Text(
-                          account.bankName!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const Gap(DesignTokens.spacingSm),
-            Text(
-              CurrencyUtils.formatAmount(
-                account.balance,
-                currency: CurrencyUtils.getCurrencySymbol(account.currency),
-              ),
-              style: AppTypography.moneyLarge.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -201,7 +199,7 @@ class AccountDetailsView extends ConsumerWidget {
             theme,
             icon: Icons.add_circle_outline,
             label: 'Add Transaction',
-            onTap: onAddTransaction,
+            onTap: widget.onAddTransaction,
           ),
         ),
         const Gap(DesignTokens.spacingSm),
@@ -240,11 +238,7 @@ class AccountDetailsView extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(
-              icon,
-              color: theme.colorScheme.primary,
-              size: 20,
-            ),
+            Icon(icon, color: theme.colorScheme.primary, size: 20),
             const Gap(DesignTokens.spacingXs),
             Text(
               label,
@@ -268,48 +262,31 @@ class AccountDetailsView extends ConsumerWidget {
           children: <Widget>[
             Text(
               'Account Information',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const Gap(DesignTokens.spacingSm),
-            _buildInfoRow(
-              theme,
-              label: 'Account Type',
-              value: UiUtils.formatAccountType(account.type),
-              icon: Icons.category_outlined,
-            ),
-            if (account.accountNumber != null)
+            _buildInfoRow(theme, label: 'Account Type', value: UiUtils.formatAccountType(widget.account.type), icon: Icons.category_outlined),
+            if (widget.account.accountNumber != null)
               _buildInfoRow(
                 theme,
                 label: 'Account Number',
-                value: '****${account.accountNumber!.substring(account.accountNumber!.length - 4)}',
+                value: '****${widget.account.accountNumber!.substring(widget.account.accountNumber!.length - 4)}',
                 icon: Icons.numbers_outlined,
               ),
-            if (account.sortCode != null)
-              _buildInfoRow(
-                theme,
-                label: 'Sort Code',
-                value: account.sortCode!,
-                icon: Icons.tag_outlined,
-              ),
-            _buildInfoRow(
-              theme,
-              label: 'Currency',
-              value: account.currency,
-              icon: Icons.monetization_on_outlined,
-            ),
+            if (widget.account.sortCode != null)
+              _buildInfoRow(theme, label: 'Sort Code', value: widget.account.sortCode!, icon: Icons.tag_outlined),
+            _buildInfoRow(theme, label: 'Currency', value: widget.account.currency, icon: Icons.monetization_on_outlined),
             _buildInfoRow(
               theme,
               label: 'Status',
-              value: account.isActive ? 'Active' : 'Inactive',
+              value: widget.account.isActive ? 'Active' : 'Inactive',
               icon: Icons.info_outline,
-              valueColor: account.isActive ? theme.colorScheme.primary : theme.colorScheme.error,
+              valueColor: widget.account.isActive ? theme.colorScheme.primary : theme.colorScheme.error,
             ),
             _buildInfoRow(
               theme,
               label: 'Created',
-              value: DateUtils.formatDate(account.createdAt),
+              value: DateUtils.formatDate(widget.account.createdAt),
               icon: Icons.schedule_outlined,
               showDivider: false,
             ),
@@ -331,11 +308,7 @@ class AccountDetailsView extends ConsumerWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Icon(
-              icon,
-              size: 16,
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
-            ),
+            Icon(icon, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.6)),
             const Gap(DesignTokens.spacingXs),
             Text(
               label,
@@ -355,81 +328,19 @@ class AccountDetailsView extends ConsumerWidget {
         ),
         if (showDivider) ...<Widget>[
           const Gap(DesignTokens.spacingSm),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outline.withOpacity(0.2),
-          ),
+          Divider(height: 1, color: theme.colorScheme.outline.withOpacity(0.2)),
           const Gap(DesignTokens.spacingSm),
         ],
       ],
     );
   }
 
-  Widget _buildTransactionsList(BuildContext context, WidgetRef ref, ThemeData theme) {
-    return Consumer(
-      builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        return FutureBuilder<List<Transaction>>(
-          future: ref.read(transactionStorageProvider).getAllByAccount(account.id),
-          builder: (BuildContext context, AsyncSnapshot<List<Transaction>> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SliverToBoxAdapter(
-                child: LoadingState(message: 'Loading transactions...'),
-              );
-            }
-            
-            if (snapshot.hasError) {
-              return SliverToBoxAdapter(
-                child: ErrorState(
-                  title: 'Failed to load transactions',
-                  message: snapshot.error.toString(),
-                ),
-              );
-            }
-
-            final List<Transaction> transactions = snapshot.data ?? <Transaction>[];
-            
-            if (transactions.isEmpty) {
-              return const SliverToBoxAdapter(
-                child: EmptyState(
-                  title: 'No transactions yet',
-                  message: 'Add your first transaction to get started',
-                  icon: Icons.receipt_long_outlined,
-                ),
-              );
-            }
-
-            // Show only first 5 transactions
-            final List<Transaction> recentTransactions = transactions.take(5).toList();
-
-            return SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  final Transaction transaction = recentTransactions[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
-                    child: TransactionListItem(
-                      transaction: transaction,
-                      onTap: () => Navigator.of(context).pushNamed('/transactions/${transaction.id}'),
-                      animationDelay: Duration(milliseconds: 500 + (index * 100)),
-                      compact: true,
-                    ),
-                  );
-                },
-                childCount: recentTransactions.length,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _handleMenuAction(BuildContext context, String action) {
     switch (action) {
       case 'edit':
-        onEditAccount();
+        widget.onEditAccount();
       case 'delete':
-        onDeleteAccount();
+        widget.onDeleteAccount();
     }
   }
 }

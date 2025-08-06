@@ -65,7 +65,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
     final AsyncValue<List<Account>> accountsAsync = ref.watch(accountsProvider);
 
     return SwipeNavigationWrapper(
-      currentRoute: '/transactions',
+      currentRoute: 'transactions',
       useTabLocking: true,
       currentTabIndex: _currentTabIndex,
       totalTabs: 3,
@@ -81,7 +81,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
             ),
             IconButton(
               icon: const Icon(Icons.add_rounded),
-              onPressed: () => context.push('/transactions/add'),
+              onPressed: () => context.pushNamed('add-transaction'),
               tooltip: 'Add Transaction',
             ),
           ],
@@ -128,7 +128,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => context.push('/transactions/add'),
+          onPressed: () => context.pushNamed('add-transaction'),
           tooltip: 'Add Transaction',
           child: const Icon(Icons.add),
         ),
@@ -185,7 +185,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       message: message,
       icon: Icons.receipt_long_outlined,
       actionText: 'Add Transaction',
-      onAction: () => context.push('/transactions/add'),
+      onAction: () => context.pushNamed('add-transaction'),
     );
   }
 
@@ -221,7 +221,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                 padding: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
                 child: TransactionListItem(
                   transaction: transaction,
-                  onTap: () => context.go('/transactions/${transaction.id}'),
+                  onTap: () => context.pushNamed(
+                    'transaction-details',
+                    pathParameters: <String, String>{'transactionId': transaction.id},
+                  ),
                   animationDelay: Duration(
                     milliseconds: index * 100 + (transactionIndex * 50) + 100,
                   ),

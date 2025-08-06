@@ -14,7 +14,7 @@ import 'core/logging/log.dart';
 import 'core/providers/database/database_service_provider.dart';
 
 Future<void> main() async {
-  SentryWidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
@@ -38,7 +38,7 @@ Future<void> main() async {
       options.tracesSampleRate = kDebugMode ? 0.1 : 1.0;
       options.sendDefaultPii = false;
       options.debug = kDebugMode;
-      
+
       if (kDebugMode) {
         options.enableAutoSessionTracking = false;
         options.enableWatchdogTerminationTracking = false;
@@ -56,6 +56,6 @@ Future<void> main() async {
           child: const TrackFiApp(),
         ),
       );
-    }
+    },
   );
 }

@@ -14,10 +14,6 @@ class AddAccountState {
     this.sortCode,
     this.isLoading = false,
     this.errorMessage,
-    this.isEditMode = false,
-    this.accountId,
-    this.createdAt,
-    this.updatedAt,
   });
 
   static const Uuid _uuid = Uuid();
@@ -31,10 +27,6 @@ class AddAccountState {
   final String? sortCode;
   final bool isLoading;
   final String? errorMessage;
-  final bool isEditMode;
-  final String? accountId;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   AddAccountState copyWith({
     String? name,
@@ -46,10 +38,6 @@ class AddAccountState {
     String? sortCode,
     bool? isLoading,
     String? errorMessage,
-    bool? isEditMode,
-    String? accountId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
   }) {
     return AddAccountState(
       name: name ?? this.name,
@@ -61,25 +49,21 @@ class AddAccountState {
       sortCode: sortCode ?? this.sortCode,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
-      isEditMode: isEditMode ?? this.isEditMode,
-      accountId: accountId ?? this.accountId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   bool get isValid => name.trim().isNotEmpty;
 
   Account toAccount() => Account(
-    id: accountId ?? 'acc_${_uuid.v4()}',
+    id: 'acc_${_uuid.v4()}',
     name: name.trim(),
     type: type,
     balance: balance,
     currency: currency,
-    bankName: bankName,
-    accountNumber: accountNumber,
-    sortCode: sortCode,
-    createdAt: createdAt ?? DateTime.now(),
+    bankName: (bankName?.isNotEmpty ?? false) ? bankName : null,
+    accountNumber: (accountNumber?.isNotEmpty ?? false) ? accountNumber : null,
+    sortCode: (sortCode?.isNotEmpty ?? false) ? sortCode : null,
+    createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
   );
 

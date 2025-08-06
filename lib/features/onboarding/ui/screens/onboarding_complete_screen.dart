@@ -31,7 +31,7 @@ class _OnboardingCompleteScreenState extends ConsumerState<OnboardingCompleteScr
       if (current.currentStep == OnboardingStep.complete && _isCompletingOnboarding) {
         Future<void>.delayed(const Duration(milliseconds: 500), () {
           if (context.mounted) {
-            context.go('/dashboard');
+            context.goNamed('dashboard');
           }
         });
       }

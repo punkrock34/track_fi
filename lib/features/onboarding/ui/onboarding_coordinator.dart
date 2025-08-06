@@ -32,7 +32,7 @@ class OnboardingCoordinator extends ConsumerWidget {
       
       Future<void>.delayed(const Duration(seconds: 2), () {
         if (context.mounted) {
-          context.go('/dashboard');
+          context.goNamed('dashboard');
         }
       });
     }

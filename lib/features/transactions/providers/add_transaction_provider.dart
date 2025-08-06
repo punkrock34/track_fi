@@ -51,7 +51,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = state.copyWith(categoryId: categoryId);
   }
 
-Future<bool> createTransaction() async {
+  Future<bool> createTransaction() async {
     if (!state.isValid) {
       state = state.error(state.validationError!);
       return false;
@@ -112,6 +112,7 @@ Future<bool> createTransaction() async {
         rethrow;
       }
 
+      _ref.invalidate(accountProvider(updatedAccount.id));
       _ref.read(transactionsProvider.notifier).loadTransactions();
       _ref.read(accountsProvider.notifier).loadAccounts();
       _ref.read(dashboardProvider.notifier).loadDashboardData();

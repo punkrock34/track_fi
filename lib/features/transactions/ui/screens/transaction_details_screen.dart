@@ -36,7 +36,10 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
             onEdit: () => UiUtils.showComingSoon(context, 'Edit Transaction'),
             onDelete: () => _showDeleteConfirmation(context, transaction),
             onShare: () => _shareTransaction(context, transaction),
-            onNavigateToAccount: () => context.go('/accounts/${transaction.accountId}'),
+            onNavigateToAccount: () => context.goNamed(
+              'account-details',
+              pathParameters: <String, String>{'accountId': transaction.accountId},
+            ),
           );
         },
       ),

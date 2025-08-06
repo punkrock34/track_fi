@@ -31,7 +31,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final ThemeData theme = Theme.of(context);
 
     return SwipeNavigationWrapper(
-      currentRoute: '/accounts',
+      currentRoute: 'accounts',
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Accounts'),
@@ -40,7 +40,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.add_rounded),
-              onPressed: () => context.push('/accounts/add'),
+              onPressed: () => context.pushNamed('add-account'),
               tooltip: 'Add Account',
             ),
           ],
@@ -51,7 +51,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           child: _buildContent(accountsAsync),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => context.push('/accounts/add'),
+          onPressed: () => context.pushNamed('add-account'),
           tooltip: 'Add Account',
           child: const Icon(Icons.add),
         ),
@@ -69,8 +69,11 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       ),
       data: (List<Account> accounts) => AccountsView(
         accounts: accounts,
-        onAccountTap: (Account account) => context.go('/accounts/${account.id}'),
-        onAddAccount: () => context.push('/accounts/add'),
+        onAccountTap: (Account account) => context.goNamed(
+          'account-details',
+          pathParameters: <String, String>{'accountId': account.id},
+        ),
+        onAddAccount: () => context.pushNamed('add-account'),
       ),
     );
   }

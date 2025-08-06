@@ -10,6 +10,7 @@ import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
+import '../../../../shared/providers/ui/balance_visibility_provider.dart';
 import '../../../../shared/widgets/dashboard/account_balance_card.dart';
 import '../../models/dashboard_state.dart';
 import '../../providers/dashboard_provider.dart';
@@ -40,7 +41,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final ThemeData theme = Theme.of(context);
 
     return SwipeNavigationWrapper(
-      currentRoute: '/dashboard',
+      currentRoute: 'dashboard',
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -58,7 +59,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.account_circle_outlined),
-              onPressed: () => context.go('/settings'),
+              onPressed: () => context.goNamed('settings'),
             ),
           ],
         ),
@@ -129,14 +130,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   totalBalance: state.totalBalance,
                   accounts: state.accounts,
                   isLoading: state.isLoading,
+                  onToggleVisibility: () {
+                    final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                    current.state = !current.state;
+                  },
                 ).animate().slideY(begin: 0.3, delay: 300.ms).fadeIn(),
                 
                 const Gap(DesignTokens.spacingMd),
                 
                 // Quick Actions
                 QuickActionsRow(
-                  onViewAccounts: () => context.go('/accounts'),
-                  onViewTransactions: () => context.go('/transactions'),
+                  onViewAccounts: () => context.goNamed('accounts'),
+                  onViewTransactions: () => context.goNamed('transactions'),
                 ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
                 
                 const Gap(DesignTokens.spacingMd),
@@ -145,6 +150,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 SpendingOverviewCard(
                   monthlySpending: state.monthlySpending,
                   recentTransactions: state.recentTransactions,
+                  onToggleVisibility: () {
+                    final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                    current.state = !current.state;
+                  },
                 ).animate().slideY(begin: 0.3, delay: 500.ms).fadeIn(),
                 
                 const Gap(DesignTokens.spacingMd),
@@ -152,8 +161,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 // Recent Transactions
                 RecentTransactionsCard(
                   transactions: state.recentTransactions,
-                  onViewAll: () => context.go('/transactions'),
+                  onViewAll: () => context.goNamed('transactions'),
                   isLoading: state.isLoading,
+                  onToggleVisibility: () {
+                    final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                    current.state = !current.state;
+                  },
                 ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(),
                 
                 const Gap(DesignTokens.spacingXl),

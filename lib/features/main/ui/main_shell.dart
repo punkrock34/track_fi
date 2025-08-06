@@ -18,25 +18,25 @@ class MainShell extends ConsumerWidget {
       label: 'Dashboard',
       icon: Icons.dashboard_rounded,
       activeIcon: Icons.dashboard,
-      route: '/dashboard',
+      routeName: 'dashboard',
     ),
     const NavigationItem(
       label: 'Accounts',
       icon: Icons.account_balance_rounded,
       activeIcon: Icons.account_balance,
-      route: '/accounts',
+      routeName: 'accounts',
     ),
     const NavigationItem(
       label: 'Transactions',
       icon: Icons.receipt_long_rounded,
       activeIcon: Icons.receipt_long,
-      route: '/transactions',
+      routeName: 'transactions',
     ),
     const NavigationItem(
       label: 'Settings',
       icon: Icons.settings_rounded,
       activeIcon: Icons.settings,
-      route: '/settings',
+      routeName: 'settings',
     ),
   ];
 
@@ -101,7 +101,7 @@ class MainShell extends ConsumerWidget {
                 child: NavigationButton(
                   item: item,
                   isSelected: isSelected,
-                  onTap: () => _onNavigationTap(context, ref, index, item.route),
+                  onTap: () => _onNavigationTap(context, ref, index, item.routeName),
                   animationDelay: Duration(milliseconds: index * 50),
                 ),
               );
@@ -113,17 +113,19 @@ class MainShell extends ConsumerWidget {
   }
 
   int _getCurrentIndex(String location) {
+    final String pathSegment = location.split('/').where((String e) => e.isNotEmpty).firstOrNull ?? '';
+
     for (int i = 0; i < _navigationItems.length; i++) {
-      if (location.startsWith(_navigationItems[i].route)) {
+      if (_navigationItems[i].routeName == pathSegment) {
         return i;
       }
     }
     return 0; // Default to Dashboard
   }
 
-  void _onNavigationTap(BuildContext context, WidgetRef ref, int index, String route) {
+  void _onNavigationTap(BuildContext context, WidgetRef ref, int index, String routeName) {
     ref.read(navigationProvider.notifier).updateCurrentIndex(index);
     Future<void>.microtask(() => ref.read(sessionProvider.notifier).updateActivity());
-    context.go(route);
+    context.goNamed(routeName);
   }
 }

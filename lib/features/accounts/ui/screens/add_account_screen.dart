@@ -5,21 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/models/database/account.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/widgets/input/currency_input_field.dart';
 import '../../../../shared/widgets/input/dropdown_field.dart';
 import '../../../../shared/widgets/input/text_input_field_widget.dart';
 import '../../models/add_account_state.dart';
-import '../../providers/accounts_provider.dart';
 import '../../providers/add_account_provider.dart';
 import '../widgets/account_type_selector.dart';
 import '../widgets/sort_code_formatter.dart';
 
 class AddAccountScreen extends ConsumerStatefulWidget {
-  const AddAccountScreen({super.key, this.accountId});
-
-  final String? accountId;
+  const AddAccountScreen({super.key});
 
   @override
   ConsumerState<AddAccountScreen> createState() => _AddAccountScreenState();
@@ -36,20 +32,8 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final AddAccountNotifier notifier = ref.read(addAccountProvider.notifier);
-
-      if (widget.accountId != null) {
-        final Account? account = ref.read(accountProvider(widget.accountId!)).value;
-        if (account != null) {
-          notifier.loadExistingAccount(account);
-        } else {
-          notifier.reset();
-        }
-      } else {
-        notifier.reset();
-      }
+      ref.read(addAccountProvider.notifier).reset();
     });
   }
 
@@ -68,12 +52,6 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     final AddAccountState state = ref.watch(addAccountProvider);
     final AddAccountNotifier notifier = ref.read(addAccountProvider.notifier);
     final ThemeData theme = Theme.of(context);
-
-    _nameController.text = state.name;
-    _balanceController.text = state.balance.toStringAsFixed(2);
-    _bankNameController.text = state.bankName ?? '';
-    _accountNumberController.text = state.accountNumber ?? '';
-    _sortCodeController.text = state.sortCode ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -272,7 +250,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                         LengthLimitingTextInputFormatter(6),
                         SortCodeFormatter(),
                       ],
-                                            onChanged: notifier.updateSortCode,
+                      onChanged: notifier.updateSortCode,
                       prefixIcon: Icons.tag_outlined,
                     ),
                   ),
@@ -327,7 +305,6 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
       return;
     }
 
-    final AddAccountState state = ref.read(addAccountProvider);
     final bool success = await ref.read(addAccountProvider.notifier).saveAccount();
 
     if (!mounted) {
@@ -337,17 +314,14 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            state.isEditMode ? 'Account updated successfully!' : 'Account created successfully!',
-          ),
+          content: const Text('Account created successfully!'),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
 
-      context.replaceNamed('accounts');
+      context.pop();
     }
   }
-
 
   String _getCurrencySymbol(String currency) {
     switch (currency) {

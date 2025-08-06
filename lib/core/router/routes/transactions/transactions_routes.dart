@@ -15,14 +15,14 @@ final GoRoute transactionsRoutes = GoRoute(
   routes: <RouteBase>[
     GoRoute(
       name: 'add-transaction',
-      path: '/add',
+      path: '/transactions/add',
       builder: (BuildContext context, GoRouterState state) {
         final String? accountId = state.uri.queryParameters['accountId'];
         return AddTransactionScreen(preselectedAccountId: accountId);
       },
     ),
     GoRoute(
-      name: 'transaction-detail',
+      name: 'transaction-details',
       path: '/:transactionId',
       builder: (BuildContext context, GoRouterState state) {
         final String transactionId = state.pathParameters['transactionId']!;
