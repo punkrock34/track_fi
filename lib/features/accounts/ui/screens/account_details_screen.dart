@@ -9,6 +9,7 @@ import '../../../../../shared/widgets/states/loading_state.dart';
 import '../../../../core/models/database/transaction.dart';
 import '../../../../core/providers/database/storage/transaction_storage_service_provider.dart';
 import '../../providers/accounts_provider.dart';
+import '../../providers/add_account_provider.dart';
 import '../widgets/account_details_view.dart';
 
 class AccountDetailScreen extends ConsumerStatefulWidget {
@@ -37,7 +38,12 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           return AccountDetailsView(
             account: account,
             onAddTransaction: () => context.push('/transactions/add?accountId=${account.id}'),
-            onEditAccount: () => UiUtils.showComingSoon(context, 'Edit Account'),
+            onEditAccount: () {
+              ref.read(addAccountProvider.notifier).loadExistingAccount(account);
+              context.pushNamed('edit_account', pathParameters: <String, String>{
+                'accountId': account.id,
+              });
+            },
             onDeleteAccount: () => _showDeleteConfirmation(context, account),
           );
         },

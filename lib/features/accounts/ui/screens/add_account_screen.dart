@@ -5,17 +5,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/models/database/account.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/widgets/input/currency_input_field.dart';
 import '../../../../shared/widgets/input/dropdown_field.dart';
 import '../../../../shared/widgets/input/text_input_field_widget.dart';
 import '../../models/add_account_state.dart';
+import '../../providers/accounts_provider.dart';
 import '../../providers/add_account_provider.dart';
 import '../widgets/account_type_selector.dart';
 import '../widgets/sort_code_formatter.dart';
 
 class AddAccountScreen extends ConsumerStatefulWidget {
-  const AddAccountScreen({super.key});
+  const AddAccountScreen({super.key, this.accountId});
+
+  final String? accountId;
 
   @override
   ConsumerState<AddAccountScreen> createState() => _AddAccountScreenState();
@@ -32,9 +36,20 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
   @override
   void initState() {
     super.initState();
-    // Reset state when screen opens
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(addAccountProvider.notifier).reset();
+      final AddAccountNotifier notifier = ref.read(addAccountProvider.notifier);
+
+      if (widget.accountId != null) {
+        final Account? account = ref.read(accountProvider(widget.accountId!)).value;
+        if (account != null) {
+          notifier.loadExistingAccount(account);
+        } else {
+          notifier.reset();
+        }
+      } else {
+        notifier.reset();
+      }
     });
   }
 
@@ -53,6 +68,12 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     final AddAccountState state = ref.watch(addAccountProvider);
     final AddAccountNotifier notifier = ref.read(addAccountProvider.notifier);
     final ThemeData theme = Theme.of(context);
+
+    _nameController.text = state.name;
+    _balanceController.text = state.balance.toStringAsFixed(2);
+    _bankNameController.text = state.bankName ?? '';
+    _accountNumberController.text = state.accountNumber ?? '';
+    _sortCodeController.text = state.sortCode ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -117,13 +138,15 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                 const Gap(DesignTokens.spacingMd),
               ],
 
-              // Basic Information Section
+              // Section: Account Details
               Text(
-                'Basic Information',
+                'Account Details',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
                 ),
-              ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+              ).animate().slideX(begin: -0.3, delay: 50.ms).fadeIn(),
+              
               const Gap(DesignTokens.spacingSm),
 
               TextInputField(
@@ -133,16 +156,25 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                 required: true,
                 onChanged: notifier.updateName,
                 prefixIcon: Icons.account_balance_outlined,
-              ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
+                validator: (String? value) {
+                  if (value?.trim().isEmpty ?? true) {
+                    return 'Account name is required';
+                  }
+                  if (value!.trim().length < 2) {
+                    return 'Account name must be at least 2 characters';
+                  }
+                  return null;
+                },
+              ).animate().slideX(begin: 0.3, delay: 100.ms).fadeIn(),
 
-              const Gap(DesignTokens.spacingSm),
+              const Gap(DesignTokens.spacingMd),
 
               AccountTypeSelector(
                 selectedType: state.type,
                 onTypeChanged: notifier.updateType,
-              ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
+              ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
 
-              const Gap(DesignTokens.spacingSm),
+              const Gap(DesignTokens.spacingMd),
 
               Row(
                 children: <Widget>[
@@ -154,7 +186,8 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       hint: '0.00',
                       currency: state.currency,
                       onChanged: (double value) => notifier.updateBalance(value),
-                    ).animate().slideX(begin: 0.3, delay: 250.ms).fadeIn(),
+                      required: true,
+                    ),
                   ),
                   const Gap(DesignTokens.spacingSm),
                   Expanded(
@@ -163,32 +196,52 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       label: 'Currency',
                       items: const <String>['GBP', 'USD', 'EUR'],
                       onChanged: notifier.updateCurrency,
-                      itemBuilder: (String currency) => Text(currency),
-                    ).animate().slideX(begin: 0.3, delay: 300.ms).fadeIn(),
+                      itemBuilder: (String currency) => Row(
+                        children: <Widget>[
+                          Text(
+                            _getCurrencySymbol(currency),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Gap(DesignTokens.spacingXs),
+                          Text(currency),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
-              ),
+              ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
 
               const Gap(DesignTokens.spacingLg),
 
-              // Bank Details Section
+              // Section: Bank Information
               Text(
-                'Bank Details (Optional)',
+                'Bank Information (Optional)',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
-              ).animate().slideX(begin: -0.3, delay: 350.ms).fadeIn(),
+              ).animate().slideX(begin: -0.3, delay: 250.ms).fadeIn(),
+              
+              Text(
+                'Add bank details for better organization',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ).animate().slideX(begin: -0.3, delay: 300.ms).fadeIn(),
+              
               const Gap(DesignTokens.spacingSm),
 
               TextInputField(
                 controller: _bankNameController,
                 label: 'Bank Name',
-                hint: 'e.g., Barclays, HSBC',
+                hint: 'e.g., Barclays, HSBC, Nationwide',
                 onChanged: notifier.updateBankName,
                 prefixIcon: Icons.business_outlined,
-              ).animate().slideX(begin: 0.3, delay: 400.ms).fadeIn(),
+              ).animate().slideX(begin: 0.3, delay: 350.ms).fadeIn(),
 
-              const Gap(DesignTokens.spacingSm),
+              const Gap(DesignTokens.spacingMd),
 
               Row(
                 children: <Widget>[
@@ -205,7 +258,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       ],
                       onChanged: notifier.updateAccountNumber,
                       prefixIcon: Icons.numbers_outlined,
-                    ).animate().slideX(begin: 0.3, delay: 450.ms).fadeIn(),
+                    ),
                   ),
                   const Gap(DesignTokens.spacingSm),
                   Expanded(
@@ -219,16 +272,16 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                         LengthLimitingTextInputFormatter(6),
                         SortCodeFormatter(),
                       ],
-                      onChanged: notifier.updateSortCode,
+                                            onChanged: notifier.updateSortCode,
                       prefixIcon: Icons.tag_outlined,
-                    ).animate().slideX(begin: 0.3, delay: 500.ms).fadeIn(),
+                    ),
                   ),
                 ],
-              ),
+              ).animate().slideX(begin: 0.3, delay: 400.ms).fadeIn(),
 
               const Gap(DesignTokens.spacingXl),
 
-              // Information card
+              // Info box
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(DesignTokens.spacingSm),
@@ -240,6 +293,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                   ),
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Icon(
                       Icons.info_outline,
@@ -249,8 +303,8 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                     const Gap(DesignTokens.spacingXs),
                     Expanded(
                       child: Text(
-                        'Bank details are optional and used only for display purposes. '
-                        'Your information is stored securely on your device.',
+                        'Bank details are optional and only used for organizing your accounts. '
+                        'All data is securely stored on your device.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer,
                         ),
@@ -258,7 +312,9 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                     ),
                   ],
                 ),
-              ).animate().slideY(begin: 0.3, delay: 550.ms).fadeIn(),
+              ).animate().slideY(begin: 0.3, delay: 450.ms).fadeIn(),
+
+              const Gap(DesignTokens.spacingLg),
             ],
           ),
         ),
@@ -271,8 +327,9 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
       return;
     }
 
-    final bool success = await ref.read(addAccountProvider.notifier).createAccount();
-    
+    final AddAccountState state = ref.read(addAccountProvider);
+    final bool success = await ref.read(addAccountProvider.notifier).saveAccount();
+
     if (!mounted) {
       return;
     }
@@ -280,12 +337,28 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Account created successfully!'),
+          content: Text(
+            state.isEditMode ? 'Account updated successfully!' : 'Account created successfully!',
+          ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
 
-      context.pop();
+      context.replaceNamed('accounts');
+    }
+  }
+
+
+  String _getCurrencySymbol(String currency) {
+    switch (currency) {
+      case 'USD':
+        return r'$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      default:
+        return '';
     }
   }
 }

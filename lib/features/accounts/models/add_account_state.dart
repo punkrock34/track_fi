@@ -1,4 +1,9 @@
+import 'package:uuid/uuid.dart';
+
+import '../../../core/models/database/account.dart';
+
 class AddAccountState {
+  
   const AddAccountState({
     this.name = '',
     this.type = 'current',
@@ -9,7 +14,13 @@ class AddAccountState {
     this.sortCode,
     this.isLoading = false,
     this.errorMessage,
+    this.isEditMode = false,
+    this.accountId,
+    this.createdAt,
+    this.updatedAt,
   });
+
+  static const Uuid _uuid = Uuid();
 
   final String name;
   final String type;
@@ -20,6 +31,10 @@ class AddAccountState {
   final String? sortCode;
   final bool isLoading;
   final String? errorMessage;
+  final bool isEditMode;
+  final String? accountId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   AddAccountState copyWith({
     String? name,
@@ -31,6 +46,10 @@ class AddAccountState {
     String? sortCode,
     bool? isLoading,
     String? errorMessage,
+    bool? isEditMode,
+    String? accountId,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return AddAccountState(
       name: name ?? this.name,
@@ -42,10 +61,27 @@ class AddAccountState {
       sortCode: sortCode ?? this.sortCode,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
+      isEditMode: isEditMode ?? this.isEditMode,
+      accountId: accountId ?? this.accountId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   bool get isValid => name.trim().isNotEmpty;
+
+  Account toAccount() => Account(
+    id: accountId ?? 'acc_${_uuid.v4()}',
+    name: name.trim(),
+    type: type,
+    balance: balance,
+    currency: currency,
+    bankName: bankName,
+    accountNumber: accountNumber,
+    sortCode: sortCode,
+    createdAt: createdAt ?? DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
 
   AddAccountState loading() => copyWith(isLoading: true);
   AddAccountState error(String message) => copyWith(isLoading: false, errorMessage: message);

@@ -123,48 +123,51 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 const Gap(DesignTokens.spacingMd),
               ],
 
+              // Section: Basic Information
+              Text(
+                'Basic Information',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                ),
+              ).animate().slideX(begin: -0.3, delay: 50.ms).fadeIn(),
+              
+              const Gap(DesignTokens.spacingSm),
+
               // Transaction Type
               TransactionTypeToggle(
                 selectedType: state.type,
                 onTypeChanged: notifier.updateType,
-              ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+              ).animate().slideX(begin: 0.3, delay: 100.ms).fadeIn(),
 
               const Gap(DesignTokens.spacingMd),
 
-              // Account Selection
-              AccountSelector(
-                selectedAccountId: state.accountId,
-                accounts: accountsAsync.value ?? <Account>[],
-                onAccountChanged: notifier.updateAccountId,
-                isLoading: accountsAsync.isLoading,
-              ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
-
-              const Gap(DesignTokens.spacingMd),
-
-              // Amount Field (Full Width)
+              // Amount and Date Row
               CurrencyInputField(
                 controller: _amountController,
                 label: 'Amount',
                 hint: '0.00',
                 currency: _getSelectedAccountCurrency(accountsAsync.value, state.accountId),
                 onChanged: notifier.updateAmount,
+                required: true,
                 validator: (String? value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Amount is required';
+                  return 'Amount is required';
                   }
                   final double? amount = double.tryParse(value!);
                   if (amount == null || amount <= 0) {
-                    return 'Enter a valid amount';
+                  return 'Enter a valid amount greater than 0';
                   }
                   return null;
                 },
-              ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
+              ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
 
               const Gap(DesignTokens.spacingMd),
 
-              // Date Field (Full Width)
               _buildDateField(theme, state, notifier)
-                  .animate().slideX(begin: 0.3, delay: 250.ms).fadeIn(),
+                .animate()
+                .slideX(begin: 0.3, delay: 150.ms)
+                .fadeIn(),
 
               const Gap(DesignTokens.spacingMd),
 
@@ -172,21 +175,41 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               TextInputField(
                 controller: _descriptionController,
                 label: 'Description',
-                hint: 'e.g., Grocery shopping, Salary payment (optional)',
+                hint: 'What was this transaction for?',
                 onChanged: notifier.updateDescription,
                 prefixIcon: Icons.description_outlined,
+                required: true,
+                validator: (String? value) {
+                  if (value?.trim().isEmpty ?? true) {
+                    return 'Description is required';
+                  }
+                  if (value!.trim().length < 3) {
+                    return 'Description must be at least 3 characters';
+                  }
+                  return null;
+                },
+              ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
+
+              const Gap(DesignTokens.spacingLg),
+
+              // Section: Account & Category
+              Text(
+                'Account & Category',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                ),
+              ).animate().slideX(begin: -0.3, delay: 250.ms).fadeIn(),
+              
+              const Gap(DesignTokens.spacingSm),
+
+              // Account Selection
+              AccountSelector(
+                selectedAccountId: state.accountId,
+                accounts: accountsAsync.value ?? <Account>[],
+                onAccountChanged: notifier.updateAccountId,
+                isLoading: accountsAsync.isLoading,
               ).animate().slideX(begin: 0.3, delay: 300.ms).fadeIn(),
-
-              const Gap(DesignTokens.spacingMd),
-
-              // Reference Field
-              TextInputField(
-                controller: _referenceController,
-                label: 'Reference',
-                hint: 'Transaction reference or ID (optional)',
-                onChanged: notifier.updateReference,
-                prefixIcon: Icons.tag_outlined,
-              ).animate().slideX(begin: 0.3, delay: 350.ms).fadeIn(),
 
               const Gap(DesignTokens.spacingMd),
 
@@ -195,41 +218,92 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 selectedCategoryId: state.categoryId,
                 transactionType: state.type,
                 onCategoryChanged: notifier.updateCategoryId,
-              ).animate().slideX(begin: 0.3, delay: 400.ms).fadeIn(),
+              ).animate().slideX(begin: 0.3, delay: 350.ms).fadeIn(),
+
+              const Gap(DesignTokens.spacingLg),
+
+              // Section: Additional Details (Optional)
+              Text(
+                'Additional Details (Optional)',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ).animate().slideX(begin: -0.3, delay: 400.ms).fadeIn(),
+              
+              const Gap(DesignTokens.spacingSm),
+
+              // Reference Field
+              TextInputField(
+                controller: _referenceController,
+                label: 'Reference',
+                hint: 'Transaction reference or ID',
+                onChanged: notifier.updateReference,
+                prefixIcon: Icons.tag_outlined,
+              ).animate().slideX(begin: 0.3, delay: 450.ms).fadeIn(),
 
               const Gap(DesignTokens.spacingXl),
 
               // Information card
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(DesignTokens.spacingSm),
+                padding: const EdgeInsets.all(DesignTokens.spacingMd),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                  gradient: LinearGradient(
+                    colors: <Color>[
+                      theme.colorScheme.primaryContainer.withOpacity(0.1),
+                      theme.colorScheme.secondaryContainer.withOpacity(0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
                   border: Border.all(
                     color: theme.colorScheme.primary.withOpacity(0.2),
                   ),
                 ),
                 child: Row(
                   children: <Widget>[
-                    Icon(
-                      Icons.info_outline,
-                      color: theme.colorScheme.primary,
-                      size: 20,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+                      ),
+                      child: Icon(
+                        Icons.info_outline,
+                        color: theme.colorScheme.primary,
+                        size: 20,
+                      ),
                     ),
-                    const Gap(DesignTokens.spacingXs),
+                    const Gap(DesignTokens.spacingSm),
                     Expanded(
-                      child: Text(
-                        'This transaction will be added to your selected account. '
-                        'You can edit or delete it later if needed.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Transaction Preview',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const Gap(DesignTokens.spacing2xs),
+                          Text(
+                            'This will be added to your selected account and update the balance accordingly.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(0.7),
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ).animate().slideY(begin: 0.3, delay: 450.ms).fadeIn(),
+              ).animate().slideY(begin: 0.3, delay: 500.ms).fadeIn(),
+
+              const Gap(DesignTokens.spacingXl),
             ],
           ),
         ),
@@ -245,10 +319,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          'Date',
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w500,
+        RichText(
+          text: TextSpan(
+            children: <InlineSpan>[
+              TextSpan(
+                text: 'Date',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextSpan(
+                text: ' *',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.error,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: DesignTokens.spacingXs),
@@ -262,23 +349,30 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               color: theme.inputDecorationTheme.fillColor,
               borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
               border: Border.all(
-                color: theme.colorScheme.outline.withOpacity(0.3),
+                color: state.transactionDate != null
+                    ? theme.colorScheme.primary.withOpacity(0.5)
+                    : theme.colorScheme.outline.withOpacity(0.3),
+                width: state.transactionDate != null ? 1.5 : 1,
               ),
             ),
             child: Row(
               children: <Widget>[
                 Icon(
                   Icons.calendar_today_outlined,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  size: 16,
+                  color: state.transactionDate != null
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
-                const Gap(DesignTokens.spacingSm),
+                const Gap(DesignTokens.spacingXs),
                 Expanded(
                   child: Text(
                     state.transactionDate != null
                         ? DateUtils.formatDate(state.transactionDate!)
                         : 'Select date',
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 14,
+                      fontWeight: state.transactionDate != null ? FontWeight.w500 : null,
                       color: state.transactionDate != null
                           ? theme.colorScheme.onSurface
                           : theme.colorScheme.onSurface.withOpacity(0.6),
@@ -287,6 +381,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
                 Icon(
                   Icons.expand_more,
+                  size: 16,
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ],
@@ -303,6 +398,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now(),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (selectedDate != null) {
@@ -337,8 +442,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Transaction created successfully!'),
+          content: Row(
+            children: <Widget>[
+              Icon(
+                Icons.check_circle_outline,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              const Gap(DesignTokens.spacingXs),
+              const Text('Transaction created successfully!'),
+            ],
+          ),
           backgroundColor: Theme.of(context).colorScheme.primary,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       

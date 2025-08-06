@@ -14,6 +14,7 @@ class CurrencyInputField extends StatelessWidget {
     this.onChanged,
     this.enabled = true,
     this.validator,
+    this.required = false,
   });
 
   final TextEditingController controller;
@@ -23,6 +24,7 @@ class CurrencyInputField extends StatelessWidget {
   final ValueChanged<double>? onChanged;
   final bool enabled;
   final String? Function(String?)? validator;
+  final bool required;
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +34,24 @@ class CurrencyInputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          label,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w500,
+        RichText(
+          text: TextSpan(
+            children: <InlineSpan>[
+              TextSpan(
+                text: label,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (required)
+                TextSpan(
+                  text: ' *',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+            ],
           ),
         ),
         const SizedBox(height: DesignTokens.spacingXs),
@@ -52,22 +68,45 @@ class CurrencyInputField extends StatelessWidget {
             }
           },
           enabled: enabled,
-          validator: validator,
+          validator: validator ?? (required ? _defaultValidator : null),
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Container(
               padding: const EdgeInsets.all(12),
-              child: Text(
-                currencySymbol,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface.withOpacity(0.8),
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      currencySymbol,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ],
     );
+  }
+
+  String? _defaultValidator(String? value) {
+    if (value?.trim().isEmpty ?? true) {
+      return '$label is required';
+    }
+    final double? amount = double.tryParse(value!);
+    if (amount == null || amount <= 0) {
+      return 'Enter a valid amount greater than 0';
+    }
+    return null;
   }
 }

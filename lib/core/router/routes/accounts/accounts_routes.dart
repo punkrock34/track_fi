@@ -16,6 +16,14 @@ final GoRoute accountsRoutes = GoRoute(
       builder: (BuildContext context, GoRouterState state) => const AddAccountScreen(),
     ),
     GoRoute(
+      path: 'edit/:accountId',
+      name: 'edit_account',
+      builder: (BuildContext context, GoRouterState state) {
+        final String accountId = state.pathParameters['accountId']!;
+        return AddAccountScreen(accountId: accountId);
+      },
+    ),
+    GoRoute(
       name: 'account-detail',
       path: '/:accountId',
       builder: (BuildContext context, GoRouterState state) {

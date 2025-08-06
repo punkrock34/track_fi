@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/contracts/services/database/storage/i_account_storage_service.dart';
-import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../models/add_account_state.dart';
@@ -63,46 +62,22 @@ class AddAccountNotifier extends StateNotifier<AddAccountState> {
     state = state.copyWith(sortCode: sortCode);
   }
 
-  Future<bool> createAccount() async {
-    if (!mounted) {
-      return false;
-    }
-
+  Future<bool> saveAccount() async {
     if (!state.isValid) {
-      if (!mounted) {
-        return false;
-      }
-      state = state.error('Account name is required');
       return false;
     }
 
-    if (state.isLoading) {
-      return false;
-    }
-
-    if (!mounted) {
-      return false;
-    }
     state = state.loading();
 
     try {
-      final DateTime now = DateTime.now();
-      final String accountId = 'acc_${now.millisecondsSinceEpoch}';
+      final Account account = state.toAccount();
 
-      final Account account = Account(
-        id: accountId,
-        name: state.name.trim(),
-        type: state.type,
-        balance: state.balance,
-        currency: state.currency,
-        bankName: (state.bankName?.trim().isEmpty ?? true) ? null : state.bankName!.trim(),
-        accountNumber: (state.accountNumber?.trim().isEmpty ?? true) ? null : state.accountNumber!.trim(),
-        sortCode: (state.sortCode?.trim().isEmpty ?? true) ? null : state.sortCode!.trim(),
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      await _accountStorage.save(account);
+      if (state.isEditMode) {
+        await _accountStorage.update(account);
+        _ref.invalidate(accountProvider(account.id));
+      } else {
+        await _accountStorage.save(account);
+      }
       await _ref.read(accountsProvider.notifier).loadAccounts();
 
       if (!mounted) {
@@ -111,19 +86,27 @@ class AddAccountNotifier extends StateNotifier<AddAccountState> {
 
       state = state.success();
       return true;
-    } catch (e, stackTrace) {
-      await log(
-        message: 'Failed to create account',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      
-      if (!mounted) {
-        return false;
-      }
-      state = state.error('Failed to create account. Please try again.');
+    } catch (e) {
+      state = state.error('Failed to save account');
       return false;
     }
+  }
+
+
+  void loadExistingAccount(Account account) {
+    state = state.copyWith(
+      isEditMode: true,
+      accountId: account.id,
+      name: account.name,
+      type: account.type,
+      balance: account.balance,
+      currency: account.currency,
+      bankName: account.bankName,
+      accountNumber: account.accountNumber,
+      sortCode: account.sortCode,
+      createdAt: account.createdAt,
+      updatedAt: account.updatedAt,
+    );
   }
 
   void reset() {
