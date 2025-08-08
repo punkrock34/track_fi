@@ -25,15 +25,20 @@ class SettingsGroup extends StatelessWidget {
           child: Text(
             title.toUpperCase(),
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+              color: theme.colorScheme.primary.withOpacity(0.8),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
             ),
           ),
         ),
-        const Gap(DesignTokens.spacingXs),
+        const Gap(DesignTokens.spacingSm),
         Card(
           margin: EdgeInsets.zero,
+          elevation: 2,
+          shadowColor: theme.colorScheme.shadow.withOpacity(0.1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+          ),
           child: Column(
             children: children.asMap().entries.map((MapEntry<int, Widget> entry) {
               final int index = entry.key;
@@ -43,10 +48,11 @@ class SettingsGroup extends StatelessWidget {
                 children: <Widget>[
                   child,
                   if (index < children.length - 1)
-                    const Divider(
+                    Divider(
                       height: 1,
-                      indent: DesignTokens.spacingLg,
+                      indent: DesignTokens.spacingXl,
                       endIndent: DesignTokens.spacingSm,
+                      color: theme.colorScheme.outline.withOpacity(0.2),
                     ),
                 ],
               );

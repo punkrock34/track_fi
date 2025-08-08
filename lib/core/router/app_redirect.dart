@@ -8,6 +8,7 @@ import '../../core/providers/secure_storage/onboarding_storage_provider.dart';
 import '../../core/providers/secure_storage/pin_storage_provider.dart';
 import '../logging/log.dart';
 import '../models/session/session_state.dart';
+import '../providers/auth/auth_service_provider.dart';
 import '../providers/session/session_provider.dart';
 
 class AppRedirect {
@@ -27,10 +28,11 @@ class AppRedirect {
       final IOnboardingStorageService onboardingStorage = ref.read(onboardingStorageProvider);
       final IPinStorageService pinStorage = ref.read(pinStorageProvider);
       
-      final SessionState sessionState = ref.read(sessionProvider);
-
+      SessionState sessionState = ref.read(sessionProvider);
       if (sessionState.isExpired) {
         ref.read(sessionProvider.notifier).logout();
+        ref.read(authServiceProvider.notifier).reset();
+        sessionState = ref.read(sessionProvider);
       }
 
       final bool isAuthenticated = sessionState.isAuthenticated;

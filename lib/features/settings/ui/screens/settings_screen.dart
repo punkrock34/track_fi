@@ -10,8 +10,8 @@ import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/theme/theme_toggle.dart';
-import '../../models/settings_state.dart';
-import '../../providers/settings_providers.dart';
+import '../../../../core/providers/auth/auth_service_provider.dart';
+import '../../../../core/providers/session/session_provider.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
 
@@ -41,7 +41,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final SettingsState settingsState = ref.watch(settingsProvider);
 
     return SwipeNavigationWrapper(
       currentRoute: 'settings',
@@ -67,20 +66,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onTap: () => context.goNamed('security-settings'),
                     showTrailing: true,
                   ).animate().slideX(begin: 0.3, delay: 100.ms).fadeIn(),
-                  
-                  SettingsItem(
-                    title: 'Biometric Authentication',
-                    subtitle: settingsState.biometricEnabled
-                        ? 'Enabled' 
-                        : 'Disabled',
-                    icon: Icons.fingerprint_rounded,
-                    trailing: Switch(
-                      value: settingsState.biometricEnabled,
-                      onChanged: settingsState.isLoading
-                          ? null 
-                          : (bool value) => _toggleBiometric(value),
-                    ),
-                  ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
                 ],
               ),
 
@@ -163,6 +148,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
 
+              const Gap(DesignTokens.spacingLg),
+
+              // Account / Session
+              SettingsGroup(
+                title: 'Account',
+                children: <Widget>[
+                  SettingsItem(
+                    title: 'Log Out',
+                    subtitle: 'Sign out of your account',
+                    icon: Icons.logout_rounded,
+                    showTrailing: true,
+                    onTap: _handleLogout,
+                  ).animate().slideX(begin: 0.3, delay: 550.ms).fadeIn(),
+                ],
+              ),
+
               const Gap(DesignTokens.spacingMd),
             ],
           ),
@@ -171,16 +172,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _toggleBiometric(bool enabled) async {
-    final bool success = await ref.read(settingsProvider.notifier).setBiometricEnabled(enabled);
-    
-    if (!success && mounted) {
-      UiUtils.showError(
-        context,
-        enabled
-            ? 'Failed to enable biometric authentication'
-            : 'Failed to disable biometric authentication',
-      );
+  Future<void> _handleLogout() async {
+    final bool? shouldLogout = await UiUtils.showConfirmationDialog(
+      context,
+      title: 'Log Out?',
+      message: 'Are you sure you want to log out?',
+      confirmText: 'Log Out',
+      isDestructive: true,
+    );
+
+    if (!(shouldLogout ?? false)) {
+      return;
     }
+
+    ref.read(sessionProvider.notifier).logout();
+    ref.read(authServiceProvider.notifier).reset();
+
+    if(!mounted) {
+      return;
+    }
+
+    context.goNamed('auth');
   }
 }

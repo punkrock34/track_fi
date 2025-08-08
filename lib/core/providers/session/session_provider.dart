@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/session/session_state.dart';
 
-class SessionNotifier extends StateNotifier<SessionState> {
+class SessionNotifier extends StateNotifier<SessionState>
+    with WidgetsBindingObserver {
   SessionNotifier() : super(const SessionState()) {
     _initializeSession();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   Timer? _sessionTimer;
@@ -70,11 +72,9 @@ class SessionNotifier extends StateNotifier<SessionState> {
 
   void logout() {
     if (_isDisposed) {
-      debugPrint('[SESSION] logout skipped (disposed)');
       return;
     }
     
-    debugPrint('[SESSION] logout called');
     state = SessionState(sessionId: 'logout_${DateTime.now().millisecondsSinceEpoch}');
     _stopSessionChecker();
     _stopHeartbeat();
@@ -150,7 +150,16 @@ class SessionNotifier extends StateNotifier<SessionState> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      logout();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _isDisposed = true;
     _stopSessionChecker();
     _stopHeartbeat();

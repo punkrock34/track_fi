@@ -25,8 +25,8 @@ class Transaction {
       description: map['description'] as String,
       reference: map['reference'] as String?,
       transactionDate: DateTime.parse(map['transaction_date'] as String),
-      balanceAfter: map['balance_after'] != null 
-        ? (map['balance_after'] as num).toDouble() 
+      balanceAfter: map['balance_after'] != null
+        ? (map['balance_after'] as num).toDouble()
         : null,
       type: TransactionType.values.firstWhere(
         (TransactionType e) => e.name == map['type'],
@@ -35,7 +35,7 @@ class Transaction {
       status: map['status'] as String? ?? 'completed',
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
-      syncedAt: map['synced_at'] != null 
+      syncedAt: map['synced_at'] != null
         ? DateTime.parse(map['synced_at'] as String)
         : null,
     );

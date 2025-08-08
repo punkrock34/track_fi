@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/contracts/services/auth/i_auth_service.dart';
+import '../../../core/models/session/session_state.dart';
 import '../../../core/providers/auth/auth_service_provider.dart';
 import '../../../core/providers/session/session_provider.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
@@ -38,19 +39,26 @@ Widget build(BuildContext context) {
       Future<void>.microtask(() => authNotifier.reset());
     }
 
-    ref.listen<AuthenticationState>(authServiceProvider, (
-      AuthenticationState? previous,
-      AuthenticationState current,
-    ) {
-      if (current.currentStep == AuthenticationStep.success) {
-        ref.read(sessionProvider.notifier).setAuthenticated(true);
-        Future<void>.delayed(const Duration(milliseconds: 500), () {
-          if (context.mounted) {
-            context.goNamed('dashboard');
-          }
-        });
-      }
-    });
+    ref.listen<AuthenticationState>(
+      authServiceProvider,
+      (AuthenticationState? previous, AuthenticationState current) {
+        final SessionState session = ref.read(sessionProvider);
+
+        final bool isNewSuccess =
+            current.currentStep == AuthenticationStep.success &&
+            previous?.currentStep != AuthenticationStep.success;
+
+        if (isNewSuccess && !session.isExpired) {
+          ref.read(sessionProvider.notifier).setAuthenticated(true);
+
+          Future<void>.delayed(const Duration(milliseconds: 500), () {
+            if (context.mounted && ref.read(sessionProvider).isAuthenticated) {
+              context.goNamed('dashboard');
+            }
+          });
+        }
+      },
+    );
 
     return Scaffold(
       body: Container(

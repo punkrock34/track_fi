@@ -168,7 +168,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                         const Text('You have unsaved changes'),
                       ],
                     ),
-                  ).animate().slideY(begin: -0.3).fadeIn(),
+                  ).animate(key: const ValueKey<String>('changes-indicator')).slideY(begin: -0.3).fadeIn(),
                   const Gap(DesignTokens.spacingMd),
                 ],
 
@@ -203,7 +203,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                         ),
                       ],
                     ),
-                  ).animate().shake(hz: 4, curve: Curves.easeInOut).fadeIn(),
+                  ).animate(key: const ValueKey<String>('error-message')).shake(hz: 4, curve: Curves.easeInOut).fadeIn(),
                   const Gap(DesignTokens.spacingMd),
                 ],
 
@@ -214,8 +214,8 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.primary,
                   ),
-                ).animate().slideX(begin: -0.3, delay: 50.ms).fadeIn(),
-                
+                ).animate(key: const ValueKey<String>('account-details-title')).slideX(begin: -0.3, delay: 50.ms).fadeIn(),
+
                 const Gap(DesignTokens.spacingSm),
 
                 TextInputField(
@@ -234,14 +234,14 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                     }
                     return null;
                   },
-                ).animate().slideX(begin: 0.3, delay: 100.ms).fadeIn(),
+                ).animate(key: const ValueKey<String>('name-field')).slideX(begin: 0.3, delay: 100.ms).fadeIn(),
 
                 const Gap(DesignTokens.spacingMd),
 
                 AccountTypeSelector(
                   selectedType: state.type,
                   onTypeChanged: notifier.updateType,
-                ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
+                ).animate(key: const ValueKey<String>('type-selector')).slideX(begin: 0.3, delay: 150.ms).fadeIn(),
 
                 const Gap(DesignTokens.spacingMd),
 
@@ -280,7 +280,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                       ),
                     ),
                   ],
-                ).animate().slideX(begin: 0.3, delay: 200.ms).fadeIn(),
+                ).animate(key: const ValueKey<String>('balance-currency-row')).slideX(begin: 0.3, delay: 200.ms).fadeIn(),
 
                 const Gap(DesignTokens.spacingLg),
 
@@ -291,7 +291,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.onSurface.withOpacity(0.7),
                   ),
-                ).animate().slideX(begin: -0.3, delay: 250.ms).fadeIn(),
+                ).animate(key: const ValueKey<String>('bank-info-title')).slideX(begin: -0.3, delay: 250.ms).fadeIn(),
                 
                 const Gap(DesignTokens.spacingSm),
 
@@ -301,7 +301,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                   hint: 'e.g., Barclays, HSBC, Nationwide',
                   onChanged: notifier.updateBankName,
                   prefixIcon: Icons.business_outlined,
-                ).animate().slideX(begin: 0.3, delay: 300.ms).fadeIn(),
+                ).animate(key: const ValueKey<String>('bank-name-field')).slideX(begin: 0.3, delay: 300.ms).fadeIn(),
 
                 const Gap(DesignTokens.spacingMd),
 
@@ -339,7 +339,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                       ),
                     ),
                   ],
-                ).animate().slideX(begin: 0.3, delay: 350.ms).fadeIn(),
+                ).animate(key: const ValueKey<String>('account-sort-row')).slideX(begin: 0.3, delay: 350.ms).fadeIn(),
 
                 const Gap(DesignTokens.spacingLg),
 
@@ -371,7 +371,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                       ],
                     ),
                   ),
-                ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
+                ).animate(key: const ValueKey<String>('account-status-card')).slideY(begin: 0.3, delay: 400.ms).fadeIn(),
 
                 const Gap(DesignTokens.spacingXl),
               ],
@@ -392,15 +392,15 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                       )
                     : const Icon(Icons.save),
                 label: const Text('Save Changes'),
-                backgroundColor: state.isValid && !state.isLoading 
-                    ? null 
+                backgroundColor: state.isValid && !state.isLoading
+                    ? null
                     : theme.colorScheme.surfaceVariant,
-                foregroundColor: state.isValid && !state.isLoading 
-                    ? null 
+                foregroundColor: state.isValid && !state.isLoading
+                    ? null
                     : theme.colorScheme.onSurfaceVariant.withOpacity(0.38),
-              ).animate()
-               .slideY(begin: 1)
-               .fadeIn(duration: const Duration(milliseconds: 200))
+                ).animate(key: const ValueKey<String>('save-fab'))
+                 .slideY(begin: 1)
+                 .fadeIn(duration: const Duration(milliseconds: 200))
             : null,
       ),
     );
@@ -433,7 +433,6 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
       isDestructive: true,
     );
   }
-
 
   String _getCurrencySymbol(String currency) {
     switch (currency) {
