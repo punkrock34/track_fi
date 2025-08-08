@@ -60,10 +60,15 @@ class TransactionUtils {
   }
 
   /// Format transaction amount with sign
-  static String formatAmountWithSign(Transaction transaction) {
-    final bool isDebit = transaction.type == TransactionType.debit;
-    final String amountFormatted = CurrencyUtils.formatAmount(transaction.amount.abs());
-    return '${isDebit ? '-' : '+'}$amountFormatted';
+  static String formatAmountWithSign(Transaction t, {String currency = 'lei'}) {
+    final bool isDebit = t.type == TransactionType.debit;
+    final String sign = isDebit ? '-' : '+';
+
+    final String formatted = CurrencyUtils.formatAmount(
+      t.amount.abs(),
+      currency: currency,
+    );
+    return '$sign$formatted';
   }
 
   /// Format transaction status for display

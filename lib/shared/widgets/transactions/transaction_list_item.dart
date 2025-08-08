@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart' hide DateUtils;
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/models/database/account.dart';
 import '../../../core/models/database/transaction.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../features/accounts/providers/accounts_provider.dart';
 import '../../utils/category_utils.dart';
+import '../../utils/currency_utils.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/transaction_utils.dart';
 
-class TransactionListItem extends StatelessWidget {
+class TransactionListItem extends ConsumerWidget {
   const TransactionListItem({
     super.key,
     required this.transaction,
@@ -27,8 +31,15 @@ class TransactionListItem extends StatelessWidget {
   final bool visible;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+
+    final AsyncValue<Account?> accountAsync = ref.watch(accountProvider(transaction.accountId));
+
+    final String currencySymbol = accountAsync.maybeWhen(
+      data: (Account? account) => CurrencyUtils.getCurrencySymbol(account?.currency ?? 'RON'),
+      orElse: () => CurrencyUtils.getCurrencySymbol('RON'),
+    );
     
     return Card(
       child: InkWell(
@@ -104,7 +115,7 @@ class TransactionListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Text(
-                    visible ? TransactionUtils.formatAmountWithSign(transaction) : '****',
+                    visible ? TransactionUtils.formatAmountWithSign(transaction, currency: currencySymbol) : '****',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: TransactionUtils.getTransactionColor(transaction.type, theme),
