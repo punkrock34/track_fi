@@ -4,7 +4,6 @@ class EditTransactionState {
   const EditTransactionState({
     this.transactionId,
     this.accountId,
-    this.accountCurrency,
     this.amount = 0.0,
     this.description = '',
     this.reference,
@@ -21,7 +20,6 @@ class EditTransactionState {
     return EditTransactionState(
       transactionId: tx.id,
       accountId: tx.accountId,
-      accountCurrency: tx.accountCurrency,
       amount: tx.amount,
       description: tx.description,
       reference: tx.reference,
@@ -34,7 +32,6 @@ class EditTransactionState {
 
   final String? transactionId;
   final String? accountId;
-  final String? accountCurrency;
   final double amount;
   final String description;
   final String? reference;
@@ -49,9 +46,6 @@ class EditTransactionState {
 
   String get effectiveAccountId =>
       accountId ?? originalTransaction?.accountId ?? '';
-
-  String get effectiveAccountCurrency =>
-      originalTransaction?.accountCurrency ?? '';
 
   double get effectiveAmount => (amount == 0.0 && originalTransaction != null)
       ? originalTransaction!.amount
@@ -82,7 +76,6 @@ class EditTransactionState {
   EditTransactionState copyWith({
     String? transactionId,
     String? accountId,
-    String? accountCurrency,
     double? amount,
     String? description,
     String? reference,
@@ -97,7 +90,6 @@ class EditTransactionState {
     return EditTransactionState(
       transactionId: transactionId ?? this.transactionId,
       accountId: accountId ?? this.accountId,
-      accountCurrency: accountCurrency ?? this.accountCurrency,
       amount: amount ?? this.amount,
       description: description ?? this.description,
       reference: reference ?? this.reference,
@@ -117,9 +109,6 @@ class EditTransactionState {
       return false;
     }
     if (effectiveAccountId.isEmpty) {
-      return false;
-    }
-    if (effectiveAccountCurrency.isEmpty) {
       return false;
     }
     if (effectiveAmount <= 0) {
@@ -144,7 +133,6 @@ class EditTransactionState {
     return Transaction(
       id: originalTransaction!.id,
       accountId: effectiveAccountId,
-      accountCurrency: effectiveAccountCurrency,
       categoryId: effectiveCategoryId,
       amount: effectiveAmount,
       description: effectiveDescription.trim(),
@@ -175,7 +163,6 @@ class EditTransactionState {
     }
     final bool changed =
         effectiveAccountId != originalTransaction!.accountId ||
-        effectiveAccountCurrency != originalTransaction!.accountCurrency ||
         effectiveAmount != originalTransaction!.amount ||
         effectiveDescription != originalTransaction!.description ||
         effectiveReference != originalTransaction!.reference ||
@@ -187,7 +174,6 @@ class EditTransactionState {
 
   EditTransactionState updateField({
     String? accountId,
-    String? accountCurrency,
     double? amount,
     String? description,
     String? reference,
@@ -197,7 +183,6 @@ class EditTransactionState {
   }) {
     return copyWith(
       accountId: accountId ?? this.accountId,
-      accountCurrency: accountCurrency ?? this.accountCurrency,
       amount: amount ?? this.amount,
       description: description ?? this.description,
       reference: reference ?? this.reference,

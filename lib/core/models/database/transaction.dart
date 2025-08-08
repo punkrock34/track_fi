@@ -3,7 +3,6 @@ class Transaction {
   const Transaction({
     required this.id,
     required this.accountId,
-    required this.accountCurrency,
     this.categoryId,
     required this.amount,
     required this.description,
@@ -21,7 +20,6 @@ class Transaction {
     return Transaction(
       id: map['id'] as String,
       accountId: map['account_id'] as String,
-      accountCurrency: map['account_currency'] as String? ?? 'RON',
       categoryId: map['category_id'] as String?,
       amount: (map['amount'] as num).toDouble(),
       description: map['description'] as String,
@@ -42,9 +40,9 @@ class Transaction {
         : null,
     );
   }
+  
   final String id;
   final String accountId;
-  final String accountCurrency;
   final String? categoryId;
   final double amount;
   final String description;
@@ -61,7 +59,6 @@ class Transaction {
     return <String, dynamic>{
       'id': id,
       'account_id': accountId,
-      'account_currency': accountCurrency,
       'category_id': categoryId,
       'amount': amount,
       'description': description,
@@ -79,7 +76,6 @@ class Transaction {
   Transaction copyWith({
     String? id,
     String? accountId,
-    String? accountCurrency,
     String? categoryId,
     double? amount,
     String? description,
@@ -95,7 +91,6 @@ class Transaction {
     return Transaction(
       id: id ?? this.id,
       accountId: accountId ?? this.accountId,
-      accountCurrency: accountCurrency ?? this.accountCurrency,
       categoryId: categoryId ?? this.categoryId,
       amount: amount ?? this.amount,
       description: description ?? this.description,
