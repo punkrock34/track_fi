@@ -16,6 +16,7 @@ class AccountBalanceCard extends ConsumerWidget {
     this.isLoading = false,
     this.showActiveAccountsCount = true,
     required this.onToggleVisibility,
+    required this.currentCurrency,
   });
 
   final double totalBalance;
@@ -23,6 +24,7 @@ class AccountBalanceCard extends ConsumerWidget {
   final bool isLoading;
   final bool showActiveAccountsCount;
   final VoidCallback onToggleVisibility;
+  final String currentCurrency;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -66,7 +68,7 @@ class AccountBalanceCard extends ConsumerWidget {
               )
             else
               Text(
-                showBalance ? CurrencyUtils.formatAmount(totalBalance) : '••••••',
+                showBalance ? CurrencyUtils.formatAmount(totalBalance, currency: currentCurrency) : '••••••',
                 style: AppTypography.moneyLarge.copyWith(
                   color: theme.colorScheme.onSurface,
                 ),

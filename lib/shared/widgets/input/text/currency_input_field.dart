@@ -10,7 +10,7 @@ class CurrencyInputField extends StatelessWidget {
     required this.controller,
     required this.label,
     this.hint,
-    this.currency = 'GBP',
+    this.currency = 'RON',
     this.onChanged,
     this.enabled = true,
     this.validator,

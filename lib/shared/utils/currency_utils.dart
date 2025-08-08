@@ -89,7 +89,7 @@ class CurrencyUtils {
   /// Get currency for a specific account
   static String getCurrencyForAccount(String? accountId, List<Account>? accounts) {
     if (accounts == null || accountId == null) {
-      return 'GBP';
+      return 'RON';
     }
     
     final Account? account = accounts.cast<Account?>().firstWhere(
@@ -97,7 +97,7 @@ class CurrencyUtils {
       orElse: () => null,
     );
     
-    return account?.currency ?? 'GBP';
+    return account?.currency ?? 'RON';
   }
 
   /// Format amount with currency symbol (async version using currencies.json)
@@ -107,7 +107,7 @@ class CurrencyUtils {
   }
 
   /// Format amount with currency symbol (sync version with fallbacks)
-  static String formatAmount(double amount, {String currency = '£'}) {
+  static String formatAmount(double amount, {String currency = 'lei'}) {
     return '$currency${amount.toStringAsFixed(2)}';
   }
 
@@ -125,7 +125,7 @@ class CurrencyUtils {
   }
 
   /// Format large amounts with abbreviations (sync version)
-  static String formatLargeAmount(double amount, {String currency = '£'}) {
+  static String formatLargeAmount(double amount, {String currency = 'lei'}) {
     if (amount.abs() >= 1000000) {
       return '$currency${(amount / 1000000).toStringAsFixed(1)}M';
     } else if (amount.abs() >= 1000) {
@@ -136,7 +136,7 @@ class CurrencyUtils {
   }
 
   /// Format amount for accounting display (with parentheses for negative)
-  static String formatAccountingAmount(double amount, {String currency = '£'}) {
+  static String formatAccountingAmount(double amount, {String currency = 'lei'}) {
     if (amount < 0) {
       return '(${formatAmount(amount.abs(), currency: currency)})';
     }
@@ -166,6 +166,8 @@ class CurrencyUtils {
         return 'kr';
       case 'NOK':
         return 'kr';
+      case 'RON':
+        return 'lei';
       default:
         return currencyCode;
     }

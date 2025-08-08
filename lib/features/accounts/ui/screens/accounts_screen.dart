@@ -6,6 +6,8 @@ import '../../../../../core/models/database/account.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
+import '../../../../core/providers/currency/currency_exchange_service_provider.dart';
+import '../../../../shared/utils/currency_utils.dart';
 import '../../providers/accounts_provider.dart';
 import '../widgets/accounts_view.dart';
 
@@ -18,11 +20,15 @@ class AccountsScreen extends ConsumerStatefulWidget {
 
 class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  String _currentCurrency = 'RON';
 
   @override
   void initState() {
     super.initState();
-    Future<void>.microtask(() => ref.read(accountsProvider.notifier).loadAccounts());
+    Future<void>.microtask(() async {
+      _currentCurrency = await ref.read(currencyExchangeServiceProvider).getBaseCurrency();
+      await ref.read(accountsProvider.notifier).loadAccounts();
+    });
   }
 
   @override
@@ -74,6 +80,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           pathParameters: <String, String>{'accountId': account.id},
         ),
         onAddAccount: () => context.pushNamed('add-account'),
+        currentCurrency: CurrencyUtils.getCurrencySymbol(_currentCurrency),
       ),
     );
   }

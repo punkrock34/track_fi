@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/models/database/account.dart';
 import '../../../../core/models/database/transaction.dart';
+import '../../../../core/providers/currency/currency_exchange_service_provider.dart';
 import '../../../../core/providers/database/storage/transaction_storage_service_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/providers/ui/balance_visibility_provider.dart';
@@ -37,11 +38,13 @@ class AccountDetailsView extends ConsumerStatefulWidget {
 
 class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> {
   late final Future<List<Transaction>> _accountTransactions;
+  late final String _currentCurrency;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
     _accountTransactions = ref.read(transactionStorageProvider).getAllByAccount(widget.account.id);
+    _currentCurrency = await ref.read(currencyExchangeServiceProvider).getBaseCurrency();
   }
 
   @override
@@ -97,6 +100,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> {
                       current.state = !current.state;
                     },
                     showActiveAccountsCount: false,
+                    currentCurrency: _currentCurrency,
                   ).animate().slideY(begin: -0.3, delay: 100.ms).fadeIn(),
 
                   const Gap(DesignTokens.spacingMd),

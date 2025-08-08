@@ -5,6 +5,7 @@ import '../../../core/models/database/transaction.dart';
 class AddTransactionState {
   const AddTransactionState({
     this.accountId,
+    this.accountCurrency,
     this.amount = 0.0,
     this.description = '',
     this.reference,
@@ -18,6 +19,7 @@ class AddTransactionState {
   static const Uuid _uuid = Uuid();
 
   final String? accountId;
+  final String? accountCurrency;
   final double amount;
   final String description;
   final String? reference;
@@ -29,6 +31,7 @@ class AddTransactionState {
 
   AddTransactionState copyWith({
     String? accountId,
+    String? accountCurrency,
     double? amount,
     String? description,
     String? reference,
@@ -40,6 +43,7 @@ class AddTransactionState {
   }) {
     return AddTransactionState(
       accountId: accountId ?? this.accountId,
+      accountCurrency: accountCurrency ?? this.accountCurrency,
       amount: amount ?? this.amount,
       description: description ?? this.description,
       reference: reference ?? this.reference,
@@ -56,6 +60,9 @@ class AddTransactionState {
   String? get validationError {
     if (accountId == null || accountId!.isEmpty) {
       return 'Please select an account';
+    }
+    if (accountCurrency == null || accountCurrency!.isEmpty) {
+      return 'Account currency is required';
     }
     if (amount <= 0) {
       return 'Amount must be greater than £0.00';
@@ -85,6 +92,7 @@ class AddTransactionState {
     return Transaction(
       id: transactionId,
       accountId: accountId!,
+      accountCurrency: accountCurrency!,
       categoryId: categoryId,
       amount: amount,
       description: description.trim(),

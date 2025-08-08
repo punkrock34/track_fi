@@ -3,150 +3,250 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/contracts/services/currency/i_currency_exchange_service.dart';
+import '../../../core/logging/log.dart';
 import '../../../core/providers/currency/currency_exchange_service_provider.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../features/accounts/providers/accounts_provider.dart';
 import '../../../features/dashboard/providers/dashboard_provider.dart';
+import '../../utils/currency_utils.dart';
 import 'currency_picker.dart';
 
-class CurrencySelectorButton extends ConsumerWidget {
+class CurrencySelectorButton extends ConsumerStatefulWidget {
   const CurrencySelectorButton({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CurrencySelectorButton> createState() => _CurrencySelectorButtonState();
+}
+
+class _CurrencySelectorButtonState extends ConsumerState<CurrencySelectorButton> {
+  String? _currentCurrency;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentCurrency();
+  }
+
+  Future<void> _loadCurrentCurrency() async {
+    final ICurrencyExchangeService currencyService = ref.read(currencyExchangeServiceProvider);
+
+    try {
+      final String currency = await currencyService.getBaseCurrency();
+      setState(() {
+        _currentCurrency = currency;
+      });
+    } catch (_) {
+      setState(() {
+        _currentCurrency = 'RON';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    
-    return FutureBuilder<String>(
-      future: ref.read(currencyExchangeServiceProvider).getBaseCurrency(),
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        final String currentCurrency = snapshot.data ?? 'GBP';
-        final bool isLoading = snapshot.connectionState == ConnectionState.waiting;
-        
-        return InkWell(
-          onTap: isLoading ? null : () => _showCurrencyPicker(context, ref, currentCurrency),
-          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-          child: Container(
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            theme.colorScheme.primaryContainer.withOpacity(0.8),
+            theme.colorScheme.secondaryContainer.withOpacity(0.6),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+          width: 0.5,
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: theme.colorScheme.primary.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _isLoading ? null : () => _showCurrencyPicker(context),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+          child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spacingXs,
-              vertical: DesignTokens.spacing2xs,
-            ),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-              border: Border.all(
-                color: theme.colorScheme.primary.withOpacity(0.2),
-              ),
+              horizontal: DesignTokens.spacingSm,
+              vertical: DesignTokens.spacingXs,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                if (isLoading) 
+                if (_isLoading)
                   SizedBox(
-                    width: 12,
-                    height: 12,
+                    width: 16,
+                    height: 16,
                     child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
+                      strokeWidth: 2,
                       color: theme.colorScheme.primary,
                     ),
                   )
-                else
+                else ...<Widget>[
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                    ),
+                    child: Text(
+                      CurrencyUtils.getCurrencySymbol(_currentCurrency ?? 'RON'),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const Gap(DesignTokens.spacing2xs),
                   Text(
-                    currentCurrency,
-                    style: theme.textTheme.labelMedium?.copyWith(
+                    _currentCurrency ?? 'RON',
+                    style: theme.textTheme.labelLarge?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                ],
                 const Gap(DesignTokens.spacing2xs),
                 Icon(
                   Icons.expand_more,
-                  size: 14,
-                  color: theme.colorScheme.primary.withOpacity(0.7),
+                  size: 16,
+                  color: theme.colorScheme.primary.withOpacity(0.8),
                 ),
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Future<void> _showCurrencyPicker(BuildContext context, WidgetRef ref, String currentCurrency) async {
+  Future<void> _showCurrencyPicker(BuildContext context) async {
     final String? selectedCurrency = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(DesignTokens.radiusLg),
         ),
       ),
-      builder: (_) => CurrencyPicker(
-        currentCurrency: currentCurrency,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(DesignTokens.radiusLg),
+          ),
+        ),
+        child: CurrencyPicker(
+          currentCurrency: _currentCurrency ?? 'RON',
+        ),
       ),
     );
 
-    if(!context.mounted) {
+    if (!mounted) {
       return;
     }
 
-    if (selectedCurrency != null && selectedCurrency != currentCurrency) {
-      await _changeCurrency(context, ref, selectedCurrency);
+    if (selectedCurrency != null && selectedCurrency != _currentCurrency) {
+      await _changeCurrency(selectedCurrency);
     }
   }
 
-  Future<void> _changeCurrency(BuildContext context, WidgetRef ref, String newCurrency) async {
+  Future<void> _changeCurrency(String newCurrency) async {
     final ICurrencyExchangeService currencyService = ref.read(currencyExchangeServiceProvider);
-    
-    // Show loading indicator
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: <Widget>[
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-            const Gap(DesignTokens.spacingSm),
-            Text('Changing currency to $newCurrency...'),
-          ],
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    final DashboardNotifier dashboardNotifier = ref.read(dashboardProvider.notifier);
+    final AccountsNotifier accountsNotifier = ref.read(accountsProvider.notifier);
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       await currencyService.setBaseCurrency(newCurrency);
+      setState(() {
+        _currentCurrency = newCurrency;
+      });
+
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: <Widget>[
+              Icon(
+                Icons.check_circle_outline,
+                color: Theme.of(context).colorScheme.onPrimary,
+                size: 20,
+              ),
+              const Gap(DesignTokens.spacingXs),
+              Text('Currency changed to $newCurrency'),
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
       
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Currency changed to $newCurrency'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        
-        // Trigger dashboard refresh - we'll need to invalidate providers
-        ref.invalidate(dashboardProvider);
-        ref.invalidate(accountsProvider);
-      }
+      await _refreshDataInBackground(
+        dashboardNotifier: dashboardNotifier,
+        accountsNotifier: accountsNotifier,
+      );
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to change currency: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      if (!mounted) {
+        return;
       }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: <Widget>[
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.onError,
+                size: 20,
+              ),
+              const Gap(DesignTokens.spacingXs),
+              Expanded(child: Text('Failed to change currency: $e')),
+            ],
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshDataInBackground({
+    required DashboardNotifier dashboardNotifier,
+    required AccountsNotifier accountsNotifier,
+  }) async {
+    try {
+      await dashboardNotifier.loadDashboardData();
+      await accountsNotifier.loadAccounts();
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Failed to refresh data after currency change',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 }

@@ -8,7 +8,7 @@ class AddAccountState {
     this.name = '',
     this.type = 'current',
     this.balance = 0.0,
-    this.currency = 'GBP',
+    this.currency = 'RON',
     this.bankName,
     this.accountNumber,
     this.sortCode,

@@ -10,7 +10,9 @@ import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
+import '../../../../core/providers/currency/currency_exchange_service_provider.dart';
 import '../../../../shared/providers/ui/balance_visibility_provider.dart';
+import '../../../../shared/utils/currency_utils.dart';
 import '../../../../shared/widgets/currency/currency_selector_button.dart';
 import '../../../../shared/widgets/dashboard/account_balance_card.dart';
 import '../../models/dashboard_state.dart';
@@ -29,11 +31,15 @@ class DashboardScreen extends ConsumerStatefulWidget {
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  String _currentCurrency = 'RON';
 
   @override
   void initState() {
     super.initState();
-    Future<void>.microtask(() => ref.read(dashboardProvider.notifier).loadDashboardData());
+    Future<void>.microtask(() async {
+      _currentCurrency = await ref.read(currencyExchangeServiceProvider).getBaseCurrency();
+      await ref.read(dashboardProvider.notifier).loadDashboardData();
+    });
   }
 
   @override
@@ -44,29 +50,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return SwipeNavigationWrapper(
       currentRoute: 'dashboard',
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'TrackFi',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          backgroundColor: theme.colorScheme.surface,
-          elevation: 0,
-          actions: <Widget>[
-            const CurrencySelectorButton(),
-            const Gap(DesignTokens.spacingXs),
-            
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined),
-              onPressed: () => UiUtils.showComingSoon(context, 'Notifications'),
-            ),
-            IconButton(
-              icon: const Icon(Icons.account_circle_outlined),
-              onPressed: () => context.goNamed('settings'),
-            ),
-          ],
-        ),
         body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: () => _handleRefresh(),
@@ -95,45 +78,140 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return CustomScrollView(
       slivers: <Widget>[
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(DesignTokens.spacingMd),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // Greeting and Sync Status
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+        // Custom App Bar
+        SliverAppBar(
+          expandedHeight: 140,
+          floating: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[
+                    theme.colorScheme.primaryContainer.withOpacity(0.1),
+                    theme.colorScheme.secondaryContainer.withOpacity(0.05),
+                  ],
+                ),
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(DesignTokens.spacingMd),
+                  child: Column(
+                    children: <Widget>[
+                      // Top Header Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Text(
-                            DateUtils.getGreeting(),
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                          // App Title
+                          Row(
+                            children: <Widget>[
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: <Color>[
+                                      theme.colorScheme.primary,
+                                      theme.colorScheme.secondary,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                                ),
+                                child: Icon(
+                                  Icons.account_balance_wallet_rounded,
+                                  color: theme.colorScheme.onPrimary,
+                                  size: 24,
+                                ),
+                              ),
+                              const Gap(DesignTokens.spacingSm),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    'TrackFi',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateUtils.getGreeting(),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+                          
+                          // Action Buttons
+                          Row(
+                            children: <Widget>[
+                              const CurrencySelectorButton(),
+                              const Gap(DesignTokens.spacingXs),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.notifications_outlined),
+                                  onPressed: () => UiUtils.showComingSoon(context, 'Notifications'),
+                                ),
+                              ),
+                              const Gap(DesignTokens.spacingXs),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.account_circle_outlined),
+                                  onPressed: () => context.goNamed('settings'),
+                                ),
+                              ),
+                            ],
+                          ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
+                        ],
+                      ),
+                      
+                      const Gap(DesignTokens.spacingSm),
+                      
+                      // Sync Status Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
                           Text(
                             "Here's your financial overview",
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(0.7),
                             ),
                           ).animate().slideX(begin: -0.3, delay: 200.ms).fadeIn(),
+                          
+                          SyncStatusCard(
+                            syncStatus: state.lastSyncStatus,
+                            lastRefresh: state.lastRefresh,
+                          ).animate().slideX(begin: 0.3, delay: 250.ms).fadeIn(),
                         ],
                       ),
-                    ),
-                    SyncStatusCard(
-                      syncStatus: state.lastSyncStatus,
-                      lastRefresh: state.lastRefresh,
-                    ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
-                  ],
+                    ],
+                  ),
                 ),
-                
-                const Gap(DesignTokens.spacingLg),
-                
-                // Account Balance Overview - Now shows converted amounts!
+              ),
+            ),
+          ),
+        ),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(DesignTokens.spacingMd),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // Account Balance Overview
                 AccountBalanceCard(
                   totalBalance: state.totalBalance,
                   accounts: state.accounts,
@@ -142,9 +220,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
                     current.state = !current.state;
                   },
+                  currentCurrency: CurrencyUtils.getCurrencySymbol(_currentCurrency),
                 ).animate().slideY(begin: 0.3, delay: 300.ms).fadeIn(),
                 
-                const Gap(DesignTokens.spacingMd),
+                const Gap(DesignTokens.spacingLg),
                 
                 // Quick Actions
                 QuickActionsRow(
@@ -152,19 +231,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   onViewTransactions: () => context.goNamed('transactions'),
                 ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
                 
-                const Gap(DesignTokens.spacingMd),
+                const Gap(DesignTokens.spacingLg),
                 
-                // Spending Overview - Now shows converted amounts!
-                SpendingOverviewCard(
-                  monthlySpending: state.monthlySpending,
-                  recentTransactions: state.recentTransactions,
-                  onToggleVisibility: () {
-                    final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
-                    current.state = !current.state;
-                  },
+                // Financial Insights Row
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: SpendingOverviewCard(
+                        monthlySpending: state.monthlySpending,
+                        recentTransactions: state.recentTransactions,
+                        onToggleVisibility: () {
+                          final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                          current.state = !current.state;
+                        },
+                        currentCurrency: CurrencyUtils.getCurrencySymbol(_currentCurrency),
+                      ),
+                    ),
+                  ],
                 ).animate().slideY(begin: 0.3, delay: 500.ms).fadeIn(),
                 
-                const Gap(DesignTokens.spacingMd),
+                const Gap(DesignTokens.spacingLg),
                 
                 // Recent Transactions
                 RecentTransactionsCard(
@@ -177,6 +263,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   },
                 ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(),
                 
+                const Gap(DesignTokens.spacingXl),
+                
+                // Bottom Spacer for FAB
                 const Gap(DesignTokens.spacingXl),
               ],
             ),

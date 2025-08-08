@@ -1,5 +1,5 @@
 abstract class ICurrencyStorageService {
-  /// Get the user's base currency (defaults to 'GBP')
+  /// Get the user's base currency (defaults to 'RON')
   Future<String> getBaseCurrency();
   
   /// Set the user's base currency

@@ -13,11 +13,13 @@ class SpendingOverviewCard extends ConsumerWidget {
     required this.monthlySpending,
     required this.recentTransactions,
     required this.onToggleVisibility,
+    required this.currentCurrency,
   });
 
   final double monthlySpending;
   final List<Transaction> recentTransactions;
   final VoidCallback onToggleVisibility;
+  final String currentCurrency;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +46,7 @@ class SpendingOverviewCard extends ConsumerWidget {
                   child: SpendingMetric(
                     label: 'This Month',
                     amount: monthlySpending,
-                    currency: '£',
+                    currency: currentCurrency,
                     visible: showBalance,
                   ),
                 ),
@@ -53,7 +55,7 @@ class SpendingOverviewCard extends ConsumerWidget {
                   child: SpendingMetric(
                     label: 'This Week',
                     amount: weeklySpending,
-                    currency: '£',
+                    currency: currentCurrency,
                     visible: showBalance,
                   ),
                 ),

@@ -11,16 +11,19 @@ import '../../../../shared/providers/ui/balance_visibility_provider.dart';
 import '../../../../shared/widgets/dashboard/account_balance_card.dart';
 
 class AccountsView extends ConsumerWidget {
+  
   const AccountsView({
     super.key,
     required this.accounts,
     required this.onAccountTap,
     required this.onAddAccount,
+    required this.currentCurrency,
   });
 
   final List<Account> accounts;
   final void Function(Account account) onAccountTap;
   final VoidCallback onAddAccount;
+  final String currentCurrency;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,6 +52,7 @@ class AccountsView extends ConsumerWidget {
                 final StateController<bool> notifier = ref.read(balanceVisibilityProvider.notifier);
                 notifier.state = !notifier.state;
               },
+              currentCurrency: currentCurrency,
             ).animate().slideY(begin: -0.3, delay: 100.ms).fadeIn(),
           ),
         ),

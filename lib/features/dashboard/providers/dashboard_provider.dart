@@ -128,8 +128,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     for (final Transaction transaction in monthlyExpenses) {
       try {
         final Account? account = await _accountStorage.get(transaction.accountId);
-        final String transactionCurrency = account?.currency ?? 'GBP';
-        
+        final String transactionCurrency = account?.currency ?? 'RON';
+
         if (transactionCurrency.toUpperCase() == baseCurrency.toUpperCase()) {
           totalSpending += transaction.amount.abs();
         } else {

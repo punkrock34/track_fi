@@ -11,24 +11,38 @@ class CurrencyStorageService implements ICurrencyStorageService {
   static const String _baseCurrencyKey = 'user_base_currency';
   static const String _exchangeRatesPrefix = 'exchange_rates_';
   static const String _lastUpdatePrefix = 'rates_last_update_';
-  static const String _defaultBaseCurrency = 'GBP';
+  static const String _defaultBaseCurrency = 'RON';
 
   @override
   Future<String> getBaseCurrency() async {
-    final String? storedCurrency = await _storage.read(_baseCurrencyKey);
-    return storedCurrency ?? _defaultBaseCurrency;
+    try {
+      final String? storedCurrency = await _storage.read(_baseCurrencyKey);
+      final String currency = storedCurrency ?? _defaultBaseCurrency;
+
+      return currency.toUpperCase();
+    } catch (e) {
+      return _defaultBaseCurrency;
+    }
   }
 
   @override
   Future<void> setBaseCurrency(String currencyCode) async {
-    await _storage.write(_baseCurrencyKey, currencyCode.toUpperCase());
+    try {
+      await _storage.write(_baseCurrencyKey, currencyCode.toUpperCase());
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
   Future<void> setExchangeRates(String baseCurrency, Map<String, double> rates) async {
-    final String key = _exchangeRatesPrefix + baseCurrency.toLowerCase();
-    final String jsonString = json.encode(rates);
-    await _storage.write(key, jsonString);
+    try {
+      final String key = _exchangeRatesPrefix + baseCurrency.toLowerCase();
+      final String jsonString = json.encode(rates);
+      await _storage.write(key, jsonString);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -37,12 +51,16 @@ class CurrencyStorageService implements ICurrencyStorageService {
       final String key = _exchangeRatesPrefix + baseCurrency.toLowerCase();
       final String? jsonString = await _storage.read(key);
       
-      if (jsonString == null) {
+      if (jsonString == null || jsonString.isEmpty) {
         return null;
       }
 
-      final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-      return jsonMap.map((String key, dynamic value) => MapEntry<String, double>(
+      final dynamic decoded = json.decode(jsonString);
+      if (decoded is! Map<String, dynamic>) {
+        return null;
+      }
+      
+      return decoded.map((String key, dynamic value) => MapEntry<String, double>(
         key,
         (value as num).toDouble(),
       ));
@@ -53,8 +71,12 @@ class CurrencyStorageService implements ICurrencyStorageService {
 
   @override
   Future<void> setLastRatesUpdate(String baseCurrency, DateTime timestamp) async {
-    final String key = _lastUpdatePrefix + baseCurrency.toLowerCase();
-    await _storage.write(key, timestamp.toIso8601String());
+    try {
+      final String key = _lastUpdatePrefix + baseCurrency.toLowerCase();
+      await _storage.write(key, timestamp.toIso8601String());
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -63,7 +85,7 @@ class CurrencyStorageService implements ICurrencyStorageService {
       final String key = _lastUpdatePrefix + baseCurrency.toLowerCase();
       final String? timestampString = await _storage.read(key);
       
-      if (timestampString == null) {
+      if (timestampString == null || timestampString.isEmpty) {
         return null;
       }
 

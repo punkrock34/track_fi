@@ -34,7 +34,7 @@ class SpendingMetric extends StatelessWidget {
         ),
         const Gap(DesignTokens.spacing2xs),
         Text(
-          visible ? CurrencyUtils.formatAmount(amount) : '****',
+          visible ? CurrencyUtils.formatAmount(amount, currency: currency) : '****',
           style: AppTypography.moneyMedium.copyWith(
             color: theme.colorScheme.onSurface,
           ),
