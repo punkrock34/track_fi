@@ -19,14 +19,12 @@ class TransactionDetailsView extends ConsumerWidget {
     required this.transaction,
     required this.onEdit,
     required this.onDelete,
-    required this.onShare,
     required this.onNavigateToAccount,
   });
 
   final Transaction transaction;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  final VoidCallback onShare;
   final VoidCallback onNavigateToAccount;
 
   @override
@@ -46,11 +44,6 @@ class TransactionDetailsView extends ConsumerWidget {
             foregroundColor: theme.colorScheme.onSurface,
             elevation: 0,
             actions: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.share_outlined),
-                onPressed: onShare,
-                tooltip: 'Share',
-              ),
               PopupMenuButton<String>(
                 onSelected: (String value) => _handleMenuAction(context, value),
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -228,16 +221,6 @@ class TransactionDetailsView extends ConsumerWidget {
             icon: Icons.copy_outlined,
             label: 'Copy ID',
             onTap: () => UiUtils.copyToClipboard(context, transaction.id),
-          ),
-        ),
-        const Gap(DesignTokens.spacingSm),
-        Expanded(
-          child: _buildActionChip(
-            context,
-            theme,
-            icon: Icons.share_outlined,
-            label: 'Share',
-            onTap: onShare,
           ),
         ),
       ],

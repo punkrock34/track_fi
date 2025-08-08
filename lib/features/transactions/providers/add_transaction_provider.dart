@@ -64,9 +64,6 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = state.loading();
 
     try {
-      final DateTime now = DateTime.now();
-      final String transactionId = 'txn_${now.millisecondsSinceEpoch}';
-
       final Account? currentAccount = await _accountStorage.get(state.accountId!);
       if (currentAccount == null) {
         state = state.error('Selected account no longer exists');
@@ -82,23 +79,13 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
         return false;
       }
 
-      final Transaction transaction = Transaction(
-        id: transactionId,
-        accountId: state.accountId!,
-        categoryId: state.categoryId,
-        amount: state.amount,
-        description: state.description.trim(),
-        reference: (state.reference?.trim().isNotEmpty ?? false) ? state.reference!.trim() : null,
-        transactionDate: state.transactionDate!,
+      final Transaction transaction = state.toTransaction().copyWith(
         balanceAfter: newBalance,
-        type: state.type,
-        createdAt: now,
-        updatedAt: now,
       );
 
       final Account updatedAccount = currentAccount.copyWith(
         balance: newBalance,
-        updatedAt: now,
+        updatedAt: DateTime.now(),
       );
 
       await _database.rawQuery('BEGIN TRANSACTION');

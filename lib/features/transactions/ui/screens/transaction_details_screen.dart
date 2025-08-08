@@ -33,9 +33,11 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
           }
           return TransactionDetailsView(
             transaction: transaction,
-            onEdit: () => UiUtils.showComingSoon(context, 'Edit Transaction'),
+            onEdit: () => context.pushNamed(
+              'edit-transaction',
+              pathParameters: <String, String>{'transactionId': transaction.id},
+            ),
             onDelete: () => _showDeleteConfirmation(context, transaction),
-            onShare: () => _shareTransaction(context, transaction),
             onNavigateToAccount: () => context.goNamed(
               'account-details',
               pathParameters: <String, String>{'accountId': transaction.accountId},
@@ -81,10 +83,6 @@ class _TransactionDetailScreenState extends ConsumerState<TransactionDetailScree
         icon: Icons.receipt_long_outlined,
       ),
     );
-  }
-
-  void _shareTransaction(BuildContext context, Transaction transaction) {
-    UiUtils.showComingSoon(context, 'Share Transaction');
   }
 
   Future<void> _showDeleteConfirmation(BuildContext context, Transaction transaction) async {

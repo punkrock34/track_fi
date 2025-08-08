@@ -71,6 +71,38 @@ class Transaction {
       'synced_at': syncedAt?.toIso8601String(),
     };
   }
+
+  Transaction copyWith({
+    String? id,
+    String? accountId,
+    String? categoryId,
+    double? amount,
+    String? description,
+    String? reference,
+    DateTime? transactionDate,
+    double? balanceAfter,
+    TransactionType? type,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? syncedAt,
+  }) {
+    return Transaction(
+      id: id ?? this.id,
+      accountId: accountId ?? this.accountId,
+      categoryId: categoryId ?? this.categoryId,
+      amount: amount ?? this.amount,
+      description: description ?? this.description,
+      reference: reference ?? this.reference,
+      transactionDate: transactionDate ?? this.transactionDate,
+      balanceAfter: balanceAfter ?? this.balanceAfter,
+      type: type ?? this.type,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncedAt: syncedAt ?? this.syncedAt,
+    );
+  }
 }
 
 enum TransactionType { debit, credit }

@@ -67,9 +67,13 @@ class _CategorySelectorState extends ConsumerState<CategorySelector> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     Category? selectedCategory;
-    try {
-      selectedCategory = _categories.firstWhere((Category c) => c.id == widget.selectedCategoryId);
-    } catch (_) {
+    
+    if (widget.selectedCategoryId != null) {
+      final int index = _categories.indexWhere(
+        (Category c) => c.id == widget.selectedCategoryId,
+      );
+      selectedCategory = index != -1 ? _categories[index] : null;
+    } else {
       selectedCategory = null;
     }
 

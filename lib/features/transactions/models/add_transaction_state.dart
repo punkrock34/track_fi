@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 import '../../../core/models/database/transaction.dart';
 
 class AddTransactionState {
@@ -12,6 +14,8 @@ class AddTransactionState {
     this.isLoading = false,
     this.errorMessage,
   });
+
+  static const Uuid _uuid = Uuid();
 
   final String? accountId;
   final double amount;
@@ -47,7 +51,6 @@ class AddTransactionState {
     );
   }
 
-  // Improved validation with specific error messages
   bool get isValid => validationError == null;
 
   String? get validationError {
@@ -73,6 +76,24 @@ class AddTransactionState {
       return 'Transaction date cannot be in the future';
     }
     return null;
+  }
+
+  Transaction toTransaction() {
+    final DateTime now = DateTime.now();
+    final String transactionId = 'txn_${_uuid.v4()}';
+
+    return Transaction(
+      id: transactionId,
+      accountId: accountId!,
+      categoryId: categoryId,
+      amount: amount,
+      description: description.trim(),
+      reference: (reference?.trim().isNotEmpty ?? false) ? reference!.trim() : null,
+      transactionDate: transactionDate!,
+      type: type,
+      createdAt: now,
+      updatedAt: now,
+    );
   }
 
   AddTransactionState loading() => copyWith(isLoading: true);
