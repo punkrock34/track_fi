@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../shared/widgets/common/error_banner.dart';
 import '../../../../shared/widgets/input/pin/pin_input_widget.dart';
 import '../../models/onboarding_state.dart';
 import '../../providers/onboarding_provider.dart';
@@ -92,35 +93,10 @@ class _PinConfirmScreenState extends ConsumerState<PinConfirmScreen> {
                   // Error display
                   if (displayError != null) ...<Widget>[
                     const Gap(DesignTokens.spacingSm),
-                    Container(
-                      padding: const EdgeInsets.all(DesignTokens.spacingSm),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-                        border: Border.all(
-                          color: theme.colorScheme.error.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.error_outline,
-                            color: theme.colorScheme.error,
-                            size: 20,
-                          ),
-                          const Gap(DesignTokens.spacingXs),
-                          Expanded(
-                            child: Text(
-                              displayError,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.error,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ).animate().shake(hz: 4, curve: Curves.easeInOut).fadeIn(),
+                    ErrorBanner(message: displayError)
+                      .animate(key: const ValueKey<String>('error-message'))
+                      .shake(hz: 4, curve: Curves.easeInOut)
+                      .fadeIn(),
                   ],
           
                   const Gap(DesignTokens.spacingMd),

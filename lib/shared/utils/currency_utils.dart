@@ -1,5 +1,21 @@
+import '../../core/models/database/account.dart';
+
 class CurrencyUtils {
   CurrencyUtils._();
+
+  static String getCurrencyForAccount(String? accountId, List<Account>? accounts) {
+    if (accounts == null || accountId == null) {
+      return 'GBP';
+    }
+    
+    final Account? account = accounts.cast<Account?>().firstWhere(
+      (Account? a) => a?.id == accountId,
+      orElse: () => null,
+    );
+    
+    return account?.currency ?? 'GBP';
+  }
+
 
   /// Format amount with currency symbol
   static String formatAmount(double amount, {String currency = '£'}) {

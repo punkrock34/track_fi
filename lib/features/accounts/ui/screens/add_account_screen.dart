@@ -6,6 +6,8 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../shared/utils/currency_utils.dart';
+import '../../../../shared/widgets/common/error_banner.dart';
 import '../../../../shared/widgets/input/text/currency_input_field.dart';
 import '../../../../shared/widgets/input/text/dropdown_field.dart';
 import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
@@ -83,36 +85,10 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
             children: <Widget>[
               // Error message
               if (state.errorMessage != null) ...<Widget>[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(DesignTokens.spacingSm),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.errorContainer.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-                    border: Border.all(
-                      color: theme.colorScheme.error.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.error_outline,
-                        color: theme.colorScheme.error,
-                        size: 20,
-                      ),
-                      const Gap(DesignTokens.spacingXs),
-                      Expanded(
-                        child: Text(
-                          state.errorMessage!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.error,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ).animate().shake(hz: 4, curve: Curves.easeInOut).fadeIn(),
+                ErrorBanner(message: state.errorMessage)
+                  .animate(key: const ValueKey<String>('error-message'))
+                  .shake(hz: 4, curve: Curves.easeInOut)
+                  .fadeIn(),
                 const Gap(DesignTokens.spacingMd),
               ],
 
@@ -177,7 +153,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       itemBuilder: (String currency) => Row(
                         children: <Widget>[
                           Text(
-                            _getCurrencySymbol(currency),
+                            CurrencyUtils.getCurrencySymbol(currency),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
@@ -320,19 +296,6 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
       );
 
       context.pop();
-    }
-  }
-
-  String _getCurrencySymbol(String currency) {
-    switch (currency) {
-      case 'USD':
-        return r'$';
-      case 'EUR':
-        return '€';
-      case 'GBP':
-        return '£';
-      default:
-        return '';
     }
   }
 }

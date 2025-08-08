@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/models/database/account.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../shared/utils/currency_utils.dart';
 import '../../../../shared/utils/date_utils.dart';
 import '../../../../shared/utils/ui_utils.dart';
 import '../../../../shared/widgets/accounts/account_selector.dart';
 import '../../../../shared/widgets/accounts/transaction_type_toggle.dart';
+import '../../../../shared/widgets/common/error_banner.dart';
 import '../../../../shared/widgets/common/unsaved_changes_banner.dart';
 import '../../../../shared/widgets/input/text/currency_input_field.dart';
 import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
@@ -150,43 +152,12 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
                   ).animate(key: const ValueKey<String>('changes-indicator')).slideY(begin: -0.3).fadeIn(),
                 ],
 
-                // Error banner
-                if (state.errorMessage != null &&
-                    state.errorMessage!.isNotEmpty) ...<Widget>[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(DesignTokens.spacingSm),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.errorContainer.withOpacity(0.1),
-                      borderRadius:
-                          BorderRadius.circular(DesignTokens.radiusMd),
-                      border: Border.all(
-                        color: theme.colorScheme.error.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.error_outline,
-                          color: theme.colorScheme.error,
-                          size: 20,
-                        ),
-                        const Gap(DesignTokens.spacingXs),
-                        Expanded(
-                          child: Text(
-                            state.errorMessage!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                      .animate(key: const ValueKey<String>('error-message'))
-                      .shake(hz: 4, curve: Curves.easeInOut)
-                      .fadeIn(),
+                // Error Message
+                if (state.errorMessage != null) ...<Widget>[
+                  ErrorBanner(message: state.errorMessage)
+                    .animate(key: const ValueKey<String>('error-message'))
+                    .shake(hz: 4, curve: Curves.easeInOut)
+                    .fadeIn(),
                   const Gap(DesignTokens.spacingMd),
                 ],
 
@@ -221,8 +192,10 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
                   controller: _amountController,
                   label: 'Amount',
                   hint: '0.00',
-                  currency: _getSelectedAccountCurrency(
-                      accountsAsync.value, state.effectiveAccountId),
+                  currency: CurrencyUtils.getCurrencyForAccount(
+                    state.effectiveAccountId,
+                    accountsAsync.value,
+                  ),
                   onChanged: notifier.updateAmount,
                   required: true,
                   validator: (String? value) {
@@ -568,20 +541,6 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
     if (selectedDate != null) {
       notifier.updateTransactionDate(selectedDate);
     }
-  }
-
-  String _getSelectedAccountCurrency(
-    List<Account>? accounts,
-    String accountId,
-  ) {
-    if (accounts == null) {
-      return 'GBP';
-    }
-    final Account? account = accounts.cast<Account?>().firstWhere(
-      (Account? a) => a?.id == accountId,
-      orElse: () => null,
-    );
-    return account?.currency ?? 'GBP';
   }
 
   Future<void> _handleSave() async {
