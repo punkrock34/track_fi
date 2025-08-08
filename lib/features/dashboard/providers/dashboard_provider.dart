@@ -1,11 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/contracts/services/currency/i_currency_exchange_service.dart';
 import '../../../core/contracts/services/database/storage/i_account_storage_service.dart';
 import '../../../core/contracts/services/database/storage/i_sync_status_storage_service.dart';
 import '../../../core/contracts/services/database/storage/i_transaction_storage_service.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/models/database/transaction.dart';
+import '../../../core/providers/currency/currency_exchange_service_provider.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../../../core/providers/database/storage/sync_status_storage_service_provider.dart';
 import '../../../core/providers/database/storage/transaction_storage_service_provider.dart';
@@ -19,6 +21,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
   IAccountStorageService get _accountStorage => _ref.read(accountStorageProvider);
   ITransactionStorageService get _transactionStorage => _ref.read(transactionStorageProvider);
   ISyncStatusStorageService get _syncStatusStorage => _ref.read(syncStatusStorageProvider);
+  ICurrencyExchangeService get _currencyService => _ref.read(currencyExchangeServiceProvider);
 
   Future<void> loadDashboardData() async {
     if (state.isLoading) {
@@ -31,15 +34,19 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       final (
         List<Account> accounts,
         List<Transaction> recentTransactions,
-        Map<String, dynamic>? syncStatus
+        Map<String, dynamic>? syncStatus,
+        String baseCurrency,
+        Map<String, double> convertedBalances,
       ) = await (
         _loadAccounts(),
         _loadRecentTransactions(),
         _loadSyncStatus(),
+        _currencyService.getBaseCurrency(),
+        _loadAccountBalancesInBaseCurrency(),
       ).wait;
 
-      final double totalBalance = _calculateTotalBalance(accounts);
-      final double monthlySpending = _calculateMonthlySpending(recentTransactions);
+      final double totalBalance = convertedBalances.values.fold(0.0, (double sum, double balance) => sum + balance);
+      final double monthlySpending = await _calculateMonthlySpendingInBaseCurrency(recentTransactions);
 
       state = state.copyWith(
         isLoading: false,
@@ -79,10 +86,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       allTransactions.addAll(accountTransactions);
     }
 
-    // Sort by date and take recent 10
-    allTransactions.sort((Transaction a, Transaction b) =>
-        b.transactionDate.compareTo(a.transactionDate));
-    
+    allTransactions.sort((Transaction a, Transaction b) => b.transactionDate.compareTo(a.transactionDate));
     return allTransactions.take(10).toList();
   }
 
@@ -90,19 +94,64 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     return _syncStatusStorage.getLatest();
   }
 
-  double _calculateTotalBalance(List<Account> accounts) {
-    return accounts.fold(0.0, (double sum, Account account) => sum + account.balance);
+  Future<Map<String, double>> _loadAccountBalancesInBaseCurrency() async {
+    try {
+      final List<Account> accounts = await _loadAccounts();
+      return await _currencyService.convertAccountBalancesToBaseCurrency(accounts);
+    } catch (e, stackTrace) {
+      await log(
+        message: 'Failed to convert account balances to base currency',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      
+      final List<Account> accounts = await _loadAccounts();
+      return Map<String, double>.fromEntries(
+        accounts.map((Account account) => MapEntry<String, double>(account.id, account.balance)),
+      );
+    }
   }
 
-  double _calculateMonthlySpending(List<Transaction> transactions) {
+  Future<double> _calculateMonthlySpendingInBaseCurrency(List<Transaction> transactions) async {
     final DateTime now = DateTime.now();
     final DateTime monthStart = DateTime(now.year, now.month);
+    final String baseCurrency = await _currencyService.getBaseCurrency();
 
-    return transactions
+    final List<Transaction> monthlyExpenses = transactions
         .where((Transaction t) =>
             t.type == TransactionType.debit &&
             t.transactionDate.isAfter(monthStart))
-        .fold(0.0, (double sum, Transaction t) => sum + t.amount.abs());
+        .toList();
+
+    double totalSpending = 0.0;
+
+    for (final Transaction transaction in monthlyExpenses) {
+      try {
+        final Account? account = await _accountStorage.get(transaction.accountId);
+        final String transactionCurrency = account?.currency ?? 'GBP';
+        
+        if (transactionCurrency.toUpperCase() == baseCurrency.toUpperCase()) {
+          totalSpending += transaction.amount.abs();
+        } else {
+          final double convertedAmount = await _currencyService.convertAmount(
+            transaction.amount.abs(),
+            transactionCurrency,
+            baseCurrency,
+          );
+          totalSpending += convertedAmount;
+        }
+      } catch (e, stackTrace) {
+        await log(
+          message: 'Failed to convert transaction ${transaction.id} to base currency',
+          error: e,
+          stackTrace: stackTrace,
+        );
+        
+        totalSpending += transaction.amount.abs();
+      }
+    }
+
+    return totalSpending;
   }
 
   Future<void> refresh() async {

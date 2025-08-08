@@ -11,6 +11,7 @@ import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
 import '../../../../shared/providers/ui/balance_visibility_provider.dart';
+import '../../../../shared/widgets/currency/currency_selector_button.dart';
 import '../../../../shared/widgets/dashboard/account_balance_card.dart';
 import '../../models/dashboard_state.dart';
 import '../../providers/dashboard_provider.dart';
@@ -53,6 +54,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           backgroundColor: theme.colorScheme.surface,
           elevation: 0,
           actions: <Widget>[
+            const CurrencySelectorButton(),
+            const Gap(DesignTokens.spacingXs),
+            
             IconButton(
               icon: const Icon(Icons.notifications_outlined),
               onPressed: () => UiUtils.showComingSoon(context, 'Notifications'),
@@ -65,11 +69,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         body: RefreshIndicator(
           key: _refreshIndicatorKey,
-          onRefresh: () => ref.read(dashboardProvider.notifier).refresh(),
+          onRefresh: () => _handleRefresh(),
           child: _buildContent(context, state, theme),
         ),
       ),
     );
+  }
+
+  Future<void> _handleRefresh() async {
+    await ref.read(dashboardProvider.notifier).refresh();
   }
 
   Widget _buildContent(BuildContext context, DashboardState state, ThemeData theme) {
@@ -125,7 +133,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 
                 const Gap(DesignTokens.spacingLg),
                 
-                // Account Balance Overview
+                // Account Balance Overview - Now shows converted amounts!
                 AccountBalanceCard(
                   totalBalance: state.totalBalance,
                   accounts: state.accounts,
@@ -146,7 +154,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 
                 const Gap(DesignTokens.spacingMd),
                 
-                // Spending Overview
+                // Spending Overview - Now shows converted amounts!
                 SpendingOverviewCard(
                   monthlySpending: state.monthlySpending,
                   recentTransactions: state.recentTransactions,

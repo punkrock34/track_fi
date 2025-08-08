@@ -12,6 +12,7 @@ abstract class DesignTokens {
   static const double spacing2xl = _baseUnit * 8; // 64px
   static const double spacing3xl = _baseUnit * 10; // 80px
   
+  static const double radiusXs = 4.0;
   static const double radiusSm = 8.0;
   static const double radiusMd = 12.0;
   static const double radiusLg = 16.0;
