@@ -9,7 +9,7 @@ import '../../../core/models/session/session_state.dart';
 import '../../../core/providers/auth/auth_service_provider.dart';
 import '../../../core/providers/session/session_provider.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../shared/widgets/input/pin_input_widget.dart';
+import '../../../shared/widgets/input/pin/pin_input_widget.dart';
 import '../../auth/models/auth_state.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {

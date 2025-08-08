@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/models/database/transaction.dart';
-import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../core/models/database/transaction.dart';
+import '../../../core/theme/design_tokens/design_tokens.dart';
 
 class TransactionTypeToggle extends StatelessWidget {
   const TransactionTypeToggle({

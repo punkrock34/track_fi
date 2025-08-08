@@ -11,8 +11,8 @@ import '../../../../core/providers/auth/biometric/biometric_service_provider.dar
 import '../../../../core/providers/secure_storage/biometric_storage_provider.dart';
 import '../../../../core/providers/secure_storage/pin_storage_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../shared/widgets/input/compact_pin_input_widget.dart';
-import '../../../../shared/widgets/input/pin_input_widget.dart';
+import '../../../../shared/widgets/input/pin/compact_pin_input_widget.dart';
+import '../../../../shared/widgets/input/pin/pin_input_widget.dart';
 
 enum PinChangeStep {
   currentAuth,

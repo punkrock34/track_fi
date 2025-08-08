@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/theme/design_tokens/design_tokens.dart';
-import 'numeric_keypad_widget.dart';
+import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../keyboard/numeric_keypad_widget.dart';
 import 'pin_display_widget.dart';
 
 enum PinInputMode {

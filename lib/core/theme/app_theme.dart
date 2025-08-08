@@ -15,7 +15,7 @@ class AppTheme {
       colorScheme: ColorSchemes.lightScheme,
       textTheme: AppTypography.lightTextTheme,
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      platform: TargetPlatform.iOS, // Consistent across platforms
+      platform: TargetPlatform.iOS,
 
       subThemesData: const FlexSubThemesData(
         interactionEffects: true,

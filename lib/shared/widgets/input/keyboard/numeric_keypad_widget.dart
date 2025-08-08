@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import 'keypad_button_widget.dart';
 
 class NumericKeypad extends StatelessWidget {

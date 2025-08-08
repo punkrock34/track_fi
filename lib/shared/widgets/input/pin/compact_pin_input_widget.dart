@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/theme/design_tokens/design_tokens.dart';
-import 'compact_numeric_keypad_widget.dart';
+import '../../../../core/theme/design_tokens/design_tokens.dart';
+import '../keyboard/compact_numeric_keypad_widget.dart';
 import 'compact_pin_display_widget.dart';
 import 'pin_input_widget.dart';
 

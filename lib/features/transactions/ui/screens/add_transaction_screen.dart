@@ -7,14 +7,14 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/models/database/account.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/utils/date_utils.dart';
-import '../../../../shared/widgets/input/currency_input_field.dart';
-import '../../../../shared/widgets/input/text_input_field_widget.dart';
+import '../../../../shared/widgets/accounts/account_selector.dart';
+import '../../../../shared/widgets/accounts/transaction_type_toggle.dart';
+import '../../../../shared/widgets/input/text/currency_input_field.dart';
+import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
 import '../../../accounts/providers/accounts_provider.dart';
 import '../../models/add_transaction_state.dart';
 import '../../providers/add_transaction_provider.dart';
-import '../widgets/account_selector.dart';
 import '../widgets/category_selector.dart';
-import '../widgets/transaction_type_toggle.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   const AddTransactionScreen({

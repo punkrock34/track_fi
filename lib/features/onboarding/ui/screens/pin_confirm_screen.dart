@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../shared/widgets/input/pin_input_widget.dart';
+import '../../../../shared/widgets/input/pin/pin_input_widget.dart';
 import '../../models/onboarding_state.dart';
 import '../../providers/onboarding_provider.dart';
 

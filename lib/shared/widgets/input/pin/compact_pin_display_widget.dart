@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../core/theme/design_tokens/design_tokens.dart';
 
 class CompactPinDisplay extends StatelessWidget {
   const CompactPinDisplay({

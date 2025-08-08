@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/models/database/account.dart';
-import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../shared/utils/currency_utils.dart';
+import '../../../core/models/database/account.dart';
+import '../../../core/theme/design_tokens/design_tokens.dart';
+import '../../utils/currency_utils.dart';
 
 class AccountSelector extends StatelessWidget {
   const AccountSelector({

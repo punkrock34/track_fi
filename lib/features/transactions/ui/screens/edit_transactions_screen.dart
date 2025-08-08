@@ -8,14 +8,15 @@ import '../../../../core/models/database/account.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/utils/date_utils.dart';
 import '../../../../shared/utils/ui_utils.dart';
-import '../../../../shared/widgets/input/currency_input_field.dart';
-import '../../../../shared/widgets/input/text_input_field_widget.dart';
+import '../../../../shared/widgets/accounts/account_selector.dart';
+import '../../../../shared/widgets/accounts/transaction_type_toggle.dart';
+import '../../../../shared/widgets/common/unsaved_changes_banner.dart';
+import '../../../../shared/widgets/input/text/currency_input_field.dart';
+import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
 import '../../../accounts/providers/accounts_provider.dart';
 import '../../models/edit_transaction_state.dart';
 import '../../providers/edit_transaction_provider.dart';
-import '../widgets/account_selector.dart';
 import '../widgets/category_selector.dart';
-import '../widgets/transaction_type_toggle.dart';
 
 class EditTransactionScreen extends ConsumerStatefulWidget {
   const EditTransactionScreen({super.key, required this.transactionId});
@@ -144,35 +145,9 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
               children: <Widget>[
                 // Unsaved changes banner
                 if (state.hasChanges) ...<Widget>[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(DesignTokens.spacingSm),
-                    decoration: BoxDecoration(
-                      color:
-                          theme.colorScheme.primaryContainer.withOpacity(0.1),
-                      borderRadius:
-                          BorderRadius.circular(DesignTokens.radiusMd),
-                      border: Border.all(
-                        color: theme.colorScheme.primary.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.edit,
-                          color: theme.colorScheme.primary,
-                          size: 20,
-                        ),
-                        const Gap(DesignTokens.spacingXs),
-                        const Text('You have unsaved changes'),
-                      ],
-                    ),
-                  )
-                      .animate(
-                          key: const ValueKey<String>('changes-indicator'))
-                      .slideY(begin: -0.3)
-                      .fadeIn(),
-                  const Gap(DesignTokens.spacingMd),
+                  UnsavedChangesBanner(
+                    visible: state.hasChanges,
+                  ).animate(key: const ValueKey<String>('changes-indicator')).slideY(begin: -0.3).fadeIn(),
                 ],
 
                 // Error banner
