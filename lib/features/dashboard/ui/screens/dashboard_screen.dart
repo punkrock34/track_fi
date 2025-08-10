@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../../shared/utils/date_utils.dart';
-import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
@@ -173,8 +172,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 ),
                                 child: IconButton(
                                   icon: const Icon(Icons.analytics_outlined),
-                                  onPressed: () => UiUtils.showComingSoon(
-                                      context, 'Analytics'),
+                                  onPressed: () => context.goNamed('analytics'),
                                 ),
                               ),
                               const Gap(DesignTokens.spacingXs),

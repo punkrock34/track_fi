@@ -22,6 +22,7 @@ class AppRedirect {
   static const String _accountsPath = '/accounts';
   static const String _transactionsPath = '/transactions';
   static const String _settingsPath = '/settings';
+  static const String _analyticsPath = '/analytics';
 
   Future<String?> handleRedirect(BuildContext context, GoRouterState state) async {
     try {
@@ -65,7 +66,7 @@ class AppRedirect {
         }
       }
 
-      final List<String> protectedRoutes = <String>[_dashboardPath, _accountsPath, _transactionsPath, _settingsPath];
+      final List<String> protectedRoutes = <String>[_dashboardPath, _accountsPath, _transactionsPath, _settingsPath, _analyticsPath];
       final bool isProtectedRoute = protectedRoutes.any((String route) => location.startsWith(route));
       
       if (isProtectedRoute && !isAuthenticated) {
