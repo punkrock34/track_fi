@@ -69,7 +69,7 @@ class _PinChangeModalState extends ConsumerState<PinChangeModal> {
         width: double.infinity,
         constraints: BoxConstraints(
           maxWidth: 400,
-          maxHeight: screenSize.height * 0.8, // Responsive height
+          maxHeight: screenSize.height * 0.8,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -235,7 +235,7 @@ class _PinChangeModalState extends ConsumerState<PinChangeModal> {
     }
 
     return Container(
-      constraints: const BoxConstraints(maxHeight: 350), // Constrain PIN input height
+      constraints: const BoxConstraints(maxHeight: 350),
       child: SingleChildScrollView(
         child: CompactPinInput(
           pin: currentPin,

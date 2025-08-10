@@ -18,6 +18,11 @@ class SwipeNavigationWrapper extends ConsumerWidget {
     this.useTabLocking = false,
     this.currentTabIndex,
     this.totalTabs,
+    this.minHorizontalDistance = 72.0,
+    this.minHorizontalVelocity = 900.0,
+    this.maxOffAxisRatio = 0.5,
+    this.onlyFromScreenEdges = false,
+    this.edgeActivationWidth = 28.0,
   });
 
   final Widget child;
@@ -27,6 +32,12 @@ class SwipeNavigationWrapper extends ConsumerWidget {
   final bool useTabLocking;
   final int? currentTabIndex;
   final int? totalTabs;
+
+  final double minHorizontalDistance;
+  final double minHorizontalVelocity;
+  final double maxOffAxisRatio;
+  final bool onlyFromScreenEdges;
+  final double edgeActivationWidth;
 
   static const List<String> _routeNames = <String>[
     'dashboard',
@@ -41,24 +52,40 @@ class SwipeNavigationWrapper extends ConsumerWidget {
       return child;
     }
 
-    final int index = _getRouteIndex(currentRoute);
+    final int index = _routeIndexFor(currentRoute);
+
+    Offset? startGlobal;
+    double dx = 0, dy = 0;
 
     return RawGestureDetector(
       gestures: <Type, GestureRecognizerFactory<GestureRecognizer>>{
         AllowMultipleHorizontalDragGestureRecognizer:
             GestureRecognizerFactoryWithHandlers<
                 AllowMultipleHorizontalDragGestureRecognizer>(
-          () => AllowMultipleHorizontalDragGestureRecognizer(
-              debugOwner: 'SwipeNavigationWrapper'),
-          (AllowMultipleHorizontalDragGestureRecognizer instance) {
-            instance.onEnd = (DragEndDetails details) {
-              final double dx = details.velocity.pixelsPerSecond.dx;
-              final double dy = details.velocity.pixelsPerSecond.dy;
-
-              if (dx.abs() <= 300 || dx.abs() <= dy.abs()) {
+          () => AllowMultipleHorizontalDragGestureRecognizer(debugOwner: 'SwipeNavigationWrapper'),
+          (AllowMultipleHorizontalDragGestureRecognizer g) {
+            g.onStart = (DragStartDetails d) {
+              startGlobal = d.globalPosition;
+              dx = 0; dy = 0;
+            };
+            g.onUpdate = (DragUpdateDetails d) {
+              dx += d.delta.dx;
+              dy += d.delta.dy;
+            };
+            g.onEnd = (DragEndDetails d) {
+              if (!_edgeAllowed(context, startGlobal)) {
                 return;
               }
-              _handleSwipe(context, ref, dx, index);
+              if (!_distanceAllowed(dx)) {
+                return;
+              }
+              if (!_angleAllowed(dx, dy)) {
+                return;
+              }
+              if (!_velocityAllowed(d)) {
+                return;
+              }
+              _navigate(context, ref, dx, index);
             };
           },
         ),
@@ -68,58 +95,60 @@ class SwipeNavigationWrapper extends ConsumerWidget {
     );
   }
 
-  int _getRouteIndex(String route) {
-    return _routeNames.indexWhere(route.startsWith).clamp(0, _routeNames.length - 1);
-  }
+  int _routeIndexFor(String route) =>
+      _routeNames.indexWhere(route.startsWith).clamp(0, _routeNames.length - 1);
 
-  void _handleSwipe(BuildContext context, WidgetRef ref, double dx, int index) {
-    int? nextIndex;
-
-    final int? tabIndex = currentTabIndex;
-    final int? total = totalTabs;
-
-    final bool tabLockingEnabled = useTabLocking && tabIndex != null && total != null;
-    final bool onFirstTab = tabLockingEnabled && tabIndex == 0;
-    final bool onLastTab = tabLockingEnabled && tabIndex == total - 1;
-
-    if (tabLockingEnabled) {
-      if (dx < 0 && onLastTab) {
-        nextIndex = _nextIndex(index);
-      }
-      if (dx > 0 && onFirstTab) {
-        nextIndex = _previousIndex(index);
-      }
-    } else {
-      nextIndex = dx < 0 ? _nextIndex(index) : _previousIndex(index);
+  bool _edgeAllowed(BuildContext context, Offset? start) {
+    if (!onlyFromScreenEdges || start == null) {
+      return true;
+    }
+    final double w = MediaQuery.of(context).size.width;
+    return start.dx <= edgeActivationWidth || start.dx >= w - edgeActivationWidth;
     }
 
-    if (nextIndex == null || nextIndex == index) {
+  bool _distanceAllowed(double dx) => dx.abs() >= minHorizontalDistance;
+
+  bool _angleAllowed(double dx, double dy) {
+    final double adx = dx.abs(), ady = dy.abs();
+    final double offAxis = adx == 0 ? double.infinity : ady / adx;
+    return offAxis <= maxOffAxisRatio;
+  }
+
+  bool _velocityAllowed(DragEndDetails details) =>
+      details.velocity.pixelsPerSecond.dx.abs() >= minHorizontalVelocity;
+
+  void _navigate(BuildContext context, WidgetRef ref, double dx, int index) {
+    final int? next = _nextIndexFrom(dx, index);
+    if (next == null || next == index) {
       return;
     }
 
     HapticFeedback.lightImpact();
     Future<void>.microtask(() => ref.read(sessionProvider.notifier).updateActivity());
-    ref.read(navigationProvider.notifier).updateCurrentIndex(nextIndex);
-    context.goNamed(_routeNames[nextIndex]);
+    ref.read(navigationProvider.notifier).updateCurrentIndex(next);
+    context.goNamed(_routeNames[next]);
   }
 
-  int? _nextIndex(int index) {
-    if (index < _routeNames.length - 1) {
-      return index + 1;
+  int? _nextIndexFrom(double dx, int index) {
+    final bool locked = useTabLocking && currentTabIndex != null && totalTabs != null;
+    final bool onFirstTab = locked && currentTabIndex == 0;
+    final bool onLastTab  = locked && currentTabIndex == (totalTabs! - 1);
+
+    if (locked) {
+      if (dx < 0 && onLastTab) {
+        return _nextIndex(index);
+      }
+      if (dx > 0 && onFirstTab) {
+        return _previousIndex(index);
+      }
+      return null;
     }
-    if (enableCircularNavigation) {
-      return 0;
-    }
-    return null;
+    return dx < 0 ? _nextIndex(index) : _previousIndex(index);
   }
 
-  int? _previousIndex(int index) {
-    if (index > 0) {
-      return index - 1;
-    }
-    if (enableCircularNavigation) {
-      return _routeNames.length - 1;
-    }
-    return null;
-  }
+  int? _nextIndex(int index) =>
+      (index < _routeNames.length - 1) ? index + 1 : (enableCircularNavigation ? 0 : null);
+
+  int? _previousIndex(int index) =>
+      (index > 0) ? index - 1 : (enableCircularNavigation ? _routeNames.length - 1 : null);
 }

@@ -6,10 +6,9 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../shared/utils/currency_utils.dart';
 import '../../../../shared/widgets/common/error_banner.dart';
+import '../../../../shared/widgets/currency/account_currency_selector.dart';
 import '../../../../shared/widgets/input/text/currency_input_field.dart';
-import '../../../../shared/widgets/input/text/dropdown_field.dart';
 import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
 import '../../models/add_account_state.dart';
 import '../../providers/add_account_provider.dart';
@@ -139,29 +138,16 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       label: 'Current Balance',
                       hint: '0.00',
                       currency: state.currency,
-                      onChanged: (double value) => notifier.updateBalance(value),
+                      onChanged: notifier.updateBalance,
                       required: true,
                     ),
                   ),
                   const Gap(DesignTokens.spacingSm),
                   Expanded(
-                    child: DropdownField<String>(
-                      value: state.currency,
+                    child: AccountCurrencySelector(
                       label: 'Currency',
-                      items: const <String>['GBP', 'USD', 'EUR'],
+                      currency: state.currency,
                       onChanged: notifier.updateCurrency,
-                      itemBuilder: (String currency) => Row(
-                        children: <Widget>[
-                          Text(
-                            CurrencyUtils.getCurrencySymbol(currency),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const Gap(DesignTokens.spacingXs),
-                          Text(currency),
-                        ],
-                      ),
                     ),
                   ),
                 ],

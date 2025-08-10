@@ -10,7 +10,7 @@ import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/states/error_state.dart';
 import '../../../../../shared/widgets/states/loading_state.dart';
-import '../../../../core/providers/currency/currency_exchange_service_provider.dart';
+import '../../../../core/providers/financial/base_currency_provider.dart';
 import '../../../../shared/providers/ui/balance_visibility_provider.dart';
 import '../../../../shared/utils/currency_utils.dart';
 import '../../../../shared/widgets/currency/currency_selector_button.dart';
@@ -30,21 +30,21 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  String _currentCurrency = 'RON';
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
     super.initState();
-    Future<void>.microtask(() async {
-      _currentCurrency = await ref.read(currencyExchangeServiceProvider).getBaseCurrency();
-      await ref.read(dashboardProvider.notifier).loadDashboardData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(dashboardProvider.notifier).loadDashboardData();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final DashboardState state = ref.watch(dashboardProvider);
+    final AsyncValue<String> baseCurrencyAsync = ref.watch(baseCurrencyProvider);
     final ThemeData theme = Theme.of(context);
 
     return SwipeNavigationWrapper(
@@ -53,7 +53,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: () => _handleRefresh(),
-          child: _buildContent(context, state, theme),
+          child: baseCurrencyAsync.when(
+            data: (String baseCurrency) =>
+                _buildContent(context, state, theme, baseCurrency),
+            loading: () => const LoadingState(message: 'Loading currency...'),
+            error: (Object e, StackTrace _) => ErrorState(
+              title: 'Error loading currency',
+              message: e.toString(),
+              onRetry: () => ref.refresh(baseCurrencyProvider),
+            ),
+          ),
         ),
       ),
     );
@@ -63,7 +72,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     await ref.read(dashboardProvider.notifier).refresh();
   }
 
-  Widget _buildContent(BuildContext context, DashboardState state, ThemeData theme) {
+  Widget _buildContent(
+      BuildContext context, DashboardState state, ThemeData theme, String baseCurrency) {
     if (state.isLoading && state.error == null) {
       return const LoadingState(message: 'Loading your financial data...');
     }
@@ -117,7 +127,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       theme.colorScheme.secondary,
                                     ],
                                   ),
-                                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                                  borderRadius:
+                                      BorderRadius.circular(DesignTokens.radiusMd),
                                 ),
                                 child: Icon(
                                   Icons.account_balance_wallet_rounded,
@@ -139,14 +150,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   Text(
                                     DateUtils.getGreeting(),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.7),
                                     ),
                                   ),
                                 ],
                               ),
                             ],
                           ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
-                          
+
                           // Action Buttons
                           Row(
                             children: <Widget>[
@@ -154,19 +166,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               const Gap(DesignTokens.spacingXs),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                                  color: theme.colorScheme.surfaceVariant
+                                      .withOpacity(0.5),
+                                  borderRadius:
+                                      BorderRadius.circular(DesignTokens.radiusMd),
                                 ),
                                 child: IconButton(
                                   icon: const Icon(Icons.notifications_outlined),
-                                  onPressed: () => UiUtils.showComingSoon(context, 'Notifications'),
+                                  onPressed: () => UiUtils.showComingSoon(
+                                      context, 'Notifications'),
                                 ),
                               ),
                               const Gap(DesignTokens.spacingXs),
                               Container(
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                                  color: theme.colorScheme.surfaceVariant
+                                      .withOpacity(0.5),
+                                  borderRadius:
+                                      BorderRadius.circular(DesignTokens.radiusMd),
                                 ),
                                 child: IconButton(
                                   icon: const Icon(Icons.account_circle_outlined),
@@ -177,9 +194,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
                         ],
                       ),
-                      
+
                       const Gap(DesignTokens.spacingSm),
-                      
+
                       // Sync Status Row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -190,7 +207,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               color: theme.colorScheme.onSurface.withOpacity(0.7),
                             ),
                           ).animate().slideX(begin: -0.3, delay: 200.ms).fadeIn(),
-                          
+
                           SyncStatusCard(
                             syncStatus: state.lastSyncStatus,
                             lastRefresh: state.lastRefresh,
@@ -217,22 +234,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   accounts: state.accounts,
                   isLoading: state.isLoading,
                   onToggleVisibility: () {
-                    final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                    final StateController<bool> current =
+                        ref.read(balanceVisibilityProvider.notifier);
                     current.state = !current.state;
                   },
-                  currentCurrency: CurrencyUtils.getCurrencySymbol(_currentCurrency),
+                  currentCurrency: CurrencyUtils.getCurrencySymbol(baseCurrency),
                 ).animate().slideY(begin: 0.3, delay: 300.ms).fadeIn(),
-                
+
                 const Gap(DesignTokens.spacingLg),
-                
+
                 // Quick Actions
                 QuickActionsRow(
                   onViewAccounts: () => context.goNamed('accounts'),
                   onViewTransactions: () => context.goNamed('transactions'),
                 ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
-                
+
                 const Gap(DesignTokens.spacingLg),
-                
+
                 // Financial Insights Row
                 Row(
                   children: <Widget>[
@@ -241,30 +259,33 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         monthlySpending: state.monthlySpending,
                         recentTransactions: state.recentTransactions,
                         onToggleVisibility: () {
-                          final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                          final StateController<bool> current =
+                              ref.read(balanceVisibilityProvider.notifier);
                           current.state = !current.state;
                         },
-                        currentCurrency: CurrencyUtils.getCurrencySymbol(_currentCurrency),
+                        currentCurrency:
+                            CurrencyUtils.getCurrencySymbol(baseCurrency),
                       ),
                     ),
                   ],
                 ).animate().slideY(begin: 0.3, delay: 500.ms).fadeIn(),
-                
+
                 const Gap(DesignTokens.spacingLg),
-                
+
                 // Recent Transactions
                 RecentTransactionsCard(
                   transactions: state.recentTransactions,
                   onViewAll: () => context.goNamed('transactions'),
                   isLoading: state.isLoading,
                   onToggleVisibility: () {
-                    final StateController<bool> current = ref.read(balanceVisibilityProvider.notifier);
+                    final StateController<bool> current =
+                        ref.read(balanceVisibilityProvider.notifier);
                     current.state = !current.state;
                   },
                 ).animate().slideY(begin: 0.3, delay: 600.ms).fadeIn(),
-                
+
                 const Gap(DesignTokens.spacingXl),
-                
+
                 // Bottom Spacer for FAB
                 const Gap(DesignTokens.spacingXl),
               ],

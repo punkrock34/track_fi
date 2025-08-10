@@ -5,6 +5,9 @@ import 'package:gap/gap.dart';
 import '../../../core/contracts/services/currency/i_currency_exchange_service.dart';
 import '../../../core/logging/log.dart';
 import '../../../core/providers/currency/currency_exchange_service_provider.dart';
+import '../../../core/providers/financial/base_currency_provider.dart';
+import '../../../core/providers/financial/converted_balances_provider.dart';
+import '../../../core/providers/financial/total_balance_provider.dart';
 import '../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../features/accounts/providers/accounts_provider.dart';
 import '../../../features/dashboard/providers/dashboard_provider.dart';
@@ -33,10 +36,17 @@ class _CurrencySelectorButtonState extends ConsumerState<CurrencySelectorButton>
 
     try {
       final String currency = await currencyService.getBaseCurrency();
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _currentCurrency = currency;
       });
-    } catch (_) {
+    } catch (e, stackTrace) {
+      await log(message: 'Failed to load current currency', error: e, stackTrace: stackTrace);
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _currentCurrency = 'RON';
       });
@@ -166,7 +176,7 @@ class _CurrencySelectorButtonState extends ConsumerState<CurrencySelectorButton>
   Future<void> _changeCurrency(String newCurrency) async {
     final ICurrencyExchangeService currencyService = ref.read(currencyExchangeServiceProvider);
     final DashboardNotifier dashboardNotifier = ref.read(dashboardProvider.notifier);
-    final AccountsNotifier accountsNotifier = ref.read(accountsProvider.notifier);
+    final AccountsNotifier accountsNotifier  = ref.read(accountsProvider.notifier);
 
     setState(() {
       _isLoading = true;
@@ -174,13 +184,24 @@ class _CurrencySelectorButtonState extends ConsumerState<CurrencySelectorButton>
 
     try {
       await currencyService.setBaseCurrency(newCurrency);
-      setState(() {
-        _currentCurrency = newCurrency;
-      });
+      if (!mounted) {
+        return;
+      }
+      setState(() { _currentCurrency = newCurrency; });
+
+      ref.invalidate(baseCurrencyProvider);
+      ref.invalidate(convertedBalancesProvider);
+      ref.invalidate(totalBalanceProvider);
+
+      await _refreshDataInBackground(
+        dashboardNotifier: dashboardNotifier,
+        accountsNotifier: accountsNotifier,
+      );
 
       if (!mounted) {
         return;
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -198,11 +219,6 @@ class _CurrencySelectorButtonState extends ConsumerState<CurrencySelectorButton>
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),
-      );
-      
-      await _refreshDataInBackground(
-        dashboardNotifier: dashboardNotifier,
-        accountsNotifier: accountsNotifier,
       );
     } catch (e) {
       if (!mounted) {

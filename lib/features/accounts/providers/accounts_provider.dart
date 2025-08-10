@@ -18,26 +18,25 @@ class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
     if (!mounted) {
       return;
     }
-    
+
     state = const AsyncValue<List<Account>>.loading();
 
     try {
-      final List<Account> accounts = await _storage.getAll();
-      
+      final List<Account> all = await _storage.getAll();
+      final List<Account> active = all.where((Account a) => a.isActive).toList();
+
       if (!mounted) {
         return;
       }
-      state = AsyncValue<List<Account>>.data(accounts);
+
+      state = AsyncValue<List<Account>>.data(active);
     } catch (e, stackTrace) {
-      await log(
-        message: 'Failed to load accounts',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      
+      await log(message: 'Failed to load accounts', error: e, stackTrace: stackTrace);
+
       if (!mounted) {
         return;
       }
+
       state = AsyncValue<List<Account>>.error(e, stackTrace);
     }
   }

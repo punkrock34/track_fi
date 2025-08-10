@@ -6,12 +6,11 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens/design_tokens.dart';
-import '../../../../shared/utils/currency_utils.dart';
 import '../../../../shared/utils/ui_utils.dart';
 import '../../../../shared/widgets/common/error_banner.dart';
 import '../../../../shared/widgets/common/unsaved_changes_banner.dart';
+import '../../../../shared/widgets/currency/account_currency_selector.dart';
 import '../../../../shared/widgets/input/text/currency_input_field.dart';
-import '../../../../shared/widgets/input/text/dropdown_field.dart';
 import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
 import '../../models/edit_account_state.dart';
 import '../../providers/edit_account_provider.dart';
@@ -217,23 +216,10 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
                     ),
                     const Gap(DesignTokens.spacingSm),
                     Expanded(
-                      child: DropdownField<String>(
-                        value: state.currency,
+                      child: AccountCurrencySelector(
                         label: 'Currency',
-                        items: const <String>['GBP', 'USD', 'EUR'],
+                        currency: state.currency,
                         onChanged: notifier.updateCurrency,
-                        itemBuilder: (String currency) => Row(
-                          children: <Widget>[
-                            Text(
-                              CurrencyUtils.getCurrencySymbol(currency),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const Gap(DesignTokens.spacingXs),
-                            Text(currency),
-                          ],
-                        ),
                       ),
                     ),
                   ],
