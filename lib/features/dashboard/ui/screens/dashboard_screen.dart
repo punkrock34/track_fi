@@ -172,9 +172,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       BorderRadius.circular(DesignTokens.radiusMd),
                                 ),
                                 child: IconButton(
-                                  icon: const Icon(Icons.notifications_outlined),
+                                  icon: const Icon(Icons.analytics_outlined),
                                   onPressed: () => UiUtils.showComingSoon(
-                                      context, 'Notifications'),
+                                      context, 'Analytics'),
                                 ),
                               ),
                               const Gap(DesignTokens.spacingXs),

@@ -63,6 +63,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   Widget build(BuildContext context) {
     final AsyncValue<List<Transaction>> transactionsAsync = ref.watch(transactionsProvider);
     final AsyncValue<List<Account>> accountsAsync = ref.watch(accountsProvider);
+    final ThemeData theme = Theme.of(context);
 
     return SwipeNavigationWrapper(
       currentRoute: 'transactions',
@@ -70,52 +71,199 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
       currentTabIndex: _currentTabIndex,
       totalTabs: 3,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Transactions'),
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.filter_list_rounded),
-              onPressed: () => _showFilterDialog(context, accountsAsync.value ?? <Account>[]),
+        body: CustomScrollView(
+          slivers: <Widget>[
+            // Custom App Bar matching Dashboard style
+            SliverAppBar(
+              expandedHeight: 160,
+              floating: true,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              pinned: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                        theme.colorScheme.primaryContainer.withOpacity(0.1),
+                        theme.colorScheme.secondaryContainer.withOpacity(0.05),
+                      ],
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(DesignTokens.spacingMd),
+                      child: Column(
+                        children: <Widget>[
+                          // Top Header Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              // App Title
+                              Row(
+                                children: <Widget>[
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: <Color>[
+                                          theme.colorScheme.primary,
+                                          theme.colorScheme.secondary,
+                                        ],
+                                      ),
+                                      borderRadius:
+                                          BorderRadius.circular(DesignTokens.radiusMd),
+                                    ),
+                                    child: Icon(
+                                      Icons.receipt_long_rounded,
+                                      color: theme.colorScheme.onPrimary,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const Gap(DesignTokens.spacingSm),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        'Transactions',
+                                        style: theme.textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Track your financial activity',
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: theme.colorScheme.onSurface
+                                              .withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+
+                              // Action Buttons
+                              Row(
+                                children: <Widget>[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.surfaceVariant
+                                          .withOpacity(0.5),
+                                      borderRadius:
+                                          BorderRadius.circular(DesignTokens.radiusMd),
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.filter_list_rounded),
+                                      onPressed: () => _showFilterDialog(context, accountsAsync.value ?? <Account>[]),
+                                    ),
+                                  ),
+                                  const Gap(DesignTokens.spacingXs),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.surfaceVariant
+                                          .withOpacity(0.5),
+                                      borderRadius:
+                                          BorderRadius.circular(DesignTokens.radiusMd),
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.add_rounded),
+                                      onPressed: () => context.pushNamed('add-transaction'),
+                                      tooltip: 'Add Transaction',
+                                    ),
+                                  ),
+                                ],
+                              ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
+                            ],
+                          ),
+
+                          const Gap(DesignTokens.spacingSm),
+
+                          // Transaction Summary Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                _getTransactionSummary(transactionsAsync),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                ),
+                              ).animate().slideX(begin: -0.3, delay: 200.ms).fadeIn(),
+
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: DesignTokens.spacingXs,
+                                  vertical: DesignTokens.spacing2xs,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                                  border: Border.all(
+                                    color: theme.colorScheme.primary.withOpacity(0.3),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.timeline,
+                                      size: 14,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    const Gap(DesignTokens.spacing2xs),
+                                    Text(
+                                      'Recent',
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ).animate().slideX(begin: 0.3, delay: 250.ms).fadeIn(),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              bottom: TabBar(
+                controller: _tabController,
+                tabs: const <Widget>[
+                  Tab(text: 'All'),
+                  Tab(text: 'Income'),
+                  Tab(text: 'Expenses'),
+                ],
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.add_rounded),
-              onPressed: () => context.pushNamed('add-transaction'),
-              tooltip: 'Add Transaction',
-            ),
-          ],
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: const <Widget>[
-              Tab(text: 'All'),
-              Tab(text: 'Income'),
-              Tab(text: 'Expenses'),
-            ],
-          ),
-        ),
-        body: Column(
-          children: <Widget>[
+
             // Filter Chip
             if (_selectedAccountId != null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(DesignTokens.spacingMd),
-                child: Wrap(
-                  children: <Widget>[
-                    FilterChip(
-                      label: Text(_getAccountName(accountsAsync.value, _selectedAccountId!)),
-                      selected: true,
-                      onSelected: (_) => setState(() => _selectedAccountId = null),
-                      deleteIcon: const Icon(Icons.close, size: 18),
-                      onDeleted: () => setState(() => _selectedAccountId = null),
-                    ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
-                  ],
+              SliverToBoxAdapter(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(DesignTokens.spacingMd),
+                  child: Wrap(
+                    children: <Widget>[
+                      FilterChip(
+                        label: Text(_getAccountName(accountsAsync.value, _selectedAccountId!)),
+                        selected: true,
+                        onSelected: (_) => setState(() => _selectedAccountId = null),
+                        deleteIcon: const Icon(Icons.close, size: 18),
+                        onDeleted: () => setState(() => _selectedAccountId = null),
+                      ).animate().slideX(begin: -0.3, delay: 100.ms).fadeIn(),
+                    ],
+                  ),
                 ),
               ),
 
             // Transactions List
-            Expanded(
+            SliverFillRemaining(
               child: TabBarView(
                 controller: _tabController,
                 children: <Widget>[
@@ -133,6 +281,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
           child: const Icon(Icons.add),
         ),
       ),
+    );
+  }
+
+  String _getTransactionSummary(AsyncValue<List<Transaction>> transactionsAsync) {
+    return transactionsAsync.maybeWhen(
+      data: (List<Transaction> transactions) {
+        final int total = transactions.length;
+        if (total == 0) {
+          return 'No transactions yet';
+        }
+        return '$total ${total == 1 ? 'transaction' : 'transactions'}';
+      },
+      orElse: () => 'Loading transactions...',
     );
   }
 
