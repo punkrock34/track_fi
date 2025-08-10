@@ -4,6 +4,8 @@ import '../../../core/contracts/services/database/storage/i_account_storage_serv
 import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
+import '../../../core/providers/financial/converted_balances_provider.dart';
+import '../../../core/providers/financial/total_balance_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../transactions/providers/transactions_provider.dart';
 
@@ -55,9 +57,17 @@ class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
       await _storage.delete(accountId);
       
       await loadAccounts();
-      
+
+      _ref.invalidate(accountProvider(accountId));
+      _ref.invalidate(accountsProvider);
+      _ref.invalidate(transactionsProvider);
+      _ref.invalidate(dashboardProvider);
+      _ref.invalidate(convertedBalancesProvider);
+      _ref.invalidate(totalBalanceProvider);
+
       _ref.read(dashboardProvider.notifier).loadDashboardData();
       _ref.read(transactionsProvider.notifier).loadTransactions();
+      _ref.read(accountsProvider.notifier).loadAccounts();
       
       return true;
     } catch (e, stackTrace) {

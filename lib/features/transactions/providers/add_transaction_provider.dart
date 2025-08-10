@@ -9,6 +9,10 @@ import '../../../core/models/database/transaction.dart';
 import '../../../core/providers/database/database_service_provider.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../../../core/providers/database/storage/transaction_storage_service_provider.dart';
+import '../../../core/providers/financial/active_accounts_provider.dart';
+import '../../../core/providers/financial/converted_balances_provider.dart';
+import '../../../core/providers/financial/inactive_accounts_provider.dart';
+import '../../../core/providers/financial/total_balance_provider.dart';
 import '../../../features/accounts/providers/accounts_provider.dart';
 import '../../../features/dashboard/providers/dashboard_provider.dart';
 import '../models/add_transaction_state.dart';
@@ -100,9 +104,23 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
       }
 
       _ref.invalidate(accountProvider(updatedAccount.id));
-      _ref.read(transactionsProvider.notifier).loadTransactions();
-      _ref.read(accountsProvider.notifier).loadAccounts();
-      _ref.read(dashboardProvider.notifier).loadDashboardData();
+      _ref.invalidate(accountsProvider);
+
+      _ref.invalidate(activeAccountsProvider);
+      _ref.invalidate(inactiveAccountsProvider);
+
+      _ref.invalidate(transactionsProvider);
+      _ref.invalidate(convertedBalancesProvider);
+      _ref.invalidate(totalBalanceProvider);
+
+
+      await _ref.read(accountsProvider.notifier).loadAccounts();
+      await _ref.read(transactionsProvider.notifier).loadTransactions();
+      await _ref.read(dashboardProvider.notifier).loadDashboardData();
+
+      if (!mounted) {
+        return false;
+      }
       
       state = state.success();
       return true;
@@ -112,6 +130,11 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
         error: e,
         stackTrace: stackTrace,
       );
+
+      if (!mounted) {
+        return false;
+      }
+
       state = state.error('Failed to create transaction. Please try again.');
       return false;
     }

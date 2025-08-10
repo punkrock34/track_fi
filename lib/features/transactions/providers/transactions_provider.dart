@@ -8,6 +8,10 @@ import '../../../core/models/database/transaction.dart';
 import '../../../core/providers/database/database_service_provider.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
 import '../../../core/providers/database/storage/transaction_storage_service_provider.dart';
+import '../../../core/providers/financial/active_accounts_provider.dart';
+import '../../../core/providers/financial/converted_balances_provider.dart';
+import '../../../core/providers/financial/inactive_accounts_provider.dart';
+import '../../../core/providers/financial/total_balance_provider.dart';
 import '../../accounts/providers/accounts_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 
@@ -77,7 +81,16 @@ class TransactionsNotifier extends StateNotifier<AsyncValue<List<Transaction>>> 
         await _accountStorage.update(updatedAccount);
         
         await _ref.read(databaseServiceProvider).rawQuery('COMMIT');
-        
+
+        _ref.invalidate(accountProvider(updatedAccount.id));
+        _ref.invalidate(accountsProvider);
+
+        _ref.invalidate(activeAccountsProvider);
+        _ref.invalidate(inactiveAccountsProvider);
+
+        _ref.invalidate(convertedBalancesProvider);
+        _ref.invalidate(totalBalanceProvider);
+
         await loadTransactions();
         _ref.read(accountsProvider.notifier).loadAccounts();
         _ref.read(dashboardProvider.notifier).loadDashboardData();

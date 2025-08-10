@@ -8,6 +8,7 @@ import '../../../../core/models/database/transaction.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../core/theme/design_tokens/typography.dart';
 import '../../../../shared/utils/category_utils.dart';
+import '../../../../shared/utils/currency_utils.dart';
 import '../../../../shared/utils/date_utils.dart';
 import '../../../../shared/utils/transaction_utils.dart';
 import '../../../../shared/utils/ui_utils.dart';
@@ -31,6 +32,10 @@ class TransactionDetailsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final AsyncValue<Account?> accountAsync = ref.watch(accountProvider(transaction.accountId));
+    final String currencySymbol = accountAsync.maybeWhen(
+      data: (Account? account) => CurrencyUtils.getCurrencySymbol(account?.currency ?? 'RON'),
+      orElse: () => CurrencyUtils.getCurrencySymbol('RON'),
+    );
     final Color typeColor = TransactionUtils.getTransactionColor(transaction.type, theme);
 
     return Scaffold(
@@ -84,7 +89,7 @@ class TransactionDetailsView extends ConsumerWidget {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: _buildHeroSection(context, theme, typeColor),
+              background: _buildHeroSection(context, theme, typeColor, currencySymbol),
             ),
           ),
 
@@ -124,14 +129,14 @@ class TransactionDetailsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeroSection(BuildContext context, ThemeData theme, Color typeColor) {
+  Widget _buildHeroSection(BuildContext context, ThemeData theme, Color typeColor, String currencySymbol) {
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingLg),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Gap(kToolbarHeight), // Account for app bar
+          const Gap(kToolbarHeight),
           
           // Transaction Icon & Type
           Row(
@@ -187,7 +192,7 @@ class TransactionDetailsView extends ConsumerWidget {
           
           // Amount
           Text(
-            TransactionUtils.formatAmountWithSign(transaction),
+            TransactionUtils.formatAmountWithSign(transaction, currency: currencySymbol),
             style: AppTypography.moneyLarge.copyWith(
               color: typeColor,
               fontSize: 36,

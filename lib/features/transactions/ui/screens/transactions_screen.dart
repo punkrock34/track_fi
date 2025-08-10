@@ -344,7 +344,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
   }
 
   Widget _buildTransactionsListView(List<Transaction> transactions) {
-    // Group transactions by date
     final Map<String, List<Transaction>> groupedTransactions =
         TransactionUtils.groupTransactionsByDate(transactions);
 

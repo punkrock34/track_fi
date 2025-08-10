@@ -165,7 +165,7 @@ class AccountSelector extends StatelessWidget {
                                     ),
                                   ],
                                   Text(
-                                    CurrencyUtils.formatAmount(selectedAccount.balance),
+                                    CurrencyUtils.formatAmount(selectedAccount.balance, currency: CurrencyUtils.getCurrencySymbol(selectedAccount.currency)),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.primary,
                                       fontWeight: FontWeight.w600,
@@ -311,7 +311,7 @@ class AccountSelector extends StatelessWidget {
                                             ),
                                           ],
                                           Text(
-                                            CurrencyUtils.formatAmount(account.balance),
+                                            CurrencyUtils.formatAmount(account.balance, currency: CurrencyUtils.getCurrencySymbol(account.currency)),
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                               color: Theme.of(context).colorScheme.primary,
                                               fontWeight: FontWeight.w600,
