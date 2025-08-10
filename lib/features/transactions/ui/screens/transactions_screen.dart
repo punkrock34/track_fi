@@ -133,13 +133,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen>
                                           color: theme.colorScheme.primary,
                                         ),
                                       ),
-                                      Text(
-                                        'Track your financial activity',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: theme.colorScheme.onSurface
-                                              .withOpacity(0.7),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ],

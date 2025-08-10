@@ -123,15 +123,6 @@ class AccountsScreen extends ConsumerWidget {
                                                     color: theme.colorScheme.primary,
                                                   ),
                                                 ),
-                                                Text(
-                                                  'Manage your financial accounts',
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: theme.textTheme.bodySmall?.copyWith(
-                                                    color: theme.colorScheme.onSurface
-                                                        .withOpacity(0.7),
-                                                  ),
-                                                ),
                                               ],
                                             ),
                                           ),

@@ -61,13 +61,17 @@ class DateUtils {
   /// Get greeting based on time of day
   static String getGreeting() {
     final int hour = DateTime.now().hour;
-    if (hour < 12) {
+    if (hour < 5) {
+      return 'Good night';
+    } else if (hour < 12) {
       return 'Good morning';
-    }
-    if (hour < 17) {
+    } else if (hour < 17) {
       return 'Good afternoon';
+    } else if (hour < 21) {
+      return 'Good evening';
+    } else {
+      return 'Good night';
     }
-    return 'Good evening';
   }
 
   static String formatDateKey(DateTime date) {

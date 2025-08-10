@@ -106,13 +106,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                           color: theme.colorScheme.primary,
                                         ),
                                       ),
-                                      Text(
-                                        'Configure your app preferences',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: theme.colorScheme.onSurface
-                                              .withOpacity(0.7),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ],
