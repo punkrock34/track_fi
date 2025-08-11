@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-
 import '../../../../../core/providers/financial/base_currency_provider.dart';
 import '../../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../../shared/utils/currency_utils.dart';
@@ -195,10 +194,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   Widget _buildAnalyticsContent(AnalyticsData data, String baseCurrency, ThemeData theme) {
     final String currencySymbol = CurrencyUtils.getCurrencySymbol(baseCurrency);
+    final EdgeInsets screenPadding = EdgeInsets.symmetric(
+      horizontal: MediaQuery.of(context).size.width > 600 ? DesignTokens.spacingLg : DesignTokens.spacingMd,
+    );
 
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.all(DesignTokens.spacingMd),
+        padding: screenPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

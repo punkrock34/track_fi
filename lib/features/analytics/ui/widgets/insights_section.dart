@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../models/analytics_data.dart';
+import '../../models/insight_item.dart';
 
 class InsightsSection extends StatelessWidget {
   const InsightsSection({
@@ -20,11 +20,12 @@ class InsightsSection extends StatelessWidget {
     final List<InsightItem> insights = _generateInsights();
 
     return Card(
-      elevation: 0,
+      elevation: DesignTokens.elevationCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
         side: BorderSide(
           color: theme.colorScheme.outline.withOpacity(0.1),
+          width: 0.5,
         ),
       ),
       child: Padding(
@@ -52,60 +53,32 @@ class InsightsSection extends StatelessWidget {
                   ),
                 ),
                 const Gap(DesignTokens.spacingSm),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'Financial Insights',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      'Key patterns from your spending data',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            
-            const Gap(DesignTokens.spacingLg),
-
-            if (insights.isNotEmpty)
-              ...insights.map((InsightItem insight) => _buildInsightCard(theme, insight))
-            else
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(DesignTokens.spacingLg),
+                Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Icon(
-                        Icons.insights,
-                        size: 48,
-                        color: theme.colorScheme.onSurface.withOpacity(0.3),
-                      ),
-                      const Gap(DesignTokens.spacingSm),
                       Text(
-                        'Not enough data for insights yet',
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        'Financial Insights',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Key patterns from your spending data',
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                         ),
-                      ),
-                      const Gap(DesignTokens.spacingXs),
-                      Text(
-                        'Keep tracking your expenses to unlock personalized insights',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
+            ),
+            const Gap(DesignTokens.spacingLg),
+            if (insights.isNotEmpty)
+              ...insights.map((InsightItem insight) => _buildInsightCard(theme, insight))
+            else
+              _buildEmptyInsightsState(theme),
           ],
         ),
       ),
@@ -115,20 +88,28 @@ class InsightsSection extends StatelessWidget {
   Widget _buildInsightCard(ThemeData theme, InsightItem insight) {
     return Container(
       margin: const EdgeInsets.only(bottom: DesignTokens.spacingSm),
-      padding: const EdgeInsets.all(DesignTokens.spacingSm),
+      padding: const EdgeInsets.all(DesignTokens.spacingMd),
       decoration: BoxDecoration(
         color: insight.color.withOpacity(0.05),
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         border: Border.all(
           color: insight.color.withOpacity(0.2),
         ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: insight.color.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: insight.color.withOpacity(0.1),
+              color: insight.color.withOpacity(0.15),
               borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
             ),
             child: Icon(
@@ -142,42 +123,99 @@ class InsightsSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  insight.title,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        insight.title,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    if (insight.value != null) ...<Widget>[
+                      const Gap(DesignTokens.spacingXs),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: insight.color.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                        ),
+                        child: Text(
+                          insight.value!,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: insight.color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                const Gap(2),
+                const Gap(DesignTokens.spacingXs),
                 Text(
                   insight.description,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                    height: 1.3,
+                    color: theme.colorScheme.onSurface.withOpacity(0.75),
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
           ),
-          if (insight.value != null)
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: insight.color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-              ),
-              child: Text(
-                insight.value!,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: insight.color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyInsightsState(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(DesignTokens.spacingLg),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        children: <Widget>[
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
             ),
+            child: Icon(
+              Icons.insights,
+              size: 32,
+              color: theme.colorScheme.primary.withOpacity(0.7),
+            ),
+          ),
+          const Gap(DesignTokens.spacingSm),
+          Text(
+            'Not enough data for insights yet',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const Gap(DesignTokens.spacingXs),
+          Text(
+            'Keep tracking your expenses to unlock personalized insights about your spending patterns and financial habits.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -185,11 +223,9 @@ class InsightsSection extends StatelessWidget {
 
   List<InsightItem> _generateInsights() {
     final List<InsightItem> insights = <InsightItem>[];
-
     if (data.categoryBreakdown.isEmpty) {
       return insights;
     }
-
     final CategoryData topCategory = data.categoryBreakdown.first;
     if (topCategory.percentage > 30) {
       insights.add(InsightItem(
@@ -200,12 +236,10 @@ class InsightsSection extends StatelessWidget {
         value: '${topCategory.percentage.toStringAsFixed(0)}%',
       ));
     }
-
     if (data.monthlyData.length >= 2) {
       final MonthlyData latest = data.monthlyData.last;
       final MonthlyData previous = data.monthlyData[data.monthlyData.length - 2];
       final double expenseChange = ((latest.expenses - previous.expenses) / previous.expenses) * 100;
-      
       if (expenseChange > 20) {
         insights.add(InsightItem(
           icon: Icons.trending_up,
@@ -224,7 +258,6 @@ class InsightsSection extends StatelessWidget {
         ));
       }
     }
-
     final num savingsRate = data.totalIncome > 0 ? (data.netIncome / data.totalIncome) * 100 : 0;
     if (savingsRate > 20) {
       insights.add(InsightItem(
@@ -243,12 +276,9 @@ class InsightsSection extends StatelessWidget {
         value: '${savingsRate.toStringAsFixed(0)}%',
       ));
     }
-
     if (data.categoryBreakdown.length >= 3) {
-      final int totalTransactions = data.categoryBreakdown
-          .fold(0, (int sum, CategoryData category) => sum + category.transactionCount);
+      final int totalTransactions = data.categoryBreakdown.fold(0, (int sum, CategoryData category) => sum + category.transactionCount);
       final double avgPerCategory = totalTransactions / data.categoryBreakdown.length;
-      
       if (avgPerCategory < 3) {
         insights.add(InsightItem(
           icon: Icons.category_outlined,
@@ -258,23 +288,6 @@ class InsightsSection extends StatelessWidget {
         ));
       }
     }
-
     return insights;
   }
-}
-
-class InsightItem {
-
-  InsightItem({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.color,
-    this.value,
-  });
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color color;
-  final String? value;
 }

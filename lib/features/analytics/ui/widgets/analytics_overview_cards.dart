@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../core/theme/design_tokens/typography.dart';
 import '../../../../shared/utils/currency_utils.dart';
@@ -40,8 +39,7 @@ class AnalyticsOverviewCards extends StatelessWidget {
         borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: (data.netIncome >= 0 ? theme.colorScheme.primary : theme.colorScheme.error)
-                .withOpacity(0.3),
+            color: (data.netIncome >= 0 ? theme.colorScheme.primary : theme.colorScheme.error).withOpacity(0.3),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -59,7 +57,7 @@ class AnalyticsOverviewCards extends StatelessWidget {
                   Text(
                     'Net ${data.netIncome >= 0 ? 'Income' : 'Loss'}',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: theme.colorScheme.onPrimary.withOpacity(0.9),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -67,7 +65,7 @@ class AnalyticsOverviewCards extends StatelessWidget {
                   Text(
                     CurrencyUtils.formatAmount(data.netIncome.abs(), currency: currencySymbol),
                     style: AppTypography.moneyLarge.copyWith(
-                      color: Colors.white,
+                      color: theme.colorScheme.onPrimary,
                       fontSize: 36,
                     ),
                   ),
@@ -76,12 +74,12 @@ class AnalyticsOverviewCards extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: theme.colorScheme.onPrimary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                 ),
                 child: Icon(
                   data.netIncome >= 0 ? Icons.trending_up : Icons.trending_down,
-                  color: Colors.white,
+                  color: theme.colorScheme.onPrimary,
                   size: 32,
                 ),
               ),
@@ -115,7 +113,7 @@ class AnalyticsOverviewCards extends StatelessWidget {
           Text(
             'For ${data.period.label.toLowerCase()}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white.withOpacity(0.8),
+              color: theme.colorScheme.onPrimary.withOpacity(0.8),
             ),
           ),
         ],
@@ -133,10 +131,10 @@ class AnalyticsOverviewCards extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(DesignTokens.spacingSm),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: theme.colorScheme.onPrimary.withOpacity(0.15),
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: theme.colorScheme.onPrimary.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -147,13 +145,13 @@ class AnalyticsOverviewCards extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: Colors.white.withOpacity(0.9),
+                color: theme.colorScheme.onPrimary.withOpacity(0.9),
               ),
               const Gap(DesignTokens.spacingXs),
               Text(
                 label,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: theme.colorScheme.onPrimary.withOpacity(0.9),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -163,7 +161,7 @@ class AnalyticsOverviewCards extends StatelessWidget {
           Text(
             CurrencyUtils.formatAmount(amount, currency: currency),
             style: AppTypography.moneyMedium.copyWith(
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
               fontSize: 18,
             ),
           ),

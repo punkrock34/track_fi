@@ -21,11 +21,12 @@ class MonthlyTrendChart extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Card(
-      elevation: 0,
+      elevation: DesignTokens.elevationCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
         side: BorderSide(
           color: theme.colorScheme.outline.withOpacity(0.1),
+          width: 0.5,
         ),
       ),
       child: Padding(
@@ -36,23 +37,25 @@ class MonthlyTrendChart extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'Monthly Trend',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Financial Trend',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const Gap(2),
-                    Text(
-                      'Income vs Expenses over time',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      const Gap(2),
+                      Text(
+                        'Income vs Expenses comparison',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -75,139 +78,97 @@ class MonthlyTrendChart extends StatelessWidget {
             
             const Gap(DesignTokens.spacingLg),
 
-            SizedBox(
-              height: 220,
-              child: data.monthlyData.isNotEmpty
-                  ? LineChart(
-                      LineChartData(
-                        gridData: FlGridData(
-                          drawVerticalLine: false,
-                          horizontalInterval: _getMaxValue() / 4,
-                          getDrawingHorizontalLine: (double value) {
-                            return FlLine(
-                              color: theme.colorScheme.outline.withOpacity(0.1),
-                              strokeWidth: 1,
-                            );
-                          },
-                        ),
-                        titlesData: FlTitlesData(
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 60,
-                              getTitlesWidget: (double value, TitleMeta meta) {
-                                return Text(
-                                  CurrencyUtils.formatLargeAmount(value, currency: currencySymbol),
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              getTitlesWidget: (double value, TitleMeta meta) {
-                                final int index = value.toInt();
-                                if (index >= 0 && index < data.monthlyData.length) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      data.monthlyData[index].month,
-                                      style: theme.textTheme.labelSmall?.copyWith(
-                                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                      ),
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final double chartHeight = constraints.maxWidth < 400 ? 220 : 280;
+                
+                return SizedBox(
+                  height: chartHeight,
+                  child: data.monthlyData.isNotEmpty
+                      ? BarChart(
+                          BarChartData(
+                            alignment: BarChartAlignment.spaceAround,
+                            maxY: _getMaxValue() * 1.1,
+                            barTouchData: BarTouchData(
+                              touchTooltipData: BarTouchTooltipData(
+                                getTooltipColor: (BarChartGroupData group) => theme.colorScheme.inverseSurface,
+                                getTooltipItem: (BarChartGroupData group, int groupIndex, BarChartRodData rod, int rodIndex) {
+                                  final String label = rodIndex == 0 ? 'Income' : 'Expenses';
+                                  final String period = groupIndex < data.monthlyData.length 
+                                      ? data.monthlyData[groupIndex].month 
+                                      : '';
+                                  return BarTooltipItem(
+                                    '$label ($period)\n${CurrencyUtils.formatAmount(rod.toY, currency: currencySymbol)}',
+                                    TextStyle(
+                                      color: theme.colorScheme.onInverseSurface,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
                                     ),
                                   );
-                                }
-                                return const Text('');
-                              },
+                                },
+                              ),
                             ),
-                          ),
-                          rightTitles: const AxisTitles(),
-                          topTitles: const AxisTitles(),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: <LineChartBarData>[
-                          LineChartBarData(
-                            spots: _getIncomeSpots(),
-                            color: theme.colorScheme.primary,
-                            barWidth: 3,
-                            isStrokeCapRound: true,
-                            dotData: FlDotData(
-                              getDotPainter: (FlSpot spot, double percent, LineChartBarData barData, int index) {
-                                return FlDotCirclePainter(
-                                  radius: 4,
-                                  color: theme.colorScheme.primary,
-                                  strokeWidth: 2,
-                                  strokeColor: theme.colorScheme.surface,
+                            titlesData: FlTitlesData(
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 60,
+                                  getTitlesWidget: (double value, TitleMeta meta) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        CurrencyUtils.formatLargeAmount(value, currency: currencySymbol),
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                          fontSize: 10,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  getTitlesWidget: (double value, TitleMeta meta) {
+                                    final int index = value.toInt();
+                                    if (index >= 0 && index < data.monthlyData.length) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: 8),
+                                        child: Text(
+                                          data.monthlyData[index].month,
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const Text('');
+                                  },
+                                ),
+                              ),
+                              rightTitles: const AxisTitles(),
+                              topTitles: const AxisTitles(),
+                            ),
+                            borderData: FlBorderData(show: false),
+                            gridData: FlGridData(
+                              drawVerticalLine: false,
+                              horizontalInterval: _getMaxValue() / 4,
+                              getDrawingHorizontalLine: (double value) {
+                                return FlLine(
+                                  color: theme.colorScheme.outline.withOpacity(0.1),
+                                  strokeWidth: 1,
                                 );
                               },
                             ),
-                            belowBarData: BarAreaData(
-                              show: true,
-                              color: theme.colorScheme.primary.withOpacity(0.1),
-                            ),
+                            barGroups: _getBarGroups(theme),
                           ),
-                          LineChartBarData(
-                            spots: _getExpenseSpots(),
-                            color: theme.colorScheme.error,
-                            barWidth: 3,
-                            isStrokeCapRound: true,
-                            dotData: FlDotData(
-                              getDotPainter: (FlSpot spot, double percent, LineChartBarData barData, int index) {
-                                return FlDotCirclePainter(
-                                  radius: 4,
-                                  color: theme.colorScheme.error,
-                                  strokeWidth: 2,
-                                  strokeColor: theme.colorScheme.surface,
-                                );
-                              },
-                            ),
-                            belowBarData: BarAreaData(
-                              show: true,
-                              color: theme.colorScheme.error.withOpacity(0.1),
-                            ),
-                          ),
-                        ],
-                        lineTouchData: LineTouchData(
-                          touchTooltipData: LineTouchTooltipData(
-                            getTooltipItems: (List<LineBarSpot> touchedSpots) {
-                              return touchedSpots.map((LineBarSpot spot) {
-                                final String label = spot.barIndex == 0 ? 'Income' : 'Expenses';
-                                return LineTooltipItem(
-                                  '$label\n${CurrencyUtils.formatAmount(spot.y, currency: currencySymbol)}',
-                                  TextStyle(
-                                    color: theme.colorScheme.onInverseSurface,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                );
-                              }).toList();
-                            },
-                          ),
-                        ),
-                      ),
-                    )
-                  : Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            Icons.show_chart,
-                            size: 48,
-                            color: theme.colorScheme.onSurface.withOpacity(0.3),
-                          ),
-                          const Gap(DesignTokens.spacingSm),
-                          Text(
-                            'No trend data available',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        )
+                      : _buildEmptyState(theme),
+                );
+              },
             ),
 
             const Gap(DesignTokens.spacingSm),
@@ -226,6 +187,28 @@ class MonthlyTrendChart extends StatelessWidget {
     );
   }
 
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.bar_chart,
+            size: 48,
+            color: theme.colorScheme.onSurface.withOpacity(0.3),
+          ),
+          const Gap(DesignTokens.spacingSm),
+          Text(
+            'No financial data available',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLegendItem(ThemeData theme, String label, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -235,7 +218,7 @@ class MonthlyTrendChart extends StatelessWidget {
           height: 12,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
         const Gap(DesignTokens.spacingXs),
@@ -249,15 +232,39 @@ class MonthlyTrendChart extends StatelessWidget {
     );
   }
 
-  List<FlSpot> _getIncomeSpots() {
+  List<BarChartGroupData> _getBarGroups(ThemeData theme) {
     return data.monthlyData.asMap().entries.map((MapEntry<int, MonthlyData> entry) {
-      return FlSpot(entry.key.toDouble(), entry.value.income);
-    }).toList();
-  }
-
-  List<FlSpot> _getExpenseSpots() {
-    return data.monthlyData.asMap().entries.map((MapEntry<int, MonthlyData> entry) {
-      return FlSpot(entry.key.toDouble(), entry.value.expenses);
+      final int index = entry.key;
+      final MonthlyData monthData = entry.value;
+      
+      return BarChartGroupData(
+        x: index,
+        barRods: <BarChartRodData>[
+          BarChartRodData(
+            toY: monthData.income,
+            color: theme.colorScheme.primary,
+            width: 16,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            backDrawRodData: BackgroundBarChartRodData(
+              show: true,
+              toY: _getMaxValue(),
+              color: theme.colorScheme.primary.withOpacity(0.1),
+            ),
+          ),
+          BarChartRodData(
+            toY: monthData.expenses,
+            color: theme.colorScheme.error,
+            width: 16,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            backDrawRodData: BackgroundBarChartRodData(
+              show: true,
+              toY: _getMaxValue(),
+              color: theme.colorScheme.error.withOpacity(0.1),
+            ),
+          ),
+        ],
+        barsSpace: 4,
+      );
     }).toList();
   }
 
@@ -271,6 +278,6 @@ class MonthlyTrendChart extends StatelessWidget {
         max = month.expenses;
       }
     }
-    return max;
+    return max == 0 ? 1000 : max; // Prevent division by zero
   }
 }

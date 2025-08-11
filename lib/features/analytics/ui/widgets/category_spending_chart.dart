@@ -29,11 +29,12 @@ class _CategorySpendingChartState extends State<CategorySpendingChart> {
     final ThemeData theme = Theme.of(context);
 
     return Card(
-      elevation: 0,
+      elevation: DesignTokens.elevationCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
         side: BorderSide(
           color: theme.colorScheme.outline.withOpacity(0.1),
+          width: 0.5,
         ),
       ),
       child: Padding(
@@ -44,23 +45,25 @@ class _CategorySpendingChartState extends State<CategorySpendingChart> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'Spending by Category',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Spending by Category',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const Gap(2),
-                    Text(
-                      'Top spending categories breakdown',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      const Gap(2),
+                      Text(
+                        'Top spending categories breakdown',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 if (widget.data.categoryBreakdown.isNotEmpty)
                   Container(
@@ -85,140 +88,213 @@ class _CategorySpendingChartState extends State<CategorySpendingChart> {
             
             const Gap(DesignTokens.spacingLg),
 
-            SizedBox(
-              height: 280,
-              child: widget.data.categoryBreakdown.isNotEmpty
-                  ? Row(
-                      children: <Widget>[
-                        Expanded(
-                          flex: 2,
-                          child: PieChart(
-                            PieChartData(
-                              pieTouchData: PieTouchData(
-                                touchCallback: (FlTouchEvent event, PieTouchResponse? pieTouchResponse) {
-                                  setState(() {
-                                    if (!event.isInterestedForInteractions ||
-                                        pieTouchResponse == null ||
-                                        pieTouchResponse.touchedSection == null) {
-                                      touchedIndex = -1;
-                                      return;
-                                    }
-                                    touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
-                                  });
-                                },
-                              ),
-                              borderData: FlBorderData(show: false),
-                              sectionsSpace: 2,
-                              centerSpaceRadius: 50,
-                              sections: _getPieChartSections(theme),
-                            ),
-                          ),
-                        ),
-                        
-                        const Gap(DesignTokens.spacingLg),
-                        
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            children: <Widget>[
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: widget.data.categoryBreakdown.take(6).length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    final CategoryData category = widget.data.categoryBreakdown[index];
-                                    final bool isSelected = index == touchedIndex;
-                                    
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: DesignTokens.spacingXs),
-                                      padding: const EdgeInsets.all(DesignTokens.spacingSm),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-                                            : theme.colorScheme.surface,
-                                        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? theme.colorScheme.primary.withOpacity(0.5)
-                                              : theme.colorScheme.outline.withOpacity(0.1),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: <Widget>[
-                                          Container(
-                                            padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(
-                                              color: CategoryUtils.getCategoryColor(category.categoryId, theme).withOpacity(0.2),
-                                              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-                                            ),
-                                            child: Icon(
-                                              CategoryUtils.getCategoryIcon(category.categoryId),
-                                              size: 16,
-                                              color: CategoryUtils.getCategoryColor(category.categoryId, theme),
-                                            ),
-                                          ),
-                                          const Gap(DesignTokens.spacingSm),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: <Widget>[
-                                                Text(
-                                                  category.categoryName,
-                                                  style: theme.textTheme.labelLarge?.copyWith(
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                                const Gap(2),
-                                                Text(
-                                                  '${category.percentage.toStringAsFixed(1)}% • ${category.transactionCount} txn',
-                                                  style: theme.textTheme.labelSmall?.copyWith(
-                                                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Text(
-                                            CurrencyUtils.formatLargeAmount(category.amount, currency: widget.currencySymbol),
-                                            style: theme.textTheme.labelLarge?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                              color: CategoryUtils.getCategoryColor(category.categoryId, theme),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    )
-                  : Center(
+            LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final bool isSmallScreen = constraints.maxWidth < 500;
+                
+                return SizedBox(
+                  height: isSmallScreen ? 380 : 320,
+                  child: widget.data.categoryBreakdown.isNotEmpty
+                      ? isSmallScreen 
+                          ? _buildVerticalLayout(theme)
+                          : _buildHorizontalLayout(theme)
+                      : _buildEmptyState(theme),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHorizontalLayout(ThemeData theme) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 2,
+          child: _buildPieChart(theme),
+        ),
+        const Gap(DesignTokens.spacingLg),
+        Expanded(
+          flex: 3,
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+              border: Border.all(
+                color: theme.colorScheme.outline.withOpacity(0.1),
+              ),
+            ),
+            child: _buildCategoryLegend(theme),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVerticalLayout(ThemeData theme) {
+    return Column(
+      children: <Widget>[
+        SizedBox(
+          height: 200,
+          child: _buildPieChart(theme),
+        ),
+        const Gap(DesignTokens.spacingMd),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+              border: Border.all(
+                color: theme.colorScheme.outline.withOpacity(0.1),
+              ),
+            ),
+            child: _buildCategoryLegend(theme),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPieChart(ThemeData theme) {
+    return PieChart(
+      PieChartData(
+        pieTouchData: PieTouchData(
+          touchCallback: (FlTouchEvent event, PieTouchResponse? pieTouchResponse) {
+            setState(() {
+              if (!event.isInterestedForInteractions ||
+                  pieTouchResponse == null ||
+                  pieTouchResponse.touchedSection == null) {
+                touchedIndex = -1;
+                return;
+              }
+              touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+            });
+          },
+        ),
+        borderData: FlBorderData(show: false),
+        sectionsSpace: 3,
+        centerSpaceRadius: 60,
+        sections: _getPieChartSections(theme),
+      ),
+    );
+  }
+
+  Widget _buildCategoryLegend(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.all(DesignTokens.spacingSm),
+      child: Scrollbar(
+        thumbVisibility: widget.data.categoryBreakdown.length > 2,
+        thickness: 4,
+        radius: const Radius.circular(2),
+        child: ListView.builder(
+          padding: EdgeInsets.zero, // Remove default padding
+          itemCount: widget.data.categoryBreakdown.take(6).length,
+          itemBuilder: (BuildContext context, int index) {
+            final CategoryData category = widget.data.categoryBreakdown[index];
+            final bool isSelected = index == touchedIndex;
+            
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  touchedIndex = touchedIndex == index ? -1 : index;
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: DesignTokens.spacingXs),
+                padding: const EdgeInsets.all(DesignTokens.spacingSm),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                  border: Border.all(
+                    color: isSelected
+                        ? theme.colorScheme.primary.withOpacity(0.5)
+                        : theme.colorScheme.outline.withOpacity(0.1),
+                  ),
+                  boxShadow: isSelected ? <BoxShadow>[
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ] : null,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: CategoryUtils.getCategoryColor(category.categoryId, theme).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                      ),
+                      child: Icon(
+                        CategoryUtils.getCategoryIcon(category.categoryId),
+                        size: 16,
+                        color: CategoryUtils.getCategoryColor(category.categoryId, theme),
+                      ),
+                    ),
+                    const Gap(DesignTokens.spacingSm),
+                    Expanded(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Icon(
-                            Icons.pie_chart_outline,
-                            size: 48,
-                            color: theme.colorScheme.onSurface.withOpacity(0.3),
-                          ),
-                          const Gap(DesignTokens.spacingSm),
                           Text(
-                            'No spending data available',
-                            style: theme.textTheme.bodyMedium?.copyWith(
+                            category.categoryName,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Gap(2),
+                          Text(
+                            '${category.percentage.toStringAsFixed(1)}% • ${category.transactionCount} txn',
+                            style: theme.textTheme.labelSmall?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                           ),
                         ],
                       ),
                     ),
-            ),
-          ],
+                    const Gap(DesignTokens.spacingXs),
+                    Text(
+                      CurrencyUtils.formatLargeAmount(category.amount, currency: widget.currencySymbol),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: CategoryUtils.getCategoryColor(category.categoryId, theme),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.pie_chart_outline,
+            size: 48,
+            color: theme.colorScheme.onSurface.withOpacity(0.3),
+          ),
+          const Gap(DesignTokens.spacingSm),
+          Text(
+            'No spending data available',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -230,7 +306,7 @@ class _CategorySpendingChartState extends State<CategorySpendingChart> {
       final int index = entry.key;
       final CategoryData category = entry.value;
       final bool isTouched = index == touchedIndex;
-      final double radius = isTouched ? 65.0 : 55.0;
+      final double radius = isTouched ? 70.0 : 60.0;
       
       return PieChartSectionData(
         color: CategoryUtils.getCategoryColor(category.categoryId, theme),
@@ -238,12 +314,12 @@ class _CategorySpendingChartState extends State<CategorySpendingChart> {
         title: isTouched ? '${category.percentage.toStringAsFixed(1)}%' : '',
         radius: radius,
         titleStyle: TextStyle(
-          fontSize: 14,
+          fontSize: 12,
           fontWeight: FontWeight.bold,
           color: Colors.white,
           shadows: <Shadow>[
             Shadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withOpacity(0.5),
               blurRadius: 2,
             ),
           ],
@@ -263,7 +339,7 @@ class _CategorySpendingChartState extends State<CategorySpendingChart> {
                 ),
                 child: Icon(
                   CategoryUtils.getCategoryIcon(category.categoryId),
-                  size: 16,
+                  size: 14,
                   color: CategoryUtils.getCategoryColor(category.categoryId, theme),
                 ),
               )
