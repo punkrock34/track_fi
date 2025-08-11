@@ -13,6 +13,7 @@ import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/theme/theme_toggle.dart';
 import '../../../../core/providers/auth/auth_service_provider.dart';
 import '../../../../core/providers/session/session_provider.dart';
+import '../widgets/danger_zone_modal.dart';
 import '../widgets/settings_group.dart';
 import '../widgets/settings_item.dart';
 
@@ -238,6 +239,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           onTap: () => ExportUtils.exportAllData(context, ref),
                           showTrailing: true,
                         ),
+                        
+                        SettingsItem(
+                          title: 'Clear All Data',
+                          subtitle: 'Permanently delete all accounts and transactions',
+                          icon: Icons.delete_forever_rounded,
+                          showTrailing: true,
+                          onTap: () => _showDangerZoneModal(context),
+                        ),
                       ],
                     ).animate().slideY(begin: 0.3, delay: 400.ms).fadeIn(),
 
@@ -385,5 +394,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
 
     context.goNamed('auth');
+  }
+
+  Future<void> _showDangerZoneModal(BuildContext context) async {
+    final bool? confirmed = await showDangerZoneModal(context);
+    
+    if ((confirmed ?? false) && context.mounted) {
+      ref.read(sessionProvider.notifier).logout();
+      ref.read(authServiceProvider.notifier).reset();
+      context.goNamed('onboarding');
+    }
   }
 }
