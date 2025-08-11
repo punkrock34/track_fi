@@ -4,7 +4,9 @@ import '../../../core/contracts/services/database/storage/i_account_storage_serv
 import '../../../core/logging/log.dart';
 import '../../../core/models/database/account.dart';
 import '../../../core/providers/database/storage/account_storage_service_provider.dart';
+import '../../../core/providers/financial/active_accounts_provider.dart';
 import '../../../core/providers/financial/converted_balances_provider.dart';
+import '../../../core/providers/financial/inactive_accounts_provider.dart';
 import '../../../core/providers/financial/total_balance_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../models/edit_account_state.dart';
@@ -114,9 +116,13 @@ class EditAccountNotifier extends StateNotifier<EditAccountState> {
       
       _ref.invalidate(accountProvider(updatedAccount.id));
       _ref.invalidate(accountsProvider);
+
+      _ref.invalidate(activeAccountsProvider);
+      _ref.invalidate(inactiveAccountsProvider);
+      
       _ref.invalidate(convertedBalancesProvider);
       _ref.invalidate(totalBalanceProvider);
-        
+
       await _ref.read(dashboardProvider.notifier).loadDashboardData();
       await _ref.read(accountsProvider.notifier).loadAccounts();
 
