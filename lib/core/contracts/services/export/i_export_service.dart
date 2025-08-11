@@ -1,8 +1,8 @@
 import 'dart:typed_data';
+import '../../../../shared/models/export_format_enum.dart';
+import '../../../../shared/models/save_result.dart';
 import '../../../models/database/account.dart';
 import '../../../models/database/transaction.dart';
-
-enum ExportFormat { csv, pdf }
 
 abstract class IExportService {
   Future<Uint8List> exportAllData({required ExportFormat format});
@@ -15,7 +15,7 @@ abstract class IExportService {
     required ExportFormat format,
   });
 
-  Future<bool> saveExportedData({
+  Future<SaveResult> saveExportedData({
     required Uint8List bytes,
     required String fileNameWithoutExt,
     required ExportFormat format,
