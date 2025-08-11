@@ -23,21 +23,18 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
       final ITransactionStorageService txStorage = _ref.read(transactionStorageProvider);
       final String baseCurrency = await _ref.read(currencyExchangeServiceProvider).getBaseCurrency();
       
-      // Get all transactions for active accounts
       final List<Transaction> allTransactions = <Transaction>[];
       for (final Account account in accounts) {
         final List<Transaction> accountTx = await txStorage.getAllByAccount(account.id);
         allTransactions.addAll(accountTx);
       }
 
-      // Filter by period
       final DateTime now = DateTime.now();
       final DateTime startDate = _getStartDateForPeriod(period, now);
       final List<Transaction> filteredTransactions = allTransactions
           .where((Transaction t) => t.transactionDate.isAfter(startDate))
           .toList();
 
-      // Calculate analytics data
       final AnalyticsData analyticsData = await _calculateAnalyticsData(
         filteredTransactions,
         accounts,
@@ -64,7 +61,7 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
       case AnalyticsPeriod.year:
         return DateTime(now.year);
       case AnalyticsPeriod.all:
-        return DateTime(2020); // Far enough back
+        return DateTime(2020);
     }
   }
 
@@ -74,7 +71,6 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
     AnalyticsPeriod period,
     String baseCurrency,
   ) async {
-    // Convert all amounts to base currency
     final List<Transaction> convertedTx = <Transaction>[];
     for (final Transaction tx in transactions) {
       final Account account = accounts.firstWhere((Account a) => a.id == tx.accountId);
@@ -92,7 +88,6 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
       convertedTx.add(tx.copyWith(amount: convertedAmount));
     }
 
-    // Calculate totals
     final double totalIncome = convertedTx
         .where((Transaction t) => t.type == TransactionType.credit)
         .fold(0.0, (double sum, Transaction t) => sum + t.amount);
@@ -103,19 +98,12 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
 
     final double netIncome = totalIncome - totalExpenses;
 
-    // Calculate monthly data
     final List<MonthlyData> monthlyData = _calculateMonthlyData(convertedTx, period);
-
-    // Calculate category breakdown
     final List<CategoryData> categoryBreakdown = _calculateCategoryBreakdown(
       convertedTx.where((Transaction t) => t.type == TransactionType.debit).toList(),
       totalExpenses,
     );
-
-    // Calculate weekly trend
     final List<DailyData> weeklyTrend = _calculateWeeklyTrend(convertedTx);
-
-    // Top categories (top 5)
     final List<CategoryData> topCategories = categoryBreakdown.take(5).toList();
 
     return AnalyticsData(
@@ -142,7 +130,7 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
     final List<MonthlyData> monthlyData = <MonthlyData>[];
     final List<String> sortedKeys = monthlyGroups.keys.toList()..sort();
     
-    for (final String key in sortedKeys.take(12)) { // Last 12 months max
+    for (final String key in sortedKeys.take(12)) {
       final List<Transaction> monthTx = monthlyGroups[key]!;
       final double income = monthTx
           .where((Transaction t) => t.type == TransactionType.credit)
@@ -182,20 +170,17 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
       final List<Transaction> categoryTx = entry.value;
       final double amount = categoryTx.fold(0.0, (double sum, Transaction t) => sum + t.amount.abs());
       final double percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0;
-
-      final ThemeData fakeTheme = ThemeData();
       
       categoryData.add(CategoryData(
         categoryId: categoryId,
         categoryName: CategoryUtils.getCategoryName(categoryId),
         amount: amount,
         percentage: percentage,
-        color: CategoryUtils.getCategoryColor(categoryId, fakeTheme),
+        color: Colors.blue, // Placeholder - will be overridden in UI with proper theme
         transactionCount: categoryTx.length,
       ));
     }
 
-    // Sort by amount descending
     categoryData.sort((CategoryData a, CategoryData b) => b.amount.compareTo(a.amount));
     
     return categoryData;
@@ -213,7 +198,7 @@ class AnalyticsNotifier extends StateNotifier<AsyncValue<AnalyticsData>> {
     final List<DailyData> dailyData = <DailyData>[];
     final List<String> sortedKeys = dailyGroups.keys.toList()..sort();
     
-    for (final String key in sortedKeys.take(30)) { // Last 30 days
+    for (final String key in sortedKeys.take(30)) {
       final List<Transaction> dayTx = dailyGroups[key]!;
       final List<String> parts = key.split('-');
       final DateTime date = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
