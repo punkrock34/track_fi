@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../../core/providers/theme/theme_provider.dart';
 import '../../../../../core/theme/design_tokens/design_tokens.dart';
+import '../../../../../shared/utils/export_utils.dart';
 import '../../../../../shared/utils/ui_utils.dart';
 import '../../../../../shared/widgets/navigation/swipe_navigation_wrapper.dart';
 import '../../../../../shared/widgets/theme/theme_toggle.dart';
@@ -234,7 +235,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: 'Export Data',
                           subtitle: 'Download your financial data',
                           icon: Icons.download_rounded,
-                          onTap: () => UiUtils.showComingSoon(context, 'Export Data'),
+                          onTap: () => ExportUtils.exportAllData(context, ref),
                           showTrailing: true,
                         ),
                       ],
