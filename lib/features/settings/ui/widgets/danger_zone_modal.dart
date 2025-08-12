@@ -10,6 +10,7 @@ import '../../../../core/providers/database/database_service_provider.dart';
 import '../../../../core/providers/secure_storage/secure_storage_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
+import '../../../onboarding/providers/onboarding_provider.dart';
 
 enum DangerZoneStep {
   warning,
@@ -255,15 +256,15 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
           _buildWarningItem(
             theme,
             Icons.category_rounded,
-            'Categories & Settings',
-            'Custom categories and app preferences',
+            'Settings',
+            'All app settings and preferences',
           ),
-
+          
           _buildWarningItem(
             theme,
             Icons.security_rounded,
             'Security Data',
-            'Stored PIN and authentication settings',
+            'All secure storage data including passwords and tokens',
           ),
 
           const Gap(DesignTokens.spacingLg),
@@ -477,7 +478,6 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
   }
 
   Widget _buildSuccessStep(ThemeData theme) {
-    // Auto-navigate to setup after 3 seconds
     Future<void>.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.of(context).pop(true);
@@ -685,11 +685,14 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
       // Clear database
       final IDatabaseService databaseService = ref.read(databaseServiceProvider);
       await databaseService.deleteDatabase();
-      await databaseService.init(); // Reinitialize empty database
+      await databaseService.init();
 
       // Clear secure storage
       final ISecureStorageService secureStorage = ref.read(secureStorageProvider);
       await secureStorage.clearAll();
+
+      // Clear onboarding state
+      ref.read(onboardingProvider.notifier).reset();
 
       // Small delay to show the clearing animation
       await Future<void>.delayed(const Duration(seconds: 2));
