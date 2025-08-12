@@ -59,7 +59,6 @@ class AccountsNotifier extends StateNotifier<AsyncValue<List<Account>>> {
       await _storage.delete(accountId);
       
       _ref.invalidate(accountProvider(accountId));
-      _ref.invalidate(accountsProvider);
       
       _ref.invalidate(activeAccountsProvider);
       _ref.invalidate(inactiveAccountsProvider);

@@ -28,6 +28,7 @@ class FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final bool hasGradient = gradient != null;
 
     return Card(
       elevation: style.elevation,
@@ -54,8 +55,8 @@ class FeatureCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(style.iconPadding),
                 decoration: BoxDecoration(
-                  color: gradient != null
-                      ? Colors.white.withOpacity(0.2)
+                  color: hasGradient
+                      ? theme.colorScheme.surface.withOpacity(0.2)
                       : theme.colorScheme.primaryContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
                   boxShadow: style.showIconShadow ? <BoxShadow>[
@@ -69,8 +70,8 @@ class FeatureCard extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: style.iconSize,
-                  color: gradient != null
-                      ? Colors.white
+                  color: hasGradient
+                      ? theme.colorScheme.onSurface
                       : theme.colorScheme.primary,
                 ),
               ),
@@ -86,8 +87,8 @@ class FeatureCard extends StatelessWidget {
                       title,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: gradient != null 
-                            ? Colors.white
+                        color: hasGradient 
+                            ? theme.colorScheme.onSurface
                             : theme.colorScheme.onSurface,
                       ),
                     ),
@@ -95,8 +96,8 @@ class FeatureCard extends StatelessWidget {
                     Text(
                       description,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: gradient != null 
-                            ? Colors.white.withOpacity(0.8)
+                        color: hasGradient 
+                            ? theme.colorScheme.onSurface.withOpacity(0.8)
                             : theme.colorScheme.onSurface.withOpacity(0.7),
                         height: 1.4,
                       ),
@@ -111,8 +112,8 @@ class FeatureCard extends StatelessWidget {
                 Icon(
                   Icons.chevron_right_rounded,
                   size: 20,
-                  color: gradient != null 
-                      ? Colors.white.withOpacity(0.7)
+                  color: hasGradient 
+                      ? theme.colorScheme.onSurface.withOpacity(0.5)
                       : theme.colorScheme.onSurface.withOpacity(0.5),
                 ),
               ],

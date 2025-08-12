@@ -232,12 +232,12 @@ class WelcomeScreen extends ConsumerWidget {
               title: feature.title,
               description: feature.description,
               animationDelay: Duration(milliseconds: 1000 + (index * 150)),
-              gradient: index == 1 ? LinearGradient(
+              gradient: LinearGradient(
                 colors: <Color>[
                   theme.colorScheme.primary.withOpacity(0.1),
                   theme.colorScheme.secondary.withOpacity(0.05),
                 ],
-              ) : null,
+              ),
             ),
           );
         }),

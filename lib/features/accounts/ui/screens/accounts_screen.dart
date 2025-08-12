@@ -90,7 +90,6 @@ class AccountsScreen extends ConsumerWidget {
                               padding: const EdgeInsets.all(DesignTokens.spacingMd),
                               child: Column(
                                 children: <Widget>[
-                                  // Header (overflow-safe)
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
@@ -278,7 +277,7 @@ class AccountsScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            expandedHeight: 120,
+            expandedHeight: 140,
             floating: true,
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -297,32 +296,75 @@ class AccountsScreen extends ConsumerWidget {
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(DesignTokens.spacingMd),
-                    child: Row(
+                    child: Column(
                       children: <Widget>[
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: <Color>[
-                                theme.colorScheme.primary,
-                                theme.colorScheme.secondary,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Expanded(
+                              child: Row(
+                                children: <Widget>[
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: <Color>[
+                                          theme.colorScheme.primary,
+                                          theme.colorScheme.secondary,
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        DesignTokens.radiusMd,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.account_balance_rounded,
+                                      color: theme.colorScheme.onPrimary,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const Gap(DesignTokens.spacingSm),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Text(
+                                          'Accounts',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.titleLarge?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const CurrencySelectorButton(),
+                                const Gap(DesignTokens.spacingXs),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surfaceVariant
+                                        .withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(
+                                      DesignTokens.radiusMd,
+                                    ),
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.add_rounded),
+                                    onPressed: () => context.pushNamed('add-account'),
+                                    tooltip: 'Add Account',
+                                  ),
+                                ),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-                          ),
-                          child: Icon(
-                            Icons.account_balance_rounded,
-                            color: theme.colorScheme.onPrimary,
-                            size: 24,
-                          ),
-                        ),
-                        const Gap(DesignTokens.spacingSm),
-                        Text(
-                          'Accounts',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.primary,
-                          ),
+                          ],
                         ),
                       ],
                     ),

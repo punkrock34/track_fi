@@ -124,7 +124,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     );
 
     if ((success ?? false) && context.mounted) {
-      context.pop();
+      context.goNamed('accounts');
     }
   }
 }

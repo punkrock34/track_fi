@@ -175,19 +175,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   onPressed: () => context.goNamed('analytics'),
                                 ),
                               ),
-                              const Gap(DesignTokens.spacingXs),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceVariant
-                                      .withOpacity(0.5),
-                                  borderRadius:
-                                      BorderRadius.circular(DesignTokens.radiusMd),
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(Icons.account_circle_outlined),
-                                  onPressed: () => context.goNamed('settings'),
-                                ),
-                              ),
                             ],
                           ).animate().slideX(begin: 0.3, delay: 150.ms).fadeIn(),
                         ],
