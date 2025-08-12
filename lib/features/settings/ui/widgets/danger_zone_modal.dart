@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/contracts/services/database/i_database_service.dart';
 import '../../../../core/contracts/services/secure_storage/i_secure_storage_service.dart';
@@ -170,7 +171,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
         ),
         if (!_isLoading)
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: _navigateToOnboarding,
             icon: const Icon(Icons.close_rounded),
             iconSize: 20,
           ),
@@ -218,7 +219,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
                     ),
                     const Gap(DesignTokens.spacingXs),
                     Text(
-                      'Dangerous Operation',
+                      'Permanent Data Deletion',
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: theme.colorScheme.error,
                         fontWeight: FontWeight.w700,
@@ -228,7 +229,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
                 ),
                 const Gap(DesignTokens.spacingXs),
                 Text(
-                  'This action cannot be undone and will permanently delete:',
+                  'This will permanently delete ALL your financial data stored locally on this device. This action cannot be undone.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
                   ),
@@ -239,32 +240,41 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
 
           const Gap(DesignTokens.spacingMd),
 
+          Text(
+            'What will be deleted:',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          const Gap(DesignTokens.spacingXs),
+
           _buildWarningItem(
             theme,
             Icons.account_balance_rounded,
-            'All Accounts',
-            'All your financial accounts and their data',
+            'All Financial Accounts',
+            "Every account you've added including names, balances, bank details, and account numbers",
           ),
 
           _buildWarningItem(
             theme,
             Icons.receipt_long_rounded,
-            'All Transactions',
-            'Complete transaction history and records',
-          ),
-
-          _buildWarningItem(
-            theme,
-            Icons.category_rounded,
-            'Settings',
-            'All app settings and preferences',
+            'Complete Transaction History',
+            "All income, expenses, and transfers - every financial transaction you've recorded",
           ),
           
           _buildWarningItem(
             theme,
             Icons.security_rounded,
-            'Security Data',
-            'All secure storage data including passwords and tokens',
+            'Security & Authentication Data',
+            'Your PIN, biometric settings, and all encrypted security information',
+          ),
+
+          _buildWarningItem(
+            theme,
+            Icons.settings_rounded,
+            'App Settings',
+            'Theme preferences, currency settings, and all other app configurations',
           ),
 
           const Gap(DesignTokens.spacingLg),
@@ -291,7 +301,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
                     ),
                     const Gap(DesignTokens.spacingXs),
                     Text(
-                      'Before proceeding',
+                      'Before you proceed',
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -301,7 +311,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
                 ),
                 const Gap(DesignTokens.spacingXs),
                 Text(
-                  'Consider exporting your data first from the Data section in Settings.',
+                  'Consider exporting your data first from Settings > Data > Export Data. While you cannot currently re-import this data, it serves as a backup record of your financial information.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                   ),
@@ -365,9 +375,28 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'To confirm this irreversible action, please type:',
+            'Are you absolutely sure?',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.error,
+            ),
+          ),
+          
+          const Gap(DesignTokens.spacingSm),
+          
+          Text(
+            'This will permanently delete all your financial data from TrackFi. Once deleted, this information cannot be recovered.',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface,
+            ),
+          ),
+
+          const Gap(DesignTokens.spacingMd),
+
+          Text(
+            'To confirm this irreversible action, please type:',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.8),
             ),
           ),
 
@@ -400,7 +429,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
           TextInputField(
             controller: _confirmationController,
             label: 'Confirmation Text',
-            hint: 'Type the text above exactly',
+            hint: 'Type the text above exactly as shown',
             onChanged: (_) => setState(() {}),
             validator: (String? value) {
               if (value?.trim() != _confirmationText) {
@@ -421,7 +450,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
               borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
             ),
             child: Text(
-              '⚠️ This will permanently delete all your financial data',
+              '⚠️ This action is permanent and will reset TrackFi to its initial state',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.error,
                 fontWeight: FontWeight.w600,
@@ -480,7 +509,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
   Widget _buildSuccessStep(ThemeData theme) {
     Future<void>.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Navigator.of(context).pop(true);
+        _navigateToOnboarding();
       }
     });
 
@@ -519,7 +548,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingSm),
               child: Text(
-                'All your financial data has been permanently deleted.',
+                'All your financial data has been permanently deleted from this device.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.8),
                 ),
@@ -558,7 +587,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: _navigateToOnboarding,
                 child: const Text('Continue Now'),
               ),
             ).animate().slideY(begin: 0.3, delay: 900.ms).fadeIn(delay: 900.ms),
@@ -620,7 +649,7 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                onPressed: _isLoading ? null : _navigateToOnboarding,
                 child: const Text('Cancel'),
               ),
             ),
@@ -714,6 +743,12 @@ class _DangerZoneModalState extends ConsumerState<DangerZoneModal> {
         _currentStep = DangerZoneStep.confirmation;
         _isLoading = false;
       });
+    }
+  }
+
+  void _navigateToOnboarding() {
+    if (mounted) {
+      context.goNamed('onboarding');
     }
   }
 }

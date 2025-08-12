@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/providers/financial/base_currency_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/widgets/common/error_banner.dart';
 import '../../../../shared/widgets/currency/account_currency_selector.dart';
@@ -52,7 +53,13 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
   Widget build(BuildContext context) {
     final AddAccountState state = ref.watch(addAccountProvider);
     final AddAccountNotifier notifier = ref.read(addAccountProvider.notifier);
+    final AsyncValue<String> baseCurAsync = ref.watch(baseCurrencyProvider);
     final ThemeData theme = Theme.of(context);
+
+    final String currentCurrency = baseCurAsync.maybeWhen(
+      data: (String baseCurrency) => baseCurrency,
+      orElse: () => 'RON',
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -137,7 +144,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                       controller: _balanceController,
                       label: 'Current Balance',
                       hint: '0.00',
-                      currency: state.currency,
+                      currency: currentCurrency,
                       onChanged: notifier.updateBalance,
                       required: true,
                     ),
@@ -146,7 +153,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                   Expanded(
                     child: AccountCurrencySelector(
                       label: 'Currency',
-                      currency: state.currency,
+                      currency: currentCurrency,
                       onChanged: notifier.updateCurrency,
                     ),
                   ),

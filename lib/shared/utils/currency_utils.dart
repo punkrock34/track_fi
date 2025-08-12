@@ -87,9 +87,9 @@ class CurrencyUtils {
   }
 
   /// Get currency for a specific account
-  static String getCurrencyForAccount(String? accountId, List<Account>? accounts) {
+  static String? getCurrencyForAccount(String? accountId, List<Account>? accounts) {
     if (accounts == null || accountId == null) {
-      return 'RON';
+      return null;
     }
     
     final Account? account = accounts.cast<Account?>().firstWhere(
@@ -97,7 +97,7 @@ class CurrencyUtils {
       orElse: () => null,
     );
     
-    return account?.currency ?? 'RON';
+    return account?.currency;
   }
 
   /// Format amount with currency symbol (async version using currencies.json)

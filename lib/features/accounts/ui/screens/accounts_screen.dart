@@ -32,7 +32,7 @@ class AccountsScreen extends ConsumerWidget {
     final ThemeData theme = Theme.of(context);
 
     final String currentCurrencySymbol = baseCurAsync.maybeWhen(
-      data: (String c) => CurrencyUtils.getCurrencySymbol(c),
+      data: (String baseCurrency) => CurrencyUtils.getCurrencySymbol(baseCurrency),
       orElse: () => CurrencyUtils.getCurrencySymbol('RON'),
     );
 

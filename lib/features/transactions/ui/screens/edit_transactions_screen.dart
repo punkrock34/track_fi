@@ -5,20 +5,23 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/models/database/account.dart';
+import '../../../../core/providers/financial/base_currency_provider.dart';
 import '../../../../core/theme/design_tokens/design_tokens.dart';
 import '../../../../shared/utils/currency_utils.dart';
-import '../../../../shared/utils/date_utils.dart';
 import '../../../../shared/utils/ui_utils.dart';
 import '../../../../shared/widgets/accounts/account_selector.dart';
 import '../../../../shared/widgets/accounts/transaction_type_toggle.dart';
 import '../../../../shared/widgets/common/error_banner.dart';
 import '../../../../shared/widgets/common/unsaved_changes_banner.dart';
+import '../../../../shared/widgets/input/date/date_picker.dart';
 import '../../../../shared/widgets/input/text/currency_input_field.dart';
 import '../../../../shared/widgets/input/text/text_input_field_widget.dart';
 import '../../../accounts/providers/accounts_provider.dart';
 import '../../models/edit_transaction_state.dart';
 import '../../providers/edit_transaction_provider.dart';
 import '../widgets/category_selector.dart';
+import '../widgets/transaction_form_validators.dart';
+import '../widgets/transaction_info_card.dart';
 
 class EditTransactionScreen extends ConsumerStatefulWidget {
   const EditTransactionScreen({super.key, required this.transactionId});
@@ -71,7 +74,23 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
 
     final ThemeData theme = Theme.of(context);
 
-    // Loading or not yet loaded
+    final String currentCurrency = () {
+      final String? accountCurrency = CurrencyUtils.getCurrencyForAccount(
+        state?.effectiveAccountId,
+        accountsAsync.value,
+      );
+      
+      if (accountCurrency != null) {
+        return accountCurrency;
+      }
+      
+      return ref.watch(baseCurrencyProvider).maybeWhen(
+        data: (String baseCurrency) => baseCurrency,
+        orElse: () => 'RON',
+      );
+    }();
+
+
     if (state == null ||
         (state.originalTransaction == null && state.isLoading)) {
       return Scaffold(
@@ -83,7 +102,6 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
       );
     }
 
-    // Error state if we failed to load
     if (state.originalTransaction == null && state.errorMessage != null) {
       return Scaffold(
         appBar: AppBar(
@@ -118,7 +136,6 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
       );
     }
 
-    // Populate text controllers with the current state
     _updateControllers(state);
 
     return PopScope(
@@ -145,14 +162,12 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                // Unsaved changes banner
                 if (state.hasChanges) ...<Widget>[
                   UnsavedChangesBanner(
                     visible: state.hasChanges,
                   ).animate(key: const ValueKey<String>('changes-indicator')).slideY(begin: -0.3).fadeIn(),
                 ],
 
-                // Error Message
                 if (state.errorMessage != null) ...<Widget>[
                   ErrorBanner(message: state.errorMessage)
                     .animate(key: const ValueKey<String>('error-message'))
@@ -161,109 +176,20 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
                   const Gap(DesignTokens.spacingMd),
                 ],
 
-                // Basic Information header
                 Text(
-                  'Basic Information',
+                  'Account',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.primary,
                   ),
                 )
                     .animate(
-                        key: const ValueKey<String>('basic-info-title'))
+                        key: const ValueKey<String>('account-title'))
                     .slideX(begin: -0.3, delay: 50.ms)
                     .fadeIn(),
 
                 const Gap(DesignTokens.spacingSm),
 
-                // Type toggle
-                TransactionTypeToggle(
-                  selectedType: state.effectiveType,
-                  onTypeChanged: notifier.updateType,
-                )
-                    .animate(key: const ValueKey<String>('type-toggle'))
-                    .slideX(begin: 0.3, delay: 100.ms)
-                    .fadeIn(),
-
-                const Gap(DesignTokens.spacingMd),
-
-                // Amount field
-                CurrencyInputField(
-                  controller: _amountController,
-                  label: 'Amount',
-                  hint: '0.00',
-                  currency: CurrencyUtils.getCurrencyForAccount(
-                    state.effectiveAccountId,
-                    accountsAsync.value,
-                  ),
-                  onChanged: notifier.updateAmount,
-                  required: true,
-                  validator: (String? value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Amount is required';
-                    }
-                    final double? amount = double.tryParse(value!);
-                    if (amount == null || amount <= 0) {
-                      return 'Enter a valid amount greater than 0';
-                    }
-                    return null;
-                  },
-                )
-                    .animate(key: const ValueKey<String>('amount-field'))
-                    .slideX(begin: 0.3, delay: 150.ms)
-                    .fadeIn(),
-
-                const Gap(DesignTokens.spacingMd),
-
-                // Date field
-                _buildDateField(theme, state, notifier)
-                    .animate(key: const ValueKey<String>('date-field'))
-                    .slideX(begin: 0.3, delay: 200.ms)
-                    .fadeIn(),
-
-                const Gap(DesignTokens.spacingMd),
-
-                // Description field
-                TextInputField(
-                  controller: _descriptionController,
-                  label: 'Description',
-                  hint: 'What was this transaction for?',
-                  onChanged: notifier.updateDescription,
-                  prefixIcon: Icons.description_outlined,
-                  required: true,
-                  validator: (String? value) {
-                    if (value?.trim().isEmpty ?? true) {
-                      return 'Description is required';
-                    }
-                    if (value!.trim().length < 3) {
-                      return 'Description must be at least 3 characters';
-                    }
-                    return null;
-                  },
-                )
-                    .animate(
-                        key: const ValueKey<String>('description-field'))
-                    .slideX(begin: 0.3, delay: 250.ms)
-                    .fadeIn(),
-
-                const Gap(DesignTokens.spacingLg),
-
-                // Account & Category header
-                Text(
-                  'Account & Category',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.primary,
-                  ),
-                )
-                    .animate(
-                        key: const ValueKey<String>('account-category-title'))
-                    .slideX(begin: -0.3, delay: 300.ms)
-                    .fadeIn(),
-
-                const Gap(DesignTokens.spacingSm),
-
-                // Account selector
                 AccountSelector(
                   selectedAccountId: state.effectiveAccountId,
                   accounts: accountsAsync.value ?? <Account>[],
@@ -272,12 +198,90 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
                 )
                     .animate(
                         key: const ValueKey<String>('account-selector'))
-                    .slideX(begin: 0.3, delay: 350.ms)
+                    .slideX(begin: 0.3, delay: 100.ms)
+                    .fadeIn(),
+
+                const Gap(DesignTokens.spacingLg),
+
+                Text(
+                  'Transaction Details',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.primary,
+                  ),
+                )
+                    .animate(
+                        key: const ValueKey<String>('basic-info-title'))
+                    .slideX(begin: -0.3, delay: 150.ms)
+                    .fadeIn(),
+
+                const Gap(DesignTokens.spacingSm),
+
+                TransactionTypeToggle(
+                  selectedType: state.effectiveType,
+                  onTypeChanged: notifier.updateType,
+                )
+                    .animate(key: const ValueKey<String>('type-toggle'))
+                    .slideX(begin: 0.3, delay: 200.ms)
                     .fadeIn(),
 
                 const Gap(DesignTokens.spacingMd),
 
-                // Category selector
+                CurrencyInputField(
+                  controller: _amountController,
+                  label: 'Amount',
+                  hint: '0.00',
+                  currency: currentCurrency,
+                  onChanged: notifier.updateAmount,
+                  required: true,
+                  validator: TransactionFormValidators.validateAmount,
+                )
+                    .animate(key: const ValueKey<String>('amount-field'))
+                    .slideX(begin: 0.3, delay: 250.ms)
+                    .fadeIn(),
+
+                const Gap(DesignTokens.spacingMd),
+
+                DatePicker(
+                  selectedDate: state.effectiveDate,
+                  onDateChanged: notifier.updateTransactionDate,
+                )
+                    .animate(key: const ValueKey<String>('date-field'))
+                    .slideX(begin: 0.3, delay: 300.ms)
+                    .fadeIn(),
+
+                const Gap(DesignTokens.spacingMd),
+
+                TextInputField(
+                  controller: _descriptionController,
+                  label: 'Description',
+                  hint: 'What was this transaction for?',
+                  onChanged: notifier.updateDescription,
+                  prefixIcon: Icons.description_outlined,
+                  required: true,
+                  validator: TransactionFormValidators.validateDescription,
+                )
+                    .animate(
+                        key: const ValueKey<String>('description-field'))
+                    .slideX(begin: 0.3, delay: 350.ms)
+                    .fadeIn(),
+
+                const Gap(DesignTokens.spacingLg),
+
+                Text(
+                  'Category',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.primary,
+                  ),
+                )
+                    .animate(
+                        key: const ValueKey<String>('category-title'))
+                    .slideX(begin: -0.3, delay: 400.ms)
+                    .fadeIn(),
+
+                const Gap(DesignTokens.spacingSm),
+
                 CategorySelector(
                   selectedCategoryId: state.effectiveCategoryId,
                   transactionType: state.effectiveType,
@@ -285,12 +289,11 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
                 )
                     .animate(
                         key: const ValueKey<String>('category-selector'))
-                    .slideX(begin: 0.3, delay: 400.ms)
+                    .slideX(begin: 0.3, delay: 450.ms)
                     .fadeIn(),
 
                 const Gap(DesignTokens.spacingLg),
 
-                // Additional Details header
                 Text(
                   'Additional Details (Optional)',
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -300,91 +303,32 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
                 )
                     .animate(
                         key: const ValueKey<String>('additional-title'))
-                    .slideX(begin: -0.3, delay: 450.ms)
+                    .slideX(begin: -0.3, delay: 500.ms)
                     .fadeIn(),
 
                 const Gap(DesignTokens.spacingSm),
 
-                // Reference field
                 TextInputField(
                   controller: _referenceController,
                   label: 'Reference',
                   hint: 'Transaction reference or ID',
                   onChanged: notifier.updateReference,
                   prefixIcon: Icons.tag_outlined,
+                  validator: TransactionFormValidators.validateReference,
                 )
                     .animate(
                         key: const ValueKey<String>('reference-field'))
-                    .slideX(begin: 0.3, delay: 500.ms)
+                    .slideX(begin: 0.3, delay: 550.ms)
                     .fadeIn(),
 
                 const Gap(DesignTokens.spacingXl),
 
-                // Info card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(DesignTokens.spacingMd),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: <Color>[
-                        theme.colorScheme.primaryContainer.withOpacity(0.1),
-                        theme.colorScheme.secondaryContainer.withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius:
-                        BorderRadius.circular(DesignTokens.radiusLg),
-                    border: Border.all(
-                      color: theme.colorScheme.primary.withOpacity(0.2),
-                    ),
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(
-                              DesignTokens.radiusFull),
-                        ),
-                        child: Icon(
-                          Icons.info_outline,
-                          color: theme.colorScheme.primary,
-                          size: 20,
-                        ),
-                      ),
-                      const Gap(DesignTokens.spacingSm),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'Transaction Update',
-                              style:
-                                  theme.textTheme.labelLarge?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const Gap(DesignTokens.spacing2xs),
-                            Text(
-                              'Changes will update your account balance accordingly.\nOriginal: ${DateUtils.formatDateTime(state.originalTransaction?.createdAt ?? DateTime.now())}',
-                              style:
-                                  theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface
-                                    .withOpacity(0.7),
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                TransactionInfoCard(
+                  isEdit: true,
+                  originalDate: state.originalTransaction?.createdAt,
                 )
                     .animate(key: const ValueKey<String>('info-card'))
-                    .slideY(begin: 0.3, delay: 550.ms)
+                    .slideY(begin: 0.3, delay: 600.ms)
                     .fadeIn(),
 
                 const Gap(DesignTokens.spacingXl),
@@ -425,122 +369,6 @@ class _EditTransactionScreenState extends ConsumerState<EditTransactionScreen> {
             : null,
       ),
     );
-  }
-
-  Widget _buildDateField(
-    ThemeData theme,
-    EditTransactionState state,
-    EditTransactionNotifier notifier,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        RichText(
-          text: TextSpan(
-            children: <InlineSpan>[
-              TextSpan(
-                text: 'Date',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              TextSpan(
-                text: ' *',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.error,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: DesignTokens.spacingXs),
-        InkWell(
-          onTap: () => _selectDate(notifier),
-          borderRadius:
-              BorderRadius.circular(DesignTokens.radiusMd),
-          child: Container(
-            width: double.infinity,
-            padding:
-                const EdgeInsets.all(DesignTokens.spacingSm),
-            decoration: BoxDecoration(
-              color: theme.inputDecorationTheme.fillColor,
-              borderRadius:
-                  BorderRadius.circular(DesignTokens.radiusMd),
-              border: Border.all(
-                color: state.effectiveDate != null
-                    ? theme.colorScheme.primary.withOpacity(0.5)
-                    : theme.colorScheme.outline.withOpacity(0.3),
-                width:
-                    state.effectiveDate != null ? 1.5 : 1,
-              ),
-            ),
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: state.effectiveDate != null
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface
-                          .withOpacity(0.6),
-                ),
-                const Gap(DesignTokens.spacingXs),
-                Expanded(
-                  child: Text(
-                    state.effectiveDate != null
-                        ? DateUtils.formatDate(
-                            state.effectiveDate!)
-                        : 'Select date',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 14,
-                      fontWeight:
-                          state.effectiveDate != null
-                              ? FontWeight.w500
-                              : null,
-                      color: state.effectiveDate != null
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface
-                              .withOpacity(0.6),
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.expand_more,
-                  size: 16,
-                  color: theme.colorScheme.onSurface
-                      .withOpacity(0.6),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _selectDate(
-      EditTransactionNotifier notifier) async {
-    final DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now(),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (selectedDate != null) {
-      notifier.updateTransactionDate(selectedDate);
-    }
   }
 
   Future<void> _handleSave() async {
