@@ -53,13 +53,18 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
   Widget build(BuildContext context) {
     final AddAccountState state = ref.watch(addAccountProvider);
     final AddAccountNotifier notifier = ref.read(addAccountProvider.notifier);
-    final AsyncValue<String> baseCurAsync = ref.watch(baseCurrencyProvider);
     final ThemeData theme = Theme.of(context);
 
-    final String currentCurrency = baseCurAsync.maybeWhen(
-      data: (String baseCurrency) => baseCurrency,
-      orElse: () => 'RON',
-    );
+    final String currentCurrency = () {
+      if (state.currency != null) {
+        return state.currency!;
+      }
+      
+      return ref.watch(baseCurrencyProvider).maybeWhen(
+        data: (String baseCurrency) => baseCurrency,
+        orElse: () => 'RON',
+      );
+    }();
 
     return Scaffold(
       appBar: AppBar(

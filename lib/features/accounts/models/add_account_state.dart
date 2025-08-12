@@ -8,7 +8,7 @@ class AddAccountState {
     this.name = '',
     this.type = 'current',
     this.balance = 0.0,
-    this.currency = 'RON',
+    this.currency,
     this.bankName,
     this.accountNumber,
     this.sortCode,
@@ -21,7 +21,7 @@ class AddAccountState {
   final String name;
   final String type;
   final double balance;
-  final String currency;
+  final String? currency;
   final String? bankName;
   final String? accountNumber;
   final String? sortCode;
@@ -59,7 +59,7 @@ class AddAccountState {
     name: name.trim(),
     type: type,
     balance: balance,
-    currency: currency,
+    currency: currency ?? 'RON',
     bankName: (bankName?.isNotEmpty ?? false) ? bankName : null,
     accountNumber: (accountNumber?.isNotEmpty ?? false) ? accountNumber : null,
     sortCode: (sortCode?.isNotEmpty ?? false) ? sortCode : null,
