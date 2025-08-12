@@ -18,67 +18,37 @@ class WelcomeScreen extends ConsumerWidget {
     final Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[
-              theme.colorScheme.primary.withOpacity(0.05),
-              theme.colorScheme.secondary.withOpacity(0.03),
-              theme.colorScheme.surface,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(DesignTokens.spacingMd),
+          child: Column(
+            children: <Widget>[
+              _buildBrandingSection(theme),
+              Gap(size.height * 0.06),
+              _buildFeaturesSection(theme),
+              Gap(size.height * 0.04),
+              _buildActionButtons(context, theme, ref),
+              const Gap(DesignTokens.spacingMd),
             ],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(DesignTokens.spacingMd),
-            child: Column(
-              children: <Widget>[
-                Gap(size.height * 0.08),
-                _buildHeroSection(theme, size),
-                Gap(size.height * 0.06),
-                _buildFeaturesSection(theme),
-                Gap(size.height * 0.04),
-                _buildActionButtons(context, theme, ref, size),
-                const Gap(DesignTokens.spacingMd),
-              ],
-            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeroSection(ThemeData theme, Size size) {
+  Widget _buildBrandingSection(ThemeData theme) {
     return Column(
       children: <Widget>[
-        // App Icon with enhanced styling
         Container(
-          width: 120,
-          height: 120,
+          padding: const EdgeInsets.all(DesignTokens.spacingMd),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                theme.colorScheme.primary,
-                theme.colorScheme.secondary,
-              ],
-            ),
+            color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
             boxShadow: <BoxShadow>[
               BoxShadow(
                 color: theme.colorScheme.primary.withOpacity(0.3),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-              BoxShadow(
-                color: theme.colorScheme.secondary.withOpacity(0.2),
-                blurRadius: 32,
-                offset: const Offset(0, 16),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
@@ -91,75 +61,45 @@ class WelcomeScreen extends ConsumerWidget {
             .animate()
             .scale(
               delay: 200.ms,
-              duration: 800.ms,
+              duration: 600.ms,
               curve: Curves.easeOutBack,
             )
             .fadeIn(delay: 200.ms),
-        
-        const Gap(DesignTokens.spacingLg),
-        
-        // App Name with enhanced typography
-        ShaderMask(
-          shaderCallback: (Rect bounds) {
-            return LinearGradient(
-              colors: <Color>[
-                theme.colorScheme.primary,
-                theme.colorScheme.secondary,
-              ],
-            ).createShader(bounds);
-          },
-          child: Text(
-            'TrackFi',
-            style: theme.textTheme.displayMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -1.5,
-              height: 1.0,
-            ),
+        const Gap(DesignTokens.spacingMd),
+        Text(
+          'TrackFi',
+          style: theme.textTheme.displaySmall?.copyWith(
+            color: theme.colorScheme.onBackground,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1,
           ),
         )
             .animate()
             .slideY(
               begin: 0.3,
-              delay: 500.ms,
+              delay: 400.ms,
               duration: 600.ms,
               curve: Curves.easeOutCubic,
             )
-            .fadeIn(delay: 500.ms),
-        
-        const Gap(DesignTokens.spacingSm),
-        
-        // Tagline with better styling
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.spacingMd,
-            vertical: DesignTokens.spacingXs,
-          ),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-            border: Border.all(
-              color: theme.colorScheme.primary.withOpacity(0.2),
-            ),
-          ),
-          child: Text(
-            'Your complete financial command center',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
+            .fadeIn(delay: 400.ms),
+        const Gap(DesignTokens.spacingXs),
+        Text(
+          'Your complete financial command center',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onBackground.withOpacity(0.7),
+            fontWeight: FontWeight.w500,
+            height: 1.3,
           ),
         )
             .animate()
             .slideY(
               begin: 0.3,
-              delay: 700.ms,
+              delay: 600.ms,
               duration: 600.ms,
               curve: Curves.easeOutCubic,
             )
-            .fadeIn(delay: 700.ms),
+            .fadeIn(delay: 600.ms),
       ],
     );
   }
@@ -169,113 +109,52 @@ class WelcomeScreen extends ConsumerWidget {
       const FeatureData(
         icon: Icons.account_balance_rounded,
         title: 'Unified Banking',
-        description: 'Connect all your accounts in one secure, encrypted dashboard',
+        description: 'Connect Revolut, BT, and more in one secure dashboard',
       ),
       const FeatureData(
         icon: Icons.analytics_rounded,
         title: 'Smart Analytics',
-        description: 'Powerful insights to optimize your financial health and spending',
+        description: 'AI-powered insights to optimize your financial health',
       ),
       const FeatureData(
         icon: Icons.security_rounded,
         title: 'Bank-Grade Security',
-        description: 'Military-grade encryption with biometric protection',
+        description: 'Military-grade encryption keeps your data safe',
       ),
     ];
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingXs),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[
-                      theme.colorScheme.primary,
-                      theme.colorScheme.secondary,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const Gap(DesignTokens.spacingSm),
-              Text(
-                'Why choose TrackFi?',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ).animate().slideX(begin: -0.3, delay: 900.ms).fadeIn(delay: 900.ms),
-        
-        const Gap(DesignTokens.spacingMd),
-        
-        ...features.asMap().entries.map((MapEntry<int, FeatureData> entry) {
-          final int index = entry.key;
-          final FeatureData feature = entry.value;
+      children:
+          features.asMap().entries.map((MapEntry<int, FeatureData> entry) {
+        final int index = entry.key;
+        final FeatureData feature = entry.value;
 
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: index < features.length - 1 ? DesignTokens.spacingSm : 0,
-            ),
-            child: FeatureCard(
-              icon: feature.icon,
-              title: feature.title,
-              description: feature.description,
-              animationDelay: Duration(milliseconds: 1000 + (index * 150)),
-              gradient: LinearGradient(
-                colors: <Color>[
-                  theme.colorScheme.primary.withOpacity(0.1),
-                  theme.colorScheme.secondary.withOpacity(0.05),
-                ],
-              ),
-            ),
-          );
-        }),
-      ],
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: index < features.length - 1 ? DesignTokens.spacingMd : 0,
+          ),
+          child: FeatureCard(
+            icon: feature.icon,
+            title: feature.title,
+            description: feature.description,
+            animationDelay: Duration(milliseconds: 800 + (index * 200)),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, ThemeData theme, WidgetRef ref, Size size) {
+  Widget _buildActionButtons(BuildContext context, ThemeData theme, WidgetRef ref) {
     return Column(
       children: <Widget>[
-        // Primary CTA with enhanced styling
-        Container(
+        SizedBox(
           width: double.infinity,
           height: DesignTokens.buttonHeightLg,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[
-                theme.colorScheme.primary,
-                theme.colorScheme.secondary,
-              ],
-            ),
-            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: theme.colorScheme.primary.withOpacity(0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
           child: ElevatedButton(
             onPressed: () => ref.read(onboardingProvider.notifier).nextStep(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-              ),
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -292,7 +171,6 @@ class WelcomeScreen extends ConsumerWidget {
                 Icon(
                   Icons.arrow_forward_rounded,
                   color: theme.colorScheme.onPrimary,
-                  size: 20,
                 ),
               ],
             ),
@@ -301,68 +179,42 @@ class WelcomeScreen extends ConsumerWidget {
             .animate()
             .slideY(
               begin: 0.5,
-              delay: 1500.ms,
+              delay: 1400.ms,
               duration: 600.ms,
               curve: Curves.easeOutCubic,
             )
-            .fadeIn(delay: 1500.ms),
-        
+            .fadeIn(delay: 1400.ms),
         const Gap(DesignTokens.spacingSm),
-        
-        // Secondary link with subtle styling
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.spacingSm,
-            vertical: DesignTokens.spacingXs,
-          ),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-          ),
-          child: InkWell(
-            onTap: () => SecurityInfoDialog.show(context),
-            borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: DesignTokens.spacingXs,
-                vertical: DesignTokens.spacing2xs,
+        TextButton(
+          onPressed: () => SecurityInfoDialog.show(context),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                'Learn more about security',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onBackground.withOpacity(0.6),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(
-                    Icons.shield_outlined,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const Gap(DesignTokens.spacing2xs),
-                  Text(
-                    'Learn about our security',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const Gap(DesignTokens.spacing2xs),
-                  Icon(
-                    Icons.arrow_outward_rounded,
-                    size: 12,
-                    color: theme.colorScheme.primary.withOpacity(0.7),
-                  ),
-                ],
+              const Gap(DesignTokens.spacing2xs),
+              Icon(
+                Icons.info_outline_rounded,
+                size: 16,
+                color: theme.colorScheme.onBackground.withOpacity(0.6),
               ),
-            ),
+            ],
           ),
         )
             .animate()
             .slideY(
               begin: 0.3,
-              delay: 1700.ms,
+              delay: 1600.ms,
               duration: 600.ms,
               curve: Curves.easeOutCubic,
             )
-            .fadeIn(delay: 1700.ms),
+            .fadeIn(delay: 1600.ms),
       ],
     );
   }
