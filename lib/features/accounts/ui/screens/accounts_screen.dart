@@ -36,6 +36,8 @@ class AccountsScreen extends ConsumerWidget {
       orElse: () => CurrencyUtils.getCurrencySymbol('RON'),
     );
 
+    final bool showBalance = ref.watch(balanceVisibilityProvider);
+
     return SwipeNavigationWrapper(
       currentRoute: 'accounts',
       child: Scaffold(
@@ -222,6 +224,7 @@ class AccountsScreen extends ConsumerWidget {
                             pathParameters: <String, String>{'accountId': a.id},
                           ),
                           onAddAccount: () => context.pushNamed('add-account'),
+                          showBalance: showBalance,
                         ).slivers.first,
                       ),
 
@@ -252,6 +255,7 @@ class AccountsScreen extends ConsumerWidget {
                               pathParameters: <String, String>{'accountId': a.id},
                             ),
                             onAddAccount: () => context.pushNamed('add-account'),
+                            showBalance: showBalance,
                           ).slivers.first,
                         ),
                       ),
